@@ -1,0 +1,433 @@
+#!/bin/bash
+
+set -e
+
+GAP_PKG_DIR=~/.gap/pkg/
+JULIA_CAP_PROJECT_DIR=~/.julia/dev/CAP_project.jl/
+JULIA_CATEGORICAL_TOWERS_DIR=~/.julia/dev/CategoricalTowers.jl/
+LOGS=0
+
+if [ "$#" -ne 1 ]; then
+	echo "Usage: gap_to_julia PKG_NAME"
+	exit 1
+fi
+
+PKG_NAME="${1%/}"
+[ "$LOGS" = "0" ] || echo "PKG_NAME: $PKG_NAME"
+
+PKG_NAME_LOWERCASE=$(echo "$PKG_NAME" | tr '[:upper:]' '[:lower:]')
+[ "$LOGS" = "0" ] || echo "PKG_NAME_LOWERCASE: $PKG_NAME_LOWERCASE"
+
+if [ -d "$GAP_PKG_DIR$PKG_NAME" ]; then
+	PKG_FULL_NAME="$PKG_NAME"
+elif [ -d "$GAP_PKG_DIR/CAP_project/$PKG_NAME" ]; then
+	PKG_FULL_NAME="CAP_project/$PKG_NAME"
+elif [ -d "$GAP_PKG_DIR/CategoricalTowers/$PKG_NAME" ]; then
+	PKG_FULL_NAME="CategoricalTowers/$PKG_NAME"
+else
+	echo "Could not find GAP package $PKG_NAME"
+	exit 1
+fi
+
+[ "$LOGS" = "0" ] || echo "PKG_FULL_NAME: $PKG_FULL_NAME"
+
+if [ -d "$JULIA_CAP_PROJECT_DIR$PKG_NAME" ]; then
+  JULIA_PKG_DIR=$JULIA_CAP_PROJECT_DIR
+elif [ -d "$JULIA_CATEGORICAL_TOWERS_DIR$PKG_NAME" ]; then
+  JULIA_PKG_DIR=$JULIA_CATEGORICAL_TOWERS_DIR
+else
+	echo "Could not find Julia package $PKG_NAME"
+	exit 1
+fi
+[ "$LOGS" = "0" ] || echo "Julia package found in $JULIA_PKG_DIR$PKG_NAME"
+
+mkdir -p "$JULIA_PKG_DIR$PKG_NAME/src/gap/"
+[ "$LOGS" = "0" ] || echo "Created directory $JULIA_PKG_DIR$PKG_NAME/src/gap/"
+
+mkdir -p "$JULIA_PKG_DIR$PKG_NAME/docs/src/"
+[ "$LOGS" = "0" ] || echo "Created directory $JULIA_PKG_DIR$PKG_NAME/docs/src/"
+
+if [ -d "$GAP_PKG_DIR$PKG_FULL_NAME/gap/precompiled_categories/" ]; then
+	mkdir -p "$JULIA_PKG_DIR$PKG_NAME/src/gap/precompiled_categories/"
+  [ "$LOGS" = "0" ] || echo "Created directory $JULIA_PKG_DIR$PKG_NAME/src/gap/precompiled_categories/"
+fi
+
+cp "$(dirname $(realpath $0))/LICENSE" "$JULIA_PKG_DIR$PKG_NAME/LICENSE"
+[ "$LOGS" = "0" ] || echo "Copied LICENSE to $JULIA_PKG_DIR$PKG_NAME/LICENSE"
+
+cp -u "$(dirname $(realpath $0))/init.jl" "$JULIA_PKG_DIR$PKG_NAME/src/init.jl"
+[ "$LOGS" = "0" ] || echo "Securily copied init.jl to $JULIA_PKG_DIR$PKG_NAME/src/init.jl"
+
+cmp -s "$(dirname $(realpath $0))/init.jl" "$JULIA_PKG_DIR$PKG_NAME/src/init.jl" || echo "init.jl in Julia package was modified, not overwriting"
+
+cat > "$JULIA_PKG_DIR$PKG_NAME/makefile" << EOS
+.PHONY: test
+
+gen:
+	../gap_to_julia/gap_to_julia $PKG_NAME
+
+clean-gen:
+	rm -f ./src/gap/*.autogen.jl
+	rm -f ./src/gap/*/*.autogen.jl
+	rm -f ./docs/src/*.autogen.md
+	../gap_to_julia/gap_to_julia $PKG_NAME
+
+test:
+	julia -e 'using Pkg; Pkg.test("$PKG_NAME");'
+
+codecov:
+	julia --project=. -e 'using Coverage; using Pkg; Pkg.test(coverage=true); LCOV.writefile("coverage.lcov", process_folder(pwd()));'
+	genhtml -o coverage_report coverage.lcov
+	open coverage_report/index.html
+
+clean-codecov:
+	find . -type f -name "*.jl.*.cov" -exec rm -f {} +
+	rm -f coverage.lcov
+	rm -rf coverage_report
+EOS
+[ "$LOGS" = "0" ] || echo "Created makefile in $JULIA_PKG_DIR$PKG_NAME/makefile"
+
+cd "$GAP_PKG_DIR$PKG_FULL_NAME"
+[ "$LOGS" = "0" ] || echo "Changed directory to $GAP_PKG_DIR$PKG_FULL_NAME"
+
+cat "init.g" | sed "s/ReadPackage( \"$PKG_NAME\", \"\\(.*\\)\" );$/include( \"\\1.autogen.jl\" );/g" > "$JULIA_PKG_DIR$PKG_NAME/src/init.g.autogen.jl"
+[ "$LOGS" = "0" ] || echo "Alter & Copy init.g from $GAP_PKG_DIR$PKG_FULL_NAME to $JULIA_PKG_DIR$PKG_NAME/src/read.g.autogen.jl"
+
+cat "read.g" | sed "s/ReadPackage( \"$PKG_NAME\", \"\\(.*\\)\" );$/include( \"\\1.autogen.jl\" );/g" > "$JULIA_PKG_DIR$PKG_NAME/src/read.g.autogen.jl"
+[ "$LOGS" = "0" ] || echo "Alter & Copy read.g from $GAP_PKG_DIR$PKG_FULL_NAME to $JULIA_PKG_DIR$PKG_NAME/src/read.g.autogen.jl"
+
+if grep -q "ReadPackage(.*);" "$JULIA_PKG_DIR$PKG_NAME/src/init.g.autogen.jl"; then
+  echo -e "\e[31mError: Please check and/or adjust the parentheses in $GAP_PKG_DIR$PKG_FULL_NAME/init.g manually.\e[0m"
+  exit 1
+fi
+
+if grep -q "ReadPackage(.*);" "$JULIA_PKG_DIR$PKG_NAME/src/read.g.autogen.jl"; then
+  echo -e "\e[31mError: Please check and/or adjust the parentheses in $GAP_PKG_DIR$PKG_FULL_NAME/read.g manually.\e[0m"
+  exit 1
+fi
+
+
+cd gap
+[ "$LOGS" = "0" ] || echo "Changed directory to $GAP_PKG_DIR$PKG_FULL_NAME/gap"
+
+chmod -f u+w "$JULIA_PKG_DIR$PKG_NAME"/src/gap/*.autogen.jl || true
+[ "$LOGS" = "0" ] || echo "Made files in $JULIA_PKG_DIR$PKG_NAME/src/gap writable"
+
+syntax_replacements() {
+	sed "s/ReadPackage( \"$1\", \"gap\/\\(.*\\)\" );$/include( \"\\1.autogen.jl\" );/g" \
+	| sed 's/ = / == /g' \
+	| sed 's/ <> / != /g' \
+	| sed 's/ :=/ =/g' \
+	| sed 's/ : /; /g' \
+	| sed 's/ :$/,/g' \
+	| sed 's/!\././g' \
+	| sed 's/^\(\s*\)if /\1if (/g' \
+	| sed 's/^\(\s*\)elif /\1elseif (/g' \
+	| sed 's/ then$/)/g' \
+	| sed 's/ fi;/ end;/g' \
+	| sed 's/^fi;/end;/g' \
+	| sed 's/ do$//g' \
+	| sed 's/ od;/ end;/g' \
+	| sed 's/^od;/end;/g' \
+	`# We turn "not" into a macro "@not" which causes problems with "or", see gap_emulation.jl. To reduce the number if places which have to be adjust manually, we insert the parantheses here for three special cases.` \
+	| sed 's/not \([^()]*([^()]*)\) or/not (\1) or/g' `# match "not func( arguments ) or"` \
+	| sed 's/not \([^()][^()]*([^()]*([^()]*)[^()]*)\) or/not (\1) or/g' `# match "not func( ... func2( arguments ) ... ) or"` \
+	| sed 's/not \([^()][^()]*([^()]*([^()]*)[^()]*([^()]*)[^()]*)\) or/not (\1) or/g' `# match "not func( ... func2( arguments ) ... func3( arguments ) ... ) or"` \
+	| sed 's/"\([^"]*\)"/⦇\1⦈/g' `# replace pairs of quotation marks by special brackets so we can later selectively replace things inside strings` \
+	| sed '/^\s*#/! s/ and / \&\& /g' \
+	| sed '/^\s*#/! s/ and$/ \&\&/g' \
+	| sed 's/⦇\([^⦇⦈]*\) \&\& \([^⦇⦈]*\)⦈/⦇\1 and \2⦈/g' `# re-replace "&&" by "and" inside strings, HACK: repeat this multiple times for multiple occurrences` \
+	| sed 's/⦇\([^⦇⦈]*\) \&\& \([^⦇⦈]*\)⦈/⦇\1 and \2⦈/g' \
+	| sed 's/⦇\([^⦇⦈]*\) \&\& \([^⦇⦈]*\)⦈/⦇\1 and \2⦈/g' \
+	| sed 's/⦇\([^⦇⦈]*\) \&\& \([^⦇⦈]*\)⦈/⦇\1 and \2⦈/g' \
+	| sed '/^\s*#/! s/ or / || /g' \
+	| sed '/^\s*#/! s/ or$/ ||/g' \
+	| sed 's/⦇\([^⦇⦈]*\) || \([^⦇⦈]*\)⦈/⦇\1 or \2⦈/g' `# re-replace "||" by "or" inside strings, HACK: repeat this multiple times for multiple occurrences` \
+	| sed 's/⦇\([^⦇⦈]*\) || \([^⦇⦈]*\)⦈/⦇\1 or \2⦈/g' \
+	| sed 's/⦇\([^⦇⦈]*\) || \([^⦇⦈]*\)⦈/⦇\1 or \2⦈/g' \
+	| sed 's/⦇\([^⦇⦈]*\) || \([^⦇⦈]*\)⦈/⦇\1 or \2⦈/g' \
+	| sed '/^\s*#/! s/not\s*(/!(/g' \
+	| sed '/^\s*#/! s/not /@not /g' \
+	| sed 's/⦇\([^⦇⦈]*\)@not \([^⦇⦈]*\)⦈/⦇\1not \2⦈/g' `# re-replace "@not" by "not" inside strings, HACK: repeat this multiple times for multiple occurrences` \
+	| sed 's/⦇\([^⦇⦈]*\)@not \([^⦇⦈]*\)⦈/⦇\1not \2⦈/g' \
+	| sed 's/⦇\([^⦇⦈]*\)@not \([^⦇⦈]*\)⦈/⦇\1not \2⦈/g' \
+	| sed 's/⦇\([^⦇⦈]*\)@not \([^⦇⦈]*\)⦈/⦇\1not \2⦈/g' \
+	| sed 's/⦇\([^⦇⦈]*\)⦈/"\1"/g' `# replace special brackets by quotation marks again` \
+	| sed 's/\.( \([^)]*\) )/[\1]/g' \
+	| sed 's/\.(\([^)]*\))/[\1]/g' \
+	| sed 's/\[ \([^].[]*\) \.\. \([^][]*\) \]/(\1):(\2)/g' `# [ a .. b ] -> (a):(b) where a and b do not contain square brackets` \
+	| sed 's/\[ \([^].[]*\) \.\. \([^][]*\)\[\([^].[]*\)\]\([^][]*\) \]/(\1):(\2[\3]\4)/g' `# [ a .. b ] -> (a):(b) where b contains a pair of square brackets` \
+	| sed 's/{ arg } ->/( arg... ) ->/g' \
+	| sed 's/{\([^}]*\)} ->/(\1) ->/g' \
+	| sed 's/{/[/g' \
+	| sed 's/}/]/g' \
+	| sed 's/function( arg )/function( arg... )/g' \
+	| sed 's/function ( arg )/function ( arg... )/g' \
+	| sed 's/Method( \\\[\\\],/Method( getindex,/g' \
+	| sed 's/Method( \\\[\\,\\\],/Method( getindex,/g' \
+	| sed 's/MethodForCompilerForCAP( \\\[\\\],/MethodForCompilerForCAP( getindex,/g' \
+	| sed 's/MethodForCompilerForCAP( \\\[\\,\\\],/MethodForCompilerForCAP( getindex,/g' \
+	| sed 's/Method( \\=,/Method( ==,/g' \
+	| sed 's/Method( \\+,/Method( +,/g' \
+	| sed 's/Method( \\-,/Method( -,/g' \
+	| sed 's/Method( \\\*,/Method( *,/g' \
+	| sed 's/Method( \\\/,/Method( \/,/g' \
+	| sed 's/Method( \\\^,/Method( ^,/g' \
+	| sed 's/Method( \\in,/Method( in,/g' \
+  | sed 's/Method( POW,/Method( ^,/g' \
+	| sed 's/Method( AdditiveInverse,/Method( -,/g' \
+	| sed 's/^DeclareInfoClass(/@DeclareInfoClass(/g' \
+	| sed 's/^DeclareAttribute(/@DeclareAttribute(/g' \
+	| sed 's/^DeclareSynonymAttr(/@DeclareSynonymAttr(/g' \
+	| sed 's/^DeclareProperty(/@DeclareProperty(/g' \
+	| sed 's/^DeclareFilter(/@DeclareFilter(/g' \
+	| sed 's/^DeclareCategory(/@DeclareFilter(/g' \
+	| sed 's/^InstallValue(/@InstallValueConst(/g' \
+	| sed 's/InstallValue(/@InstallValue(/g' \
+	| sed 's/BindGlobal(/@BindGlobal(/g' \
+	| sed 's/DeclareSynonym(/@BindGlobal(/g' \
+	| sed 's/DeclareGlobalFunction(/@DeclareGlobalFunction(/g' \
+	| sed 's/InstallGlobalFunction(/@InstallGlobalFunction(/g' \
+	| sed 's/^DeclareOperation(/@DeclareOperation(/g' \
+	| sed 's/^DeclareOperationWithCache(/@DeclareOperation(/g' \
+	| sed 's/^KeyDependentOperation(/@KeyDependentOperation(/g' \
+	| sed 's/^InstallOtherMethod(/InstallMethod(/g' \
+	| sed 's/^InstallMethodForCompilerForCAP(/InstallMethod(/g' \
+	| sed 's/^InstallOtherMethodForCompilerForCAP(/InstallMethod(/g' \
+	| sed 's/^InstallMethod(/@InstallMethod(/g' \
+	| sed 's/\brec(/@rec(/g' \
+	| sed 's/\bAssert(/@Assert(/g' \
+	| sed 's/\bConcatenation(/@Concatenation(/g' \
+	| sed 's/\bInfo(/@Info(/g' \
+	| sed 's/\bUnbind(/@Unbind(/g' \
+	| sed 's/\bIsBound(/@IsBound(/g' \
+	| sed 's/\bNTuple\b/@NTupleGAP/g' \
+	| sed 's/\bFunctionWithNamedArguments\b/@FunctionWithNamedArguments/g' \
+	| sed 's/CAP_NAMED_ARGUMENTS\.//g' \
+	| sed 's/\bPair\b/PairGAP/g' \
+	| sed 's/\bUnion\b/UnionGAP/g' \
+	| sed 's/\bInt\b/IntGAP/g' \
+	| sed 's/\bString\b/StringGAP/g' \
+	| sed 's/\bSet\b/SetGAP/g' \
+	| sed 's/\bNumber\b/NumberGAP/g' \
+  | sed 's/\bOneMutable\b/OneMutableGAP/g' \
+	# terminate line continuation
+}
+export -f syntax_replacements
+
+test_replacements() {
+	if [ "$1" = "CAP" ]; then
+		USING="using $1"
+	elif [ "$1" = "MonoidalCategories" ]; then
+		USING="using CAP; using $1"
+	elif [ "$1" = "CartesianCategories" ]; then
+		USING="using CAP; using $1"
+	elif [ "$1" = "Toposes" ]; then
+		USING="using CAP; using CartesianCategories; using FinSetsForCAP; using $1"
+	elif [ "$1" = "FinSetsForCAP" ]; then
+		USING="using CAP; using CartesianCategories; using Toposes; using $1"
+	elif [ "$1" = "ZXCalculusForCAP" ]; then
+		USING="using CAP; using MonoidalCategories; using $1"
+	elif [ "$1" = "LinearAlgebraForCAP" ]; then
+		USING="using MatricesForHomalg; using CAP; using MonoidalCategories; using $1"
+	elif [ "$1" = "FreydCategoriesForCAP" ]; then
+		USING="using MatricesForHomalg; using CAP; using MonoidalCategories; using LinearAlgebraForCAP; using CartesianCategories; using Toposes; using FinSetsForCAP; using $1"
+	elif [ "$1" = "ModulePresentationsForCAP" ]; then
+		USING="using MatricesForHomalg; using CAP; using MonoidalCategories; using LinearAlgebraForCAP; using $1"
+  elif [ "$1" = "ToolsForCategoricalTowers" ]; then
+    USING="using CAP; using MonoidalCategories; using CartesianCategories; using Toposes; using FinSetsForCAP; using MatricesForHomalg; using FreydCategoriesForCAP; using $1"
+	else
+    >&2 echo -e "\e[31mUnkown package $1, please explicitly add its dependencies.\e[0m"
+		USING="using CAP; using $1"
+	fi
+	# first, revert some code changes also affecting output lines
+	sed '/^[>g]/! s/(\([0-9]*\)):(\([0-9]*\))/[ \1 .. \2 ]/g' \
+	| sed '/^[>g]/! s/&&/and/g' \
+	| sed 's/^<A[n ].*object in /<An object in /g' \
+	| sed 's/^A[n ].*object in /An object in /g' \
+	| sed 's/^<A[n ].*morphism in /<A morphism in /g' \
+	| sed 's/^A[n ].*morphism in /A morphism in /g' \
+	| sed 's/ @not yet algorithmically/ not yet algorithmically/g' \
+	| sed 's/^gap> /julia> /g' \
+	| sed 's/^> /        /g' \
+	| sed 's/;$//g' \
+	| sed 's/^julia> LoadPackage( .*/julia> true/g' \
+	| sed 's/^julia> DeclareCategory(/julia> @DeclareFilter(/g' \
+	| sed 's/^julia> DeclareOperation(/julia> @DeclareOperation(/g' \
+	| sed 's/^julia> DeclareAttribute(/julia> @DeclareAttribute(/g' \
+	| sed 's/^julia> InstallMethod(/julia> @InstallMethod(/g' \
+	| sed 's/^\(\s*\)if /\1if (/g' \
+	| sed '/^#/d' \
+	| sed 's/julia> /\njulia> /g' \
+	| sed "s/julia> START_TEST(.*/\`\`\`jldoctest\njulia> $USING/g" \
+	| sed 's/julia> STOP_TEST(.*/```/g' \
+	# terminate line continuation
+}
+export -f test_replacements
+
+for FILE in $(git ls-files); do
+  if [[ "$FILE" != *CompilerLogic.gi && "$FILE" != *AUTOGENERATED_FROM.md ]]; then
+	  cat "$FILE" | syntax_replacements $PKG_NAME > "$JULIA_PKG_DIR$PKG_NAME"/src/gap/"$FILE".autogen.jl
+    [ "$LOGS" = "0" ] || echo "Alter & Copy $GAP_PKG_DIR$PKG_FULL_NAME/gap/$FILE to $JULIA_PKG_DIR$PKG_NAME/src/gap/$FILE.autogen.jl"
+  fi
+done
+
+chmod -f a-w "$JULIA_PKG_DIR$PKG_NAME"/src/gap/*.autogen.jl
+[ "$LOGS" = "0" ] || echo "Made files in $JULIA_PKG_DIR$PKG_NAME/src/gap read-only"
+
+cd ../tst
+
+chmod -f u+w "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.autogen.md || true
+[ "$LOGS" = "0" ] || echo "Made files in $JULIA_PKG_DIR$PKG_NAME/docs/src writable"
+
+# use perl to handle line continuation and empty lines starting comments
+find . \( -type d -name .git -prune \) -o \( -type f -name '*.tst' \) -exec bash -c "cat '{}' | perl -p -e 's/\\\\\\n//' | perl -0 -p -e 's/\\n\\n#.*\\n/\\n/g' | syntax_replacements $PKG_NAME | test_replacements $PKG_NAME > \"$JULIA_PKG_DIR$PKG_NAME\"/docs/src/'{}'.autogen.md" \;
+[ "$LOGS" = "0" ] || echo "Alter & Copy $GAP_PKG_DIR$PKG_FULL_NAME/gap/tst/*.tst to $JULIA_PKG_DIR$PKG_NAME/docs/src/*.autogen.md"
+
+rm "$JULIA_PKG_DIR$PKG_NAME"/docs/src/100_LoadPackage.tst.autogen.md
+[ "$LOGS" = "0" ] || echo "Remove $JULIA_PKG_DIR$PKG_NAME/docs/src/100_LoadPackage.tst.autogen.md"
+
+if [ "$PKG_NAME" = "CAP" ]; then
+	# DummyRing is not available yet
+	rm -f $(grep -l "DummyRing( )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	
+	# Functor example: requires ModulePresentationsForCAP and convenience functions for UnionOfRows,
+	# a better example is part of LinearAlgebraForCAP
+	rm -f $(grep -l "CapFunctor( " "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "InputSignature( " "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "InstallFunctor( " "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "ApplyFunctor( " "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+fi
+
+if [ "$PKG_NAME" = "FinSetsForCAP" ]; then
+	rm -f $(grep -l "@drop_example_in_Julia" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	
+	# remove tests needing CompilerForCAP
+	rm -f $(grep -l "CapJitPrecompileCategoryAndCompareResult(" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "CapJitCompiledFunction(" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+fi
+
+if [ "$PKG_NAME" = "Toposes" ]; then
+	# remove tests computing HasPushoutComplement
+	# the one using FinSets runs out of memory in GitHub actions
+	rm -f $(grep -l "HasPushoutComplement(" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	
+	# LazyCategory is not yet available in Julia
+	rm -f $(grep -l "LazyCategory(" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+fi
+
+if [ "$PKG_NAME" = "ZXCalculusForCAP" ]; then
+	rm -f $(grep -l "@drop_example_in_Julia" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	
+	# remove tests needing CompilerForCAP
+	rm -f $(grep -l "CapJitPrecompileCategoryAndCompareResult(" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+fi
+
+if [ "$PKG_NAME" = "LinearAlgebraForCAP" ]; then
+	rm -f $(grep -l "@drop_example_in_Julia" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	
+	# MonoidalPreComposeMorphism is very slow because multiplication of matrices of Rationals{BigInt} is very slow
+	# see https://github.com/homalg-project/MatricesForHomalg.jl/issues/48
+	rm "$JULIA_PKG_DIR$PKG_NAME"/docs/src/ClosedAndCoclosedInMatrixCategory.tst.autogen.md
+	rm "$JULIA_PKG_DIR$PKG_NAME"/docs/src/TensorCorrespondenceMatrixCategoryAndOpposite.tst.autogen.md
+fi
+
+if [ "$PKG_NAME" = "FreydCategoriesForCAP" ]; then
+	# random functions, in particular for rings, are not implemented yet
+	rm -f $(grep -l "RandomObject" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "Random" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	
+	# Singular is not available yet
+	rm -f $(grep -l "HomalgFieldOfRationalsInSingular" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "HomalgFieldOfRationalsInDefaultCAS" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "M_tor = M/Adel;" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "mu1 = GradeFiltrationNthMonomorphism( M, 1 );" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "g = FreydCategoryMorphism( obj_gamma," "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "a = GradedRowOrColumnMorphism( obj1" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "Z2 = FreydCategoryObject( a )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "id = IdentityMorphism( Z2 )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "id = IdentityMorphism( ZFree )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "Object2LShuffle" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "categoryL = CapCategory( Q1L )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "ZeroObject( categoryL )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "IsWellDefined( IdentityMorphism( Q2L ) )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "O1L" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "O2L" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "proj1L" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "ckL" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "m1L" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "m2L" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "ObjectL" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "O1R" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "O2R" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "proj1R" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "ckR" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "m1R" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "m2R" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "ObjectR" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "coevR" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "coevC" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "DeduceMapFromMatrixAndRangeForGradedRows" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "R2 = DirectSum( T, T );" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "M = FreydCategoryObject( alpha );" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+
+	# ReducedSyzygiesOfRows/Columns is not available yet
+	rm -f $(grep -l "k = WeakKernelEmbedding( proj1 )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "ck = WeakCokernelProjection( k )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "IsEpimorphism( ck )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "fp = WeakBiFiberProduct( mor1, mor2 )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "po = WeakBiPushout( mor, mor2 )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "lift = Lift( mor1, mor2 )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "IsBijectiveObject( obj )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	
+	# SimplifyHomalgMatrix* are not available yet
+	rm -f $(grep -l "SimplifySourceAndRange_IsoFromInputSource( alpha, infinity )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "mu1 = GradeFiltrationNthMonomorphism( Mrows, 1 );" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "SimplifyObject_IsoFromInputObject( Mcols, infinity )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	
+	# differences in the output of SyzygiesOfRows, see https://github.com/homalg-project/MatricesForHomalg.jl/issues/50
+	rm -f $(grep -l "Display( EntriesOfHomalgMatrixAsListList( UnderlyingMatrix( equalizer ) ) )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "Display( EntriesOfHomalgMatrixAsListList( UnderlyingMatrix( coequalizer ) ) )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	
+	# functors are not available yet
+	rm -f $(grep -l "EmbeddingFunctorIntoFreydCategory" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	
+	# CoFreyd: FreydCategory tries to compute a distinguished object of the underlying opposite category, which causes problems with world age
+	rm -f $(grep -l "co_freyd = CoFreydCategory( rows )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	
+	# groups are not available yet
+	rm -f $(grep -l "SymmetricGroup" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "u = GroupAsCategoryUniqueObject( CG );" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "elem = List( elem, x -> x/CG/ZCG );" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	
+	# example too large (https://github.com/JuliaDocs/Documenter.jl/issues/2489)
+	rm "$JULIA_PKG_DIR$PKG_NAME"/docs/src/ClosedAndCoclosedRows.tst.autogen.md
+	
+	# MonoidalPreComposeMorphism is very slow because multiplication of matrices of Rationals{BigInt} is very slow
+	rm "$JULIA_PKG_DIR$PKG_NAME"/docs/src/TensorCorrespondenceRowsAndOppositeOfRows.tst.autogen.md
+fi
+
+if [ "$PKG_NAME" = "ModulePresentationsForCAP" ]; then
+	# Singular is not available yet
+	rm -f $(grep -l "HomalgRingOfIntegersInSingular" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "HomalgFieldOfRationalsInSingular" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	
+	# convenience operations for UnionOfRows/Columns are missing, see https://github.com/homalg-project/MatricesForHomalg.jl/issues/39
+	rm -f $(grep -l "T = TensorProductOnObjects( M, N )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+	rm -f $(grep -l "Tl = TensorProductOnObjects( Ml, Nl )" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+fi
+
+if [ "$PKG_NAME" = "ToolsForCategoricalTowers" ]; then
+	rm -f $(grep -l "@drop_example_in_Julia" "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.tst.autogen.md)
+fi
+
+# merge AutoDocTests into one big testfile to execute in the correct order
+if compgen -G "$JULIA_PKG_DIR$PKG_NAME"/docs/src/"$PKG_NAME_LOWERCASE"*.tst.autogen.md > /dev/null; then
+	cat "$JULIA_PKG_DIR$PKG_NAME"/docs/src/"$PKG_NAME_LOWERCASE"*.tst.autogen.md > "$JULIA_PKG_DIR$PKG_NAME"/docs/src/AutoDocTests.tst.autogen.md
+	rm "$JULIA_PKG_DIR$PKG_NAME"/docs/src/"$PKG_NAME_LOWERCASE"*.tst.autogen.md
+	
+	# execute tests in the same session
+	sed -i 's/```jldoctest/```jldoctest AutoDocTests/g' "$JULIA_PKG_DIR$PKG_NAME"/docs/src/AutoDocTests.tst.autogen.md
+fi
+
+chmod a-w "$JULIA_PKG_DIR$PKG_NAME"/docs/src/*.autogen.md
