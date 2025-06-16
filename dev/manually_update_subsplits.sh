@@ -25,3 +25,8 @@ fi
 git subtree split --prefix=ToolsForCategoricalTowers -b ToolsForCategoricalTowers-split
 git push git@github.com:${GITHUB_USER}/ToolsForCategoricalTowers.jl.git ToolsForCategoricalTowers-split:master
 echo "Pushed to ToolsForCategoricalTowers.jl"
+
+# QuotientCategories
+git subtree split --prefix=QuotientCategories -b QuotientCategories-split
+git push git@github.com:${GITHUB_USER}/QuotientCategories.jl.git QuotientCategories-split:master
+echo "Pushed to QuotientCategories.jl"
