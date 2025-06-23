@@ -182,7 +182,7 @@
             return PairGAP( """
                     function( input_arguments... )
                       
-                      return CallFuncList( operation_name, List( @NTupleGAP( number_of_arguments, input_arguments... )[[2 .. number_of_arguments]], UnderlyingCell ) );
+                      return CallFuncList( operation_name, List( @NTupleGAP( number_of_arguments, input_arguments... )[ (2):(number_of_arguments) ], UnderlyingCell ) );
                       
                     end
                     """, OperationWeight( ambient_cat, name ) );
