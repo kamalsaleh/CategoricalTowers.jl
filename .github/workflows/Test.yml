@@ -1,0 +1,52 @@
+name: Run Julia Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  schedule:
+    - cron: "0 0 * * *"  # Run every day at midnight
+permissions:
+  contents: write
+
+# cancel runs for pull requests on force push
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-a-fallback-value
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}-${{ github.run_attempt }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Julia ${{ matrix.julia-version }} on ${{ matrix.os }} - ${{ github.event_name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        julia-version:
+          - '1.11'
+          - 'nightly'
+        os:
+          - ubuntu-latest
+          - macOS-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.julia-version }}
+      - name: Install all packages
+        run: make install
+      - name: Run tests
+        run: make test
+      - name: Run update_subsplits script if tests pass
+        if: success() && github.event_name == 'push' && matrix.julia-version == '1.11' && matrix.os == 'ubuntu-latest'
+        env:
+          JULIA_SUBSPLIT_TOKEN: ${{ secrets.SUBSPLIT_PUSH_SECRET }}
+        run: |
+          ./dev/update_subsplits.sh
