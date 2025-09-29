@@ -1,0 +1,41 @@
+name = "Algebroids"
+uuid = "3989e2bd-547b-4f09-b4cc-82abd55d872d"
+authors = [
+	"Mohamed Barakat <mohamed.barakat@uni-siegen.de>",
+	"Florian Heiderich <heiderich@mathematik.uni-siegen.de>",
+	"Sebastian Posur <sebastian.posur@uni-siegen.de>",
+	"Kamal Saleh <kamal.saleh@uni-siegen.de>",
+	"Fabian Zickgraf <fabian.zickgraf@uni-siegen.de>"
+]
+
+# Transpiled from GAP's Algebroids v2025.09-10
+version = "0.1.0"
+
+[deps]
+MatricesForHomalg = "29b9b1b6-efa6-450e-8188-a5a2c25df071"
+CAP = "d64df2ee-d2bb-46f4-8cbc-f03bb858f8cb"
+MonoidalCategories = "bfd98c86-782f-4b94-909f-74167f1eb613"
+CartesianCategories = "c5961c08-7b59-43f4-a15e-02b3e7c87ab8"
+ToolsForCategoricalTowers = "e2cf920d-0824-4cbb-97bb-0be40824f89f"
+Toposes = "36a15fe6-6211-457f-8fdb-aa2e0d2f3052"
+FinSetsForCAP = "0a079e9b-4bc2-44fe-a89b-7607e4464786"
+QuotientCategories = "c103c924-3523-4680-a691-c88f3312ec70"
+FpCategories = "b9f20f1b-1226-4811-b6a0-b2e47a225553"
+LinearClosuresForCAP = "1f080b7b-ff6a-46b3-9ade-986f655adc86"
+AdditiveClosuresForCAP = "bbee75d5-3cb4-4478-8ae7-eddc7864e69e"
+LinearAlgebraForCAP = "3dc4824f-14ac-4ab7-8a60-75dbcd4a9d60"
+FreydCategoriesForCAP = "cec356e3-7627-4f73-8308-af32cbf46c2b"
+
+[weakdeps]
+
+[extensions]
+
+[compat]
+
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+
+[targets]
+test = ["Test", "Documenter"]
