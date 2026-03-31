@@ -39,3 +39,8 @@ echo "Pushed to FpCategories.jl"
 git subtree split --prefix=FpLinearCategories -b FpLinearCategories-split > /dev/null 2>&1
 git push https://${JULIA_SUBSPLIT_TOKEN}@github.com/homalg-project/FpLinearCategories.jl.git FpLinearCategories-split:master
 echo "Pushed to FpLinearCategories.jl"
+
+# Locales
+git subtree split --prefix=Locales -b Locales-split > /dev/null 2>&1
+git push https://${JULIA_SUBSPLIT_TOKEN}@github.com/homalg-project/Locales.jl.git Locales-split:master
+echo "Pushed to Locales.jl"

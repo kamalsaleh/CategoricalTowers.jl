@@ -40,3 +40,8 @@ echo "Pushed to FpCategories.jl"
 git subtree split --prefix=FpLinearCategories -b FpLinearCategories-split
 git push git@github.com:${GITHUB_USER}/FpLinearCategories.jl.git FpLinearCategories-split:master
 echo "Pushed to FpLinearCategories.jl"
+
+# Locales
+git subtree split --prefix=Locales -b Locales-split
+git push git@github.com:${GITHUB_USER}/Locales.jl.git Locales-split:master
+echo "Pushed to Locales.jl"
