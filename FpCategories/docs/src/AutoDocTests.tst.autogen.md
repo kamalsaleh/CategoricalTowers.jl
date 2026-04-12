@@ -110,6 +110,12 @@ FinQuiver( "q(1,2,3)[a:1→2,b:2→3]" )
 julia> q4 = FinQuiver( "q(4..6)[a:4->5,b:5->6]" )
 FinQuiver( "q(4,5,6)[a:4→5,b:5→6]" )
 
+julia> Display( ExternalHoms( q3 )[1][2] )
+[ a:(1) → (2) ]
+
+julia> Display( ExternalHoms( q3 )[1][3] )
+[  ]
+
 ```
 
 ```jldoctest AutoDocTests
@@ -220,7 +226,7 @@ Functor from PathCategory( FinQuiver(
                    ps:C1→C2,pt:C1→C2,mu:C1→C2]" ) )
 / [ s⋅id == i d(C0), t⋅id == id(C0), ps⋅is == id(C1), ... ] -> SkeletalFinSets
 
-julia> Ymu = YonedaProjectionAsNaturalEpimorphism( Delta2 )
+julia> Yp = YonedaProjectionAsNaturalEpimorphism( Delta2 )
 Natural transformation from
 Functor from PathCategory( FinQuiver(
   "Delta(C0,C1,C2)[id:C1→C0,s:C0→C1,t:C0→C1,
@@ -543,6 +549,20 @@ julia> Display( List( SetOfGeneratingMorphisms( qC ), IsMonomorphism ) )
 
 julia> Display( List( SetOfGeneratingMorphisms( qC ), IsEpimorphism ) )
 [ false, true, true, true, true, true, true, true, false ]
+
+julia> C_op = OppositePathCategory( C )
+PathCategory( FinQuiver( "q_op(0,1,2,3,4,5)[x:0→0,s:1→0,a:2→1,c:3→1,e:4→1,b:4→2,
+d:4→3,t:5→4,y:5→5]" ) )
+
+julia> IsIdenticalObj( OppositePathCategory( C_op ), C )
+true
+
+julia> qC_op = OppositeQuotientOfPathCategory( qC )
+PathCategory( FinQuiver( "q_op(0,1,2,3,4,5)[x:0→0,s:1→0,a:2→1,c:3→1,e:4→1,b:4→2,
+d:4→3,t:5→4,y:5→5]" ) ) / [ x^5 == x, y^5 == y^2 ]
+
+julia> IsIdenticalObj( OppositeQuotientOfPathCategory( qC_op ), qC )
+true
 
 ```
 

@@ -603,6 +603,7 @@ DeclareGlobalVariable( "RECORD_OF_COMPACT_NAMES_OF_CATEGORICAL_OPERATIONS" );
 #! @Returns a list of integers
 @DeclareGlobalFunction( "PositionsOfSublist" );
 
+#= comment for Julia
 #! @Description
 #!  The input is a cocartesian category <A>cat</A> and a list <A>objs</A> of objects therein of length $l$,
 #!  such that the list of all possible finite coproducts is finite.
@@ -612,5 +613,7 @@ DeclareGlobalVariable( "RECORD_OF_COMPACT_NAMES_OF_CATEGORICAL_OPERATIONS" );
 #! @Returns a list of objects
 @DeclareOperation( "AllCoproducts",
         [ IsCapCategory, IsList ] );
+# =#
+@DeclareFilterDispatchedOperation( "AllCoproducts" )
 
 @DeclareOperation( "OneMutableGAP", [ IsCapCategoryMorphism ] );

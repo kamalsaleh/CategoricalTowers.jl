@@ -4,8 +4,8 @@ authors = [
 	"Mohamed Barakat <mohamed.barakat@uni-siegen.de>"
 ]
 
-# Transpiled from GAP's ToolsForCategoricalTowers v2026.02-01
-version = "0.1.5"
+# Transpiled from GAP's ToolsForCategoricalTowers v2026.03-01
+version = "0.1.6"
 
 [deps]
 CAP = "d64df2ee-d2bb-46f4-8cbc-f03bb858f8cb"
