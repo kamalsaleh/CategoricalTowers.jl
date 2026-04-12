@@ -25,7 +25,7 @@
    "AdditiveInverseForMorphisms",
    "SubtractionForMorphisms",
    "ZeroMorphism",
-   #"MultiplyWithElementOfCommutativeRingForMorphisms",
+   #"MultiplyWithElementOfCommutativeSemiringForMorphisms",
    
    # IsCartesianCategory
    "DirectProduct",
@@ -82,7 +82,7 @@
     local congruence_func, ambient_cat, name, category_filter, category_object_filter, category_morphism_filter,
           object_constructor, object_datum, morphism_constructor, morphism_datum,
           create_func_bool, create_func_object, create_func_morphism,
-          list_of_operations_to_install, commutative_ring,
+          list_of_operations_to_install, commutative_semiring,
           properties, supports_empty_limits, quotient_cat;
     
     if (@not @IsBound( record.congruence_func ))
@@ -143,10 +143,10 @@
     
     list_of_operations_to_install = Intersection( ListPrimitivelyInstalledOperationsOfCategory( ambient_cat ), CAP_INTERNAL_METHOD_NAME_LIST_FOR_QUOTIENT_CATEGORY );
     
-    if (HasCommutativeRingOfLinearCategory( ambient_cat ))
-        commutative_ring = CommutativeRingOfLinearCategory( ambient_cat );
+    if (HasCommutativeSemiringOfLinearCategory( ambient_cat ))
+        commutative_semiring = CommutativeSemiringOfLinearCategory( ambient_cat );
     else
-        commutative_ring = fail;
+        commutative_semiring = fail;
     end;
     
     properties = [ "IsObjectFiniteCategory",
@@ -161,9 +161,9 @@
     
     if (HasIsLinearCategoryOverCommutativeRingWithFinitelyGeneratedFreeExternalHoms( ambient_cat ) &&
          IsLinearCategoryOverCommutativeRingWithFinitelyGeneratedFreeExternalHoms( ambient_cat ) &&
-         HasCommutativeRingOfLinearCategory( ambient_cat ))
+         HasCommutativeSemiringOfLinearCategory( ambient_cat ))
         
-        if (HasIsFieldForHomalg( commutative_ring ) && IsFieldForHomalg( commutative_ring ))
+        if (HasIsFieldForHomalg( commutative_semiring ) && IsFieldForHomalg( commutative_semiring ))
             Add( properties, "IsLinearCategoryOverCommutativeRingWithFinitelyGeneratedFreeExternalHoms" );
         end;
         
@@ -275,7 +275,7 @@
                    category_filter = category_filter,
                    category_object_filter = category_object_filter,
                    category_morphism_filter = category_morphism_filter,
-                   #commutative_ring_of_linear_category = commutative_ring,
+                   #commutative_semiring_of_linear_category = commutative_semiring,
                    properties = properties,
                    object_constructor = object_constructor,
                    object_datum = object_datum,
@@ -310,8 +310,8 @@
     
     SetQuotientCategoryCongruenceFunction( quotient_cat, record.congruence_func );
     
-    if (commutative_ring != fail)
-        SetCommutativeRingOfLinearCategory( quotient_cat, commutative_ring );
+    if (commutative_semiring != fail)
+        SetCommutativeSemiringOfLinearCategory( quotient_cat, commutative_semiring );
     end;
     
     AddIsCongruentForMorphisms( quotient_cat,
@@ -321,15 +321,15 @@
         
     end );
     
-    if (CanCompute( ambient_cat, "MultiplyWithElementOfCommutativeRingForMorphisms" ))
+    if (CanCompute( ambient_cat, "MultiplyWithElementOfCommutativeSemiringForMorphisms" ))
         
         ##
-        AddMultiplyWithElementOfCommutativeRingForMorphisms( quotient_cat,
+        AddMultiplyWithElementOfCommutativeSemiringForMorphisms( quotient_cat,
           function( quotient_cat, r, phi )
             
-            return MorphismConstructor( quotient_cat, Source( phi ), MultiplyWithElementOfCommutativeRingForMorphisms( AmbientCategory( quotient_cat ), r, UnderlyingCell( phi ) ), Target( phi ) );
+            return MorphismConstructor( quotient_cat, Source( phi ), MultiplyWithElementOfCommutativeSemiringForMorphisms( AmbientCategory( quotient_cat ), r, UnderlyingCell( phi ) ), Target( phi ) );
             
-        end, OperationWeight( ambient_cat, "MultiplyWithElementOfCommutativeRingForMorphisms" ) );
+        end, OperationWeight( ambient_cat, "MultiplyWithElementOfCommutativeSemiringForMorphisms" ) );
     
     end;
     

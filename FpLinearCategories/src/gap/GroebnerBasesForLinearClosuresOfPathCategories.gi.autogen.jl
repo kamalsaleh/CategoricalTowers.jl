@@ -53,7 +53,7 @@
             
             v_i = MorphismConstructor( kC, Target( G[i] ), PairGAP( [ one ], [ v_i ] ), Target( f ) );
             
-            t = MultiplyWithElementOfCommutativeRingForMorphisms( kC, c_i, PreComposeList( kC, [ u_i, G[i], v_i ] ) );
+            t = MultiplyWithElementOfCommutativeSemiringForMorphisms( kC, c_i, PreComposeList( kC, [ u_i, G[i], v_i ] ) );
             f = SubtractionForMorphisms( kC, f, t );
             
         else
@@ -96,8 +96,8 @@ end );
     leading_coeff_h = CoefficientsList( h )[1];
     
     return SubtractionForMorphisms( kC,
-                MultiplyWithElementOfCommutativeRingForMorphisms( kC, Inverse( leading_coeff_g ), PreComposeList( kC, [ l_leading_morph_g, g, r_leading_morph_g ] ) ),
-                MultiplyWithElementOfCommutativeRingForMorphisms( kC, Inverse( leading_coeff_h ), PreComposeList( kC, [ l_leading_morph_h, h, r_leading_morph_h ] ) ) );
+                MultiplyWithElementOfCommutativeSemiringForMorphisms( kC, Inverse( leading_coeff_g ), PreComposeList( kC, [ l_leading_morph_g, g, r_leading_morph_g ] ) ),
+                MultiplyWithElementOfCommutativeSemiringForMorphisms( kC, Inverse( leading_coeff_h ), PreComposeList( kC, [ l_leading_morph_h, h, r_leading_morph_h ] ) ) );
     
 end );
 
@@ -176,7 +176,7 @@ end );
           
       elseif (@not IsEqualForMorphisms( kC, r, reduced_gb[i] ))
           
-          reduced_gb[i] = MultiplyWithElementOfCommutativeRingForMorphisms( kC, Inverse( CoefficientsList( r )[1] ), r );
+          reduced_gb[i] = MultiplyWithElementOfCommutativeSemiringForMorphisms( kC, Inverse( CoefficientsList( r )[1] ), r );
           
           i = 1;
           

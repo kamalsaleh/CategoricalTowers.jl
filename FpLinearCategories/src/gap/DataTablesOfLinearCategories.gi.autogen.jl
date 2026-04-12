@@ -83,7 +83,7 @@ end );
     
     return @NTupleGAP( 5,
               #coefficients_ring,
-              CommutativeRingOfLinearCategory( quo_kC ),
+              CommutativeSemiringOfLinearCategory( quo_kC ),
               #quiver
               q,
               #decomposition_indices_of_bases_elements
@@ -147,7 +147,7 @@ end );
     end;
     
     return @NTupleGAP( 5,
-              CommutativeRingOfLinearCategory( A ),
+              CommutativeSemiringOfLinearCategory( A ),
               q,
               List( objs, s -> List( objs, t -> List( BasisOfExternalHom( qA, s, t ), m ->
                 List( DecompositionIndicesOfMorphismInAlgebroid( MorphismDatum( m ) )[1][2], index -> SafePosition( support_gmors, index ) ) ) ) ),

@@ -21,7 +21,7 @@ Q-LinearClosure( PathCategory( FinQuiver( "q(0,1,2,3)[a:0→1,b:1→3,c:0→2,d:
 
 julia> data_tables = DataTablesOfLinearCategory( B );
 
-julia> IsIdenticalObj( data_tables[1], CommutativeRingOfLinearCategory( B ) )
+julia> IsIdenticalObj( data_tables[1], CommutativeSemiringOfLinearCategory( B ) )
 true
 
 julia> data_tables[2]
