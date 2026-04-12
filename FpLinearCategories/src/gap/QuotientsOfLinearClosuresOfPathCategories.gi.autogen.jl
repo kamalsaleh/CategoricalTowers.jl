@@ -103,7 +103,7 @@
         
         SET_RANGE_CATEGORY_Of_HOMOMORPHISM_STRUCTURE( quo_kC, range_HomStructure );
         
-        k = CommutativeRingOfLinearCategory( kC );
+        k = CommutativeSemiringOfLinearCategory( kC );
         
         if (( HasIsFieldForHomalg( k ) && IsFieldForHomalg( k ) ) ||
            ForAll( relations, rel -> ForAll( CoefficientsList( rel ), coef -> IsUnit( k, coef ) ) ))

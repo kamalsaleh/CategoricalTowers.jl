@@ -13,7 +13,7 @@
   function ( CAP_NAMED_ARGUMENTS, rows, C )
     local k, sorting_func, order, kC;
     
-    k = CommutativeRingOfLinearCategory( rows );
+    k = CommutativeSemiringOfLinearCategory( rows );
     
     if (colors == fail)
         

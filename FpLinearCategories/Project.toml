@@ -5,8 +5,8 @@ authors = [
 	"Kamal Saleh <kamal.saleh@uni-siegen.de>"
 ]
 
-# Transpiled from GAP's FpLinearCategories v2026.01-02
-version = "0.1.5"
+# Transpiled from GAP's FpLinearCategories v2026.04-01
+version = "0.2"
 
 [deps]
 MatricesForHomalg = "29b9b1b6-efa6-450e-8188-a5a2c25df071"
@@ -30,18 +30,18 @@ FreydCategoriesForCAP = "cec356e3-7627-4f73-8308-af32cbf46c2b"
 [compat]
 julia = "1.11, 1.12"
 MatricesForHomalg = "~0.1.5"
-CAP = "~0.6.13"
+CAP = "0.7"
 MonoidalCategories = "~0.2.12"
 CartesianCategories = "~0.3.12"
 ToolsForCategoricalTowers = "0.1"
 Toposes = "~0.1.14"
 FinSetsForCAP = "0.2, 0.3"
-QuotientCategories = "0.1"
+QuotientCategories = "0.2"
 FpCategories = "~0.1.2"
-LinearClosuresForCAP = "~0.1.2"
-AdditiveClosuresForCAP = "~0.1.4"
-LinearAlgebraForCAP = "~0.1.13"
-FreydCategoriesForCAP = "~0.1.13"
+LinearClosuresForCAP = "0.2"
+AdditiveClosuresForCAP = "0.2"
+LinearAlgebraForCAP = "0.2"
+FreydCategoriesForCAP = "0.2"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
