@@ -360,7 +360,7 @@ end );
         [ IsPathCategory, IsBigInt ],
   
   function ( C, len )
-    local q, nr_objs, nr_gmors, gmors, data, prev_data, r, j, s;
+    local q, nr_objs, nr_gmors, gmors, data, prev_data, r, j;
     
     q = UnderlyingQuiver( C );
     
@@ -381,24 +381,10 @@ end );
       
       prev_data = ExternalHomsWithGivenLengthData( C, len - 1 );
       
-      # It is better to get the morphisms already sorted from max to min, hence:
-      
-      if (C.admissible_order == "Dp")
-        
-        for r in (1):(nr_objs)
-          for j in (1):(nr_gmors)
-            data[gmors[j][1]][r] = @Concatenation( data[gmors[j][1]][r], List( prev_data[gmors[j][2]][r], l -> @Concatenation( [ j ], l ) ) );
-          end;
+      for r in (1):(nr_objs)
+        for j in (1):(nr_gmors)
+          data[gmors[j][1]][r] = @Concatenation( data[gmors[j][1]][r], List( prev_data[gmors[j][2]][r], l -> @Concatenation( [ j ], l ) ) );
         end;
-        
-      elseif (C.admissible_order == "dp")
-        
-        for s in (1):(nr_objs)
-          for j in (1):(nr_gmors)
-            data[s][gmors[j][2]] = @Concatenation( data[s][gmors[j][2]], List( prev_data[s][gmors[j][1]], l -> @Concatenation( l, [ j ] ) ) );
-          end;
-        end;
-        
       end;
       
     end;
@@ -1091,45 +1077,6 @@ end );
 end );
 
 ##
-@InstallGlobalFunction( FpCategories_SORT_MORPHISMS_LIKE_QPA,
-  
-  function ( supports )
-    local nr_objs, sort_function, s, t;
-    
-    nr_objs = Length( supports );
-    
-    sort_function =
-      function ( m_1, m_2 )
-        local l_1, l_2, i;
-        
-        l_1 = Length( m_1 );
-        l_2 = Length( m_2 );
-        
-        if (l_1 != l_2)
-          
-          return l_1 < l_2;
-          
-        else
-          
-          i = PositionProperty( (1):(l_1), j -> m_1[j] != m_2[j] );
-          
-          return i != fail && m_1[i] < m_2[i];
-          
-        end;
-        
-    end;
-    
-    for s in (1):(nr_objs)
-      for t in (1):(nr_objs)
-        
-        supports[s][t] = SortedList( supports[s][t], sort_function );
-        
-      end;
-    end;
-    
-end );
-
-##
 @InstallMethod( MacaulayMorphisms,
           [ IsPathCategory, IsDenseList ],
   
@@ -1185,7 +1132,11 @@ end );
               
           end;
           
-          supports[s][t] = @Concatenation( homQ_len_st, supports[s][t] );
+          if (C.admissible_order == "dp")
+              supports[s][t] = @Concatenation( supports[s][t], homQ_len_st );
+          else
+              supports[s][t] = @Concatenation( homQ_len_st, supports[s][t] );
+          end;
           
         end;
       end;
@@ -1196,12 +1147,6 @@ end );
           break;
       end;
       
-    end;
-    
-    if (C.admissible_order == "dp")
-        
-        FpCategories_SORT_MORPHISMS_LIKE_QPA( supports );
-        
     end;
     
     return LazyHList( (1):(nr_objs), s ->
