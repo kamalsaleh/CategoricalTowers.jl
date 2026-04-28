@@ -44,3 +44,8 @@ echo "Pushed to FpLinearCategories.jl"
 git subtree split --prefix=Locales -b Locales-split > /dev/null 2>&1
 git push https://${JULIA_SUBSPLIT_TOKEN}@github.com/homalg-project/Locales.jl.git Locales-split:master
 echo "Pushed to Locales.jl"
+
+# SubcategoriesForCAP
+git subtree split --prefix=SubcategoriesForCAP -b SubcategoriesForCAP-split > /dev/null 2>&1
+git push https://${JULIA_SUBSPLIT_TOKEN}@github.com/homalg-project/SubcategoriesForCAP.jl.git SubcategoriesForCAP-split:master
+echo "Pushed to SubcategoriesForCAP.jl"
