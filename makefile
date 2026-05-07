@@ -6,6 +6,7 @@ install:
 		Pkg.develop(path = "FpLinearCategories"); \
 		Pkg.develop(path = "Locales"); \
 		Pkg.develop(path = "SubcategoriesForCAP"); \
+		Pkg.develop(path = "PresheafCategories"); \
 	'
 
 gen:
@@ -15,6 +16,7 @@ gen:
 	$(MAKE) -C FpLinearCategories gen
 	$(MAKE) -C Locales gen
 	$(MAKE) -C SubcategoriesForCAP gen
+	$(MAKE) -C PresheafCategories gen
 
 
 gen-full:
@@ -24,6 +26,7 @@ gen-full:
 	$(MAKE) -C FpLinearCategories gen-full
 	$(MAKE) -C Locales gen-full
 	$(MAKE) -C SubcategoriesForCAP gen-full
+	$(MAKE) -C PresheafCategories gen-full
 
 test:
 	$(MAKE) -C ToolsForCategoricalTowers test
@@ -32,6 +35,7 @@ test:
 	$(MAKE) -C FpLinearCategories test
 	$(MAKE) -C Locales test
 	$(MAKE) -C SubcategoriesForCAP test
+	$(MAKE) -C PresheafCategories test
 
 git-commit:
 	$(MAKE) -C ToolsForCategoricalTowers git-commit
@@ -40,6 +44,7 @@ git-commit:
 	$(MAKE) -C FpLinearCategories git-commit
 	$(MAKE) -C Locales git-commit
 	$(MAKE) -C SubcategoriesForCAP git-commit
+	$(MAKE) -C PresheafCategories git-commit
 
 update-subsplits:
 	./dev/manually_update_subsplits.sh

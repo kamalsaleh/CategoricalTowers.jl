@@ -50,3 +50,8 @@ echo "Pushed to Locales.jl"
 git subtree split --prefix=SubcategoriesForCAP -b SubcategoriesForCAP-split
 git push git@github.com:${GITHUB_USER}/SubcategoriesForCAP.jl.git SubcategoriesForCAP-split:master
 echo "Pushed to SubcategoriesForCAP.jl"
+
+# PresheafCategories
+git subtree split --prefix=PresheafCategories -b PresheafCategories-split
+git push git@github.com:${GITHUB_USER}/PresheafCategories.jl.git PresheafCategories-split:master
+echo "Pushed to PresheafCategories.jl"
