@@ -6,7 +6,7 @@ authors = [
 ]
 
 # Transpiled from GAP's PresheafCategories v2026.05-02
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 CAP = "d64df2ee-d2bb-46f4-8cbc-f03bb858f8cb"
@@ -23,8 +23,8 @@ Toposes = "36a15fe6-6211-457f-8fdb-aa2e0d2f3052"
 [compat]
 CAP = "~0.7.4"
 MatricesForHomalg = "~0.1.6"
-MonoidalCategories = "~0.2.14"
-CartesianCategories = "~0.3.14"
+MonoidalCategories = "~0.2.15"
+CartesianCategories = "~0.3.15"
 ToolsForCategoricalTowers = "~0.1.7"
 Toposes = "~0.1.18"
 FinSetsForCAP = "~0.3.8"

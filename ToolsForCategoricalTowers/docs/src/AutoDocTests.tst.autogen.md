@@ -20,7 +20,7 @@ DummyCategoryInDoctrines( [ "IsAbelianCategory" ] )
 julia> Display( D2 )
 A CAP category with name DummyCategoryInDoctrines( [ "IsAbelianCategory" ] ):
 
-33 primitive operations were used to derive 292 operations for this category which algorithmically
+33 primitive operations were used to derive 300 operations for this category which algorithmically
 * IsAbelianCategory
 
 julia> D3 = DummyCategoryInDoctrines(
@@ -67,7 +67,7 @@ SkeletalFinSets
 julia> Display( sFinSets )
 A CAP category with name SkeletalFinSets:
 
-58 primitive operations were used to derive 368 operations for this category which algorithmically
+58 primitive operations were used to derive 380 operations for this category which algorithmically
 * IsCategoryWithDecidableColifts
 * IsCategoryWithDecidableLifts
 * IsEquippedWithHomomorphismStructure
@@ -112,7 +112,7 @@ WrapperCategory( SkeletalFinSets )
 julia> Display( W )
 A CAP category with name WrapperCategory( SkeletalFinSets ):
 
-344 primitive operations were used to derive 358 operations for this category which algorithmically
+356 primitive operations were used to derive 370 operations for this category which algorithmically
 * IsCategoryWithDecidableColifts
 * IsCategoryWithDecidableLifts
 * IsEquippedWithHomomorphismStructure
@@ -156,7 +156,7 @@ Opposite( SkeletalFinSets )
 julia> Display( O )
 A CAP category with name Opposite( SkeletalFinSets ):
 
-277 primitive operations were used to derive 293 operations for this category which algorithmically
+289 primitive operations were used to derive 305 operations for this category which algorithmically
 * IsCategoryWithDecidableColifts
 * IsCategoryWithDecidableLifts
 * IsEquippedWithHomomorphismStructure
@@ -215,7 +215,7 @@ SkeletalFinSets
 julia> Display( sFinSets )
 A CAP category with name SkeletalFinSets:
 
-58 primitive operations were used to derive 368 operations for this category which algorithmically
+58 primitive operations were used to derive 380 operations for this category which algorithmically
 * IsCategoryWithDecidableColifts
 * IsCategoryWithDecidableLifts
 * IsEquippedWithHomomorphismStructure
@@ -260,7 +260,7 @@ WrapperCategory( SkeletalFinSets )
 julia> Display( W )
 A CAP category with name WrapperCategory( SkeletalFinSets ):
 
-344 primitive operations were used to derive 358 operations for this category which algorithmically
+356 primitive operations were used to derive 370 operations for this category which algorithmically
 * IsCategoryWithDecidableColifts
 * IsCategoryWithDecidableLifts
 * IsEquippedWithHomomorphismStructure
@@ -304,7 +304,7 @@ Opposite( SkeletalFinSets )
 julia> Display( O )
 A CAP category with name Opposite( SkeletalFinSets ):
 
-277 primitive operations were used to derive 293 operations for this category which algorithmically
+289 primitive operations were used to derive 305 operations for this category which algorithmically
 * IsCategoryWithDecidableColifts
 * IsCategoryWithDecidableLifts
 * IsEquippedWithHomomorphismStructure

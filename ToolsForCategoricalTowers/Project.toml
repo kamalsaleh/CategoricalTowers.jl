@@ -5,7 +5,7 @@ authors = [
 ]
 
 # Transpiled from GAP's ToolsForCategoricalTowers v2026.04-01
-version = "0.1.7"
+version = "0.1.8"
 
 [deps]
 CAP = "d64df2ee-d2bb-46f4-8cbc-f03bb858f8cb"
@@ -19,8 +19,8 @@ CartesianCategories = "c5961c08-7b59-43f4-a15e-02b3e7c87ab8"
 [compat]
 julia = "1.11"
 CAP = "~0.6.19, 0.7"
-MonoidalCategories = "0.2"
-CartesianCategories = "0.3"
+MonoidalCategories = "~0.2.15"
+CartesianCategories = "~0.3.15"
 FinSetsForCAP = "0.2, 0.3"
 FreydCategoriesForCAP = "~0.1.11, 0.2"
 
