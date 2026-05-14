@@ -6,8 +6,8 @@ authors = [
 	"Kamal Saleh <kamal.saleh@uni-siegen.de>"
 ]
 
-# Transpiled from GAP's SubcategoriesForCAP v2026.04-03
-version = "0.1.0"
+# Transpiled from GAP's SubcategoriesForCAP v2026.05-01
+version = "0.1.1"
 
 [deps]
 CAP = "d64df2ee-d2bb-46f4-8cbc-f03bb858f8cb"
@@ -19,7 +19,7 @@ Locales = "1a4f975e-c827-4943-8d73-13a8c91de15b"
 [extensions]
 
 [compat]
-CAP = "0.7"
+CAP = "0.7, 0.8"
 ToolsForCategoricalTowers = "~0.1.7"
 Locales = "0.1"
 MatricesForHomalg = "~0.1.6"

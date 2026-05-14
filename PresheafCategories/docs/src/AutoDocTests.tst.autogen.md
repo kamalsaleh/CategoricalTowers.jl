@@ -20,7 +20,7 @@ true
 julia> Display( T )
 A CAP category with name PreSheaves( InitialCategory( ), InitialCategory( ) ):
 
-124 primitive operations were used to derive 645 operations for this category which algorithmically
+127 primitive operations were used to derive 654 operations for this category which algorithmically
 * IsCategoryWithDecidableColifts
 * IsCategoryWithDecidableLifts
 * IsFiniteCategory
@@ -118,7 +118,7 @@ PreSheaves( SkeletalFinSets, SkeletalFinSets )
 julia> Display( PSh )
 A CAP category with name PreSheaves( SkeletalFinSets, SkeletalFinSets ):
 
-28 primitive operations were used to derive 204 operations for this category
+28 primitive operations were used to derive 213 operations for this category
 which not yet algorithmically
 * IsSymmetricMonoidalCategory
 * IsElementaryTopos

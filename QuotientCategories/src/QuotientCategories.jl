@@ -6,6 +6,10 @@ using MatricesForHomalg
 
 using CAP
 
+using MonoidalCategories
+
+using CartesianCategories
+
 using ToolsForCategoricalTowers
 
 using LinearAlgebraForCAP
