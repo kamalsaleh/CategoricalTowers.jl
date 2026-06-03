@@ -124,6 +124,262 @@ julia> using CAP, QuotientCategories, FpCategories
 julia> true
 true
 
+julia> Delta1 = SimplicialCategoryTruncatedInDegree( 1 )
+PathCategory( FinQuiver( "Delta(C0,C1)[id:C1→C0,s:C0→C1,t:C0→C1]" ) )
+/ [ s⋅id == id(C0), t⋅id == id(C0) ]
+
+julia> Size( Delta1 )
+7
+
+julia> mors = SetOfMorphisms( Delta1 );
+
+julia> ViewObj( mors )
+[ [id(C0)]:(C0) → (C0), [id]:(C1) → (C0), [s]:(C0) → (C1), [t]:(C0) → (C1),
+  [id(C1)]:(C1) → (C1), [id⋅s]:(C1) → (C1), [id⋅t]:(C1) → (C1) ]
+
+julia> ViewObj( List( mors, DecompositionOfMorphismInCategory ) )
+[ [  ], [ [id]:(C1) → (C0) ], [ [s]:(C0) → (C1) ], [ [t]:(C0) → (C1) ],
+  [  ], [ [id]:(C1) → (C0), [s]:(C0) → (C1) ],
+  [ [id]:(C1) → (C0), [t]:(C0) → (C1) ] ]
+
+julia> C = CategoryFromDataTables( Delta1 )
+PathCategory( FinQuiver( "Delta(C0,C1)[id:C1→C0,s:C0→C1,t:C0→C1]" ) )
+/ [ s⋅id == id(C0), t⋅id == id(C0) ]
+
+julia> Size( C )
+7
+
+julia> morsC = SetOfMorphisms( C );
+
+julia> ViewObj( morsC )
+[ (C0)-[(C0)]->(C0), (C1)-[(id)]->(C0), (C0)-[(s)]->(C1), (C0)-[(t)]->(C1),
+  (C1)-[(C1)]->(C1), (C1)-[(id*s)]->(C1), (C1)-[(id*t)]->(C1) ]
+
+julia> ViewObj( List( morsC, DecompositionOfMorphismInCategory ) )
+[ [  ], [ (C1)-[(id)]->(C0) ], [ (C0)-[(s)]->(C1) ], [ (C0)-[(t)]->(C1) ],
+  [  ], [ (C1)-[(id)]->(C0), (C0)-[(s)]->(C1) ],
+  [ (C1)-[(id)]->(C0), (C0)-[(t)]->(C1) ] ]
+
+julia> NerveTruncatedInDegree2Data( C ) == NerveTruncatedInDegree2Data( Delta1 )
+true
+
+julia> ViewObj( IndicesOfGeneratingMorphisms( C ) )
+[ 1, 2, 3 ]
+
+julia> ViewObj( SetOfGeneratingMorphisms( C ) )
+[ (C1)-[(id)]->(C0), (C0)-[(s)]->(C1), (C0)-[(t)]->(C1) ]
+
+julia> Display( C )
+A CAP category with name
+PathCategory( FinQuiver( "Delta(C0,C1)[id:C1→C0,s:C0→C1,t:C0→C1]" ) )
+/ [ s⋅id == id(C0), t⋅id == id(C0) ]:
+
+19 primitive operations were used to derive 55 operations for this category
+which algorithmically
+* IsCategoryWithDecidableColifts
+* IsCategoryWithDecidableLifts
+* IsFiniteCategory
+* IsEquippedWithHomomorphismStructure
+
+julia> C0 = CreateObject( C, 0 )
+<(C0)>
+
+julia> IsWellDefined( C0 )
+true
+
+julia> C1 = 1 / C
+<(C1)>
+
+julia> IsWellDefined( C1 )
+true
+
+julia> IsWellDefined( 2 / C )
+false
+
+julia> idC0 = CreateMorphism( C0, 0, C0 )
+(C0)-[(C0)]->(C0)
+
+julia> CreateMorphism( C, 0 ) == idC0
+true
+
+julia> IsOne( idC0 )
+true
+
+julia> id = CreateMorphism( C, 1 )
+(C1)-[(id)]->(C0)
+
+julia> s = CreateMorphism( C, 2 )
+(C0)-[(s)]->(C1)
+
+julia> t = CreateMorphism( C, 3 )
+(C0)-[(t)]->(C1)
+
+julia> IsSplitMonomorphism( s )
+true
+
+julia> IsSplitMonomorphism( t )
+true
+
+julia> IsEpimorphism( s )
+false
+
+julia> IsEpimorphism( t )
+false
+
+julia> IsSplitEpimorphism( id )
+true
+
+julia> IsMonomorphism( id )
+false
+
+julia> idC1 = CreateMorphism( C, 4 )
+(C1)-[(C1)]->(C1)
+
+julia> IsOne( idC1 )
+true
+
+julia> sigma = CreateMorphism( C, 5 )
+(C1)-[(id*s)]->(C1)
+
+julia> tau = CreateMorphism( C, 6 )
+(C1)-[(id*t)]->(C1)
+
+julia> IsEndomorphism( sigma )
+true
+
+julia> IsMonomorphism( sigma )
+false
+
+julia> IsEpimorphism( sigma )
+false
+
+julia> IsEndomorphism( tau )
+true
+
+julia> IsMonomorphism( tau )
+false
+
+julia> IsEpimorphism( tau )
+false
+
+julia> IsOne( tau )
+false
+
+julia> IsWellDefined( CreateMorphism( C1, 7, C1 ) )
+false
+
+julia> PreCompose( s, id ) == idC0
+true
+
+julia> PreCompose( t, id ) == idC0
+true
+
+julia> PreCompose( id, s ) == sigma
+true
+
+julia> PreCompose( id, t ) == tau
+true
+
+julia> HomStructure( C0, C0 )
+|1|
+
+julia> HomStructure( C1, C1 )
+|3|
+
+julia> HomStructure( C0, C1 )
+|2|
+
+julia> HomStructure( C1, C0 )
+|1|
+
+julia> Display( HomStructure( s ) )
+[ 0 ] ⱶ[ 0 ]→ [ 0, 1 ]
+
+julia> Display( HomStructure( t ) )
+[ 0 ] ⱶ[ 1 ]→ [ 0, 1 ]
+
+julia> HomStructure( Source( s ), Target( s ), HomStructure( s ) ) == s
+true
+
+julia> HomStructure( Source( t ), Target( t ), HomStructure( t ) ) == t
+true
+
+julia> Display( HomStructure( s, t ) )
+[ 0 ] ⱶ[ 1 ]→ [ 0, 1 ]
+
+julia> Display( HomStructure( t, s ) )
+[ 0 ] ⱶ[ 0 ]→ [ 0, 1 ]
+
+julia> Display( HomStructure( sigma, tau ) )
+[ 0, 1, 2 ] ⱶ[ 2, 2, 2 ]→ [ 0, 1, 2 ]
+
+julia> Display( HomStructure(
+                PreCompose( Delta1.id, Delta1.s ),
+                PreCompose( Delta1.id, Delta1.t ) ) )
+[ 0, 1, 2 ] ⱶ[ 2, 2, 2 ]→ [ 0, 1, 2 ]
+
+julia> Display( HomStructure( tau, sigma ) )
+[ 0, 1, 2 ] ⱶ[ 1, 1, 1 ]→ [ 0, 1, 2 ]
+
+julia> Display( HomStructure(
+                PreCompose( Delta1.id, Delta1.t ),
+                PreCompose( Delta1.id, Delta1.s ) ) )
+[ 0, 1, 2 ] ⱶ[ 1, 1, 1 ]→ [ 0, 1, 2 ]
+
+julia> Display( HomStructure( tau, idC1 ) )
+[ 0, 1, 2 ] ⱶ[ 2, 1, 2 ]→ [ 0, 1, 2 ]
+
+julia> Display( HomStructure( idC1, idC1 ) )
+[ 0, 1, 2 ] ⱶ[ 0, 1, 2 ]→ [ 0, 1, 2 ]
+
+julia> mors = SetOfMorphisms( C );
+
+julia> ViewObj( mors )
+[ (C0)-[(C0)]->(C0), (C1)-[(id)]->(C0), (C0)-[(s)]->(C1), (C0)-[(t)]->(C1),
+  (C1)-[(C1)]->(C1), (C1)-[(id*s)]->(C1), (C1)-[(id*t)]->(C1) ]
+
+julia> ViewObj( List( mors, OppositeMorphismInOppositeCategoryFromDataTables ) )
+[ (C0)-[(C0)]->(C0), (C0)-[(id)]->(C1), (C1)-[(s)]->(C0), (C1)-[(t)]->(C0),
+(C1)-[(C1)]->(C1), (C1)-[(s*id)]->(C1), (C1)-[(t*id)]->(C1) ]
+
+julia> ViewObj( List( mors, DecompositionOfMorphismInCategory ) )
+[ [  ], [ (C1)-[(id)]->(C0) ], [ (C0)-[(s)]->(C1) ], [ (C0)-[(t)]->(C1) ],
+  [  ], [ (C1)-[(id)]->(C0), (C0)-[(s)]->(C1) ],
+  [ (C1)-[(id)]->(C0), (C0)-[(t)]->(C1) ] ]
+
+julia> C_op = OppositeCategoryFromDataTables( C )
+Opposite(
+PathCategory( FinQuiver( "Delta(C0,C1)[id:C1→C0,s:C0→C1,t:C0→C1]" ) )
+/ [ s⋅id == id(C0), t⋅id == id(C0) ] )
+
+julia> IsIdenticalObj( OppositeCategoryFromDataTables( C_op ), C )
+true
+
+julia> ViewObj( IndicesOfGeneratingMorphisms( C_op ) )
+[ 3, 1, 2 ]
+
+julia> ViewObj( SetOfGeneratingMorphisms( C_op ) )
+[ (C0)-[(id)]->(C1), (C1)-[(s)]->(C0), (C1)-[(t)]->(C0) ]
+
+julia> mors_op = SetOfMorphisms( C_op );
+
+julia> ViewObj( mors_op )
+[ (C0)-[(C0)]->(C0), (C1)-[(s)]->(C0), (C1)-[(t)]->(C0), (C0)-[(id)]->(C1),
+  (C1)-[(C1)]->(C1), (C1)-[(s*id)]->(C1), (C1)-[(t*id)]->(C1) ]
+
+julia> ViewObj( List( mors_op, DecompositionOfMorphismInCategory ) )
+[ [  ], [ (C1)-[(s)]->(C0) ], [ (C1)-[(t)]->(C0) ], [ (C0)-[(id)]->(C1) ],
+  [  ], [ (C1)-[(s)]->(C0), (C0)-[(id)]->(C1) ],
+  [ (C1)-[(t)]->(C0), (C0)-[(id)]->(C1) ] ]
+
+```
+
+```jldoctest AutoDocTests
+julia> using CAP, QuotientCategories, FpCategories
+
+julia> true
+true
+
 julia> Delta2 = SimplicialCategoryTruncatedInDegree( 2 )
 PathCategory( FinQuiver(
   "Delta(C0,C1,C2)[id:C1→C0,s:C0→C1,t:C0→C1,

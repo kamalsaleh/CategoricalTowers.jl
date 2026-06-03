@@ -41,3 +41,32 @@ InstallMethod( /,
   function( i, C )
     return CreateObject( C, i );
 end );
+
+##
+InstallMethod( CreateObject,
+          [ IsCategoryFromDataTables, IsInt ],
+  function( C, i )
+    return CreateObject( C, BigInt( i ) );
+end );
+
+##
+InstallMethod( CreateMorphism,
+          [ IsObjectInCategoryFromDataTables, IsInt, IsObjectInCategoryFromDataTables ],
+  function( source, m, range )
+    return CreateMorphism( source, BigInt( m ), range );
+end );
+
+##
+InstallMethod( CreateMorphism,
+          [ IsCategoryFromDataTables, IsInt ],
+  function( C, m )
+    return CreateMorphism( C, BigInt( m ) );
+end );
+
+
+##
+InstallMethod( /,
+        [ IsInt, IsCategoryFromDataTables ],
+  function( i, C )
+    return CreateObject( C, i );
+end );

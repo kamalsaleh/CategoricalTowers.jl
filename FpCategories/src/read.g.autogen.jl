@@ -6,12 +6,14 @@
 
 include( "gap/precompiled_categories/CategoryFromNerveDataPrecompiled.gi.autogen.jl" );
 include( "gap/precompiled_categories/CategoryFromNerveDataHomStructureOnMorphismsPrecompiled.gi.autogen.jl" );
+include( "gap/precompiled_categories/CategoryFromDataTablesPrecompiled.gi.autogen.jl" );
 
 include( "gap/Quivers.gi.autogen.jl");
 include( "gap/PathCategories.gi.autogen.jl");
 include( "gap/GroebnerBasesForPathCategories.gi.autogen.jl");
 include( "gap/QuotientsOfPathCategories.gi.autogen.jl");
 include( "gap/CategoryFromNerveData.gi.autogen.jl");
+include( "gap/CategoryFromDataTables.gi.autogen.jl");
 include( "gap/Tools.gi.autogen.jl");
 include( "gap/ToolsDerivedMethods.gi.autogen.jl");
 include( "gap/SimplicialCategory.gi.autogen.jl");
