@@ -5,8 +5,8 @@ authors = [
 	"Kamal Saleh <kamal.saleh@uni-siegen.de>"
 ]
 
-# Transpiled from GAP's FpCategories v2026.05-02
-version = "0.1.11"
+# Transpiled from GAP's FpCategories v2026.06-02
+version = "0.1.12"
 
 [deps]
 CAP = "d64df2ee-d2bb-46f4-8cbc-f03bb858f8cb"

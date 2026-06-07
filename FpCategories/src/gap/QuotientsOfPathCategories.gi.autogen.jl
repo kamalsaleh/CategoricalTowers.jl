@@ -484,7 +484,7 @@ end );
         
   function( C )
     
-    return DataTablesOfCategory( CategoryFromNerveData( C; FinalizeCategory = true ) );
+    return DataTablesOfCategory( CategoryFromNerveData( C ) );
     
 end );
 
