@@ -1,0 +1,101 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# FiniteCocompletions: Finite (co)product/(co)limit (co)completions
+#
+# Declarations
+#
+
+#! @Chapter SkeletalFinSets
+
+####################################
+#
+#! @Section GAP categories
+#
+####################################
+
+#! @Description
+#!  The &GAP; category of a finite coproduct cocompletion category.
+@DeclareFilter( "IsSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory",
+        IsCapCategory );
+
+#! @Description
+#!  The &GAP; category of cells in the category of skeletal finsets.
+@DeclareFilter( "IsCellInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory",
+        IsCapCategoryCell );
+
+#! @Description
+#!  The &GAP; category of objects in the category of skeletal finsets.
+@DeclareFilter( "IsObjectInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory",
+        FilterIntersection( IsCapCategoryObject, IsCellInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory ) );
+
+#! @Description
+#!  The &GAP; category of morphisms in the category of skeletal finsets.
+@DeclareFilter( "IsMorphismInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory",
+        FilterIntersection( IsCapCategoryMorphism, IsCellInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory ) );
+
+####################################
+#
+#! @Section Attributes
+#
+####################################
+
+#! @Description
+#!  The integer defining the skeletal finite set <A>M</A>, i.e.,
+#!  <C>Cardinality( FinSet( n ) ) == n</C>.
+#! @Arguments M
+#! @Returns an integer
+@DeclareAttribute( "Cardinality",
+        IsObjectInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory );
+
+CapJitAddTypeSignature( "Cardinality", [ IsObjectInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory ],
+  function ( input_types )
+    
+    @Assert( 0, IsSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory( input_types[1].category ) );
+    
+    return ObjectDatumType( input_types[1].category );
+    
+end );
+
+#! @Description
+#!  The list associated to a skeletal finite set, i.e.,
+#!  <C>AsList( FinSet( n ) ) == (0):(n - 1)</C>.
+#! @Arguments M
+#! @Returns a list
+@DeclareAttribute( "AsList",
+        IsObjectInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory );
+
+CapJitAddTypeSignature( "AsList", [ IsObjectInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory ], CapJitDataTypeOfListOf( IsBigInt ) );
+
+#! @Description
+#!  The list of images between skeletal finite sets.
+#! @Arguments phi
+#! @Returns a list
+@DeclareAttribute( "AsList",
+        IsMorphismInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory );
+
+CapJitAddTypeSignature( "AsList", [ IsMorphismInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory ],
+  function ( input_types )
+    
+    @Assert( 0, IsSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory( input_types[1].category ) );
+    
+    return MorphismDatumType( input_types[1].category );
+    
+end );
+
+####################################
+#
+#! @Section Constructors
+#
+####################################
+
+#! @Description
+#!  Construct a category of skeletal finite sets
+#!  as the finite coproduct cocompletion of the terminal category.
+#! @Returns a &CAP; category
+@DeclareGlobalFunction( "SkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory" );
+
+#! @Description
+#!  The default instance of the category of skeletal finite sets.
+#!  It is automatically created while loading this package.
+# DeclareGlobalVariable( "SkeletalFinSetsAsFreeElementaryToposOfInitialCategory" );
+
+#KeyDependentOperation( "FinSet", IsSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory, IsInt, ReturnTrue );

@@ -1,0 +1,106 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# FiniteCocompletions: Finite (co)product/(co)limit (co)completions
+#
+# Declarations
+#
+
+#! @Chapter The pair of parallel arrows category of a category
+
+####################################
+#
+#! @Section GAP categories
+#
+####################################
+
+#! @Description
+#!  The &GAP; category of pair of parallel arrows categories.
+@DeclareFilter( "IsPairOfParallelArrowsCategory",
+        IsCapCategory );
+
+#! @Description
+#!  The &GAP; category of cells in the pair of parallel arrows category of a category.
+@DeclareFilter( "IsCellInPairOfParallelArrowsCategory",
+        IsCapCategoryCell );
+
+#! @Description
+#!  The &GAP; category of objects in the pair of parallel arrows category of a category.
+@DeclareFilter( "IsObjectInPairOfParallelArrowsCategory",
+        FilterIntersection( IsCapCategoryObject, IsCellInPairOfParallelArrowsCategory ) );
+
+#! @Description
+#!  The &GAP; category of morphisms in the pair of parallel arrows category of a category.
+@DeclareFilter( "IsMorphismInPairOfParallelArrowsCategory",
+        FilterIntersection( IsCapCategoryMorphism, IsCellInPairOfParallelArrowsCategory ) );
+
+####################################
+#
+#! @Section Global variables
+#
+####################################
+
+if (false)
+#! @Description
+#!  The quiver generating the category of quivers.
+DeclareGlobalVariable( "QuiverOfCategoryOfQuivers" );
+end;
+
+####################################
+#
+#! @Section Attributes
+#
+####################################
+
+#! @Arguments quiver
+@DeclareAttribute( "PairOfObjectsAndPairOfParallelMorphisms",
+        IsObjectInPairOfParallelArrowsCategory );
+
+#CapJitAddTypeSignature( "PairOfObjectsAndPairOfParallelMorphisms", [ IsObjectInPairOfParallelArrowsCategory ],
+#  function ( input_types )
+#    
+#    @Assert( 0, IsPairOfParallelArrowsCategory( input_types[1].category ) );
+#    
+#    return ObjectDatumType( input_types[1].category );
+#    
+#end );
+
+#! @Arguments quiver_morphism
+@DeclareAttribute( "DefiningPairOfMorphismBetweenParallelPairs",
+        IsMorphismInPairOfParallelArrowsCategory );
+
+#CapJitAddTypeSignature( "DefiningPairOfMorphismBetweenParallelPairs", [ IsMorphismInPairOfParallelArrowsCategory ],
+#  function ( input_types )
+#    
+#    @Assert( 0, IsPairOfParallelArrowsCategory( input_types[1].category ) );
+#    
+#    return MorphismDatumType( input_types[1].category );
+#    
+#end );
+
+#! @Description
+#!  Return the category $C$ underlying the category
+#!  <A>PPAC</A> = <C>PairOfParallelArrowsCategory</C>( $C$ ).
+#! @Arguments PPAC
+@DeclareAttribute( "UnderlyingCategory",
+        IsPairOfParallelArrowsCategory );
+
+#CapJitAddTypeSignature( "UnderlyingCategory", [ IsPairOfParallelArrowsCategory ],
+#  function ( input_types )
+#    
+#    return CapJitDataTypeOfCategory( UnderlyingCategory( input_types[1].category ) );
+#    
+#end );
+
+####################################
+#
+#! @Section Constructors
+#
+####################################
+
+#! @Description
+#!  Return the finite coequalizer closure of the coartesian category <A>cat</A>.
+#! @Arguments cat
+#= comment for Julia
+@DeclareAttribute( "PairOfParallelArrowsCategory",
+        IsCapCategory );
+# =#
+@DeclareFilterDispatchedOperation( "PairOfParallelArrowsCategory" );
