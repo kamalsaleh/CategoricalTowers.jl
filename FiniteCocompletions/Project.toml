@@ -6,7 +6,7 @@ authors = [
 ]
 
 # Transpiled from GAP's FiniteCocompletions v2026.06-06
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 MatricesForHomalg = "29b9b1b6-efa6-450e-8188-a5a2c25df071"
