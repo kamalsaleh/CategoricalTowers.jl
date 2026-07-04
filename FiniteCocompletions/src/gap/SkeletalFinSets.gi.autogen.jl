@@ -1,0 +1,285 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# FiniteCocompletions: Finite (co)product/(co)limit (co)completions
+#
+# Implementations
+#
+
+##
+@InstallMethod( AsList,
+        "for a skeletal finite set",
+        [ IsObjectInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory ],
+        
+  function ( s )
+    
+    return (0):(Cardinality( s ) - 1);
+    
+end );
+
+##
+@InstallGlobalFunction( SkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory,
+  function( )
+    local name, category_filter, category_object_filter, category_morphism_filter,
+          object_datum_type, object_constructor, object_datum,
+          morphism_datum_type, morphism_constructor, morphism_datum,
+          I, T, UT,
+          modeling_tower_object_constructor, modeling_tower_object_datum,
+          modeling_tower_morphism_constructor, modeling_tower_morphism_datum,
+          sFinSets;
+    
+    ##
+    name = "SkeletalFinSetsAsFiniteStrictCoproductCompletionOfTerminalCategory";
+    
+    ##
+    category_filter = IsSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory;
+    category_object_filter = IsObjectInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory;
+    category_morphism_filter = IsMorphismInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory;
+    
+    ##
+    object_datum_type = IsBigInt;
+    
+    object_constructor = ( sFinSets, cardinality ) ->
+                          CreateCapCategoryObjectWithAttributes( sFinSets,
+                                  Cardinality, cardinality );
+    
+    object_datum = ( sFinSets, M ) -> Cardinality( M );
+    
+    ##
+    morphism_datum_type = CapJitDataTypeOfListOf( IsBigInt );
+    
+    morphism_constructor =
+      function( sFinSets, source, images, target )
+        
+        return CreateCapCategoryMorphismWithAttributes( sFinSets,
+                   source,
+                   target,
+                   AsList, images );
+        
+    end;
+    
+    morphism_datum = ( sFinSets, phi ) -> AsList( phi );
+    
+    ## building the categorical tower:
+    
+    ## the initial category in the doctrine of categories
+    I = InitialCategory(; FinalizeCategory = true );
+    
+    ## the terminal category
+    T = FiniteStrictCoproductCompletion( I; FinalizeCategory = true );
+    
+    UT = FiniteStrictCoproductCompletion( T; FinalizeCategory = true );
+    
+    ## from the raw object data to the object in the modeling category
+    modeling_tower_object_constructor =
+      function( sFinSets, cardinality )
+        local UT, T;
+        
+        UT = ModelingCategory( sFinSets );
+        
+        T = UnderlyingCategory( UT );
+        
+        return ObjectConstructor( UT,
+                       PairGAP( cardinality,
+                             ListWithIdenticalEntries( cardinality,
+                                     InitialObject( T ) ) ) );
+        
+    end;
+    
+    ## from the object in the modeling category to the raw object data
+    modeling_tower_object_datum =
+      function( sFinSets, U )
+        local UT;
+        
+        UT = ModelingCategory( sFinSets );
+        
+        return ObjectDatum( UT, U )[1];
+        
+    end;
+    
+    ## from the raw morphism data to the morphism in the modeling category
+    modeling_tower_morphism_constructor =
+      function( sFinSets, source, map, target )
+        local UT, T;
+        
+        UT = ModelingCategory( sFinSets );
+        
+        T = UnderlyingCategory( UT );
+        
+        return MorphismConstructor( UT,
+                       source,
+                       PairGAP( map,
+                             ListWithIdenticalEntries( ObjectDatum( UT, source )[1],
+                                     IdentityMorphism( T, InitialObject( T ) ) ) ),
+                       target );
+        
+    end;
+    
+    ## from the morphism in the modeling category to the raw morphism data
+    modeling_tower_morphism_datum =
+      function( sFinSets, mor )
+        local UT;
+        
+        UT = ModelingCategory( sFinSets );
+        
+        return MorphismDatum( UT, mor )[1];
+        
+    end;
+    
+    ##
+    sFinSets =
+      ReinterpretationOfCategory( UT,
+              @rec( name = name,
+                   category_filter = category_filter,
+                   category_object_filter = category_object_filter,
+                   category_morphism_filter = category_morphism_filter,
+                   object_datum_type = object_datum_type,
+                   morphism_datum_type = morphism_datum_type,
+                   object_constructor = object_constructor,
+                   object_datum = object_datum,
+                   morphism_constructor = morphism_constructor,
+                   morphism_datum = morphism_datum,
+                   modeling_tower_object_constructor = modeling_tower_object_constructor,
+                   modeling_tower_object_datum = modeling_tower_object_datum,
+                   modeling_tower_morphism_constructor = modeling_tower_morphism_constructor,
+                   modeling_tower_morphism_datum = modeling_tower_morphism_datum,
+                   only_primitive_operations = true )
+             ; FinalizeCategory = false );
+    
+    SetIsSkeletalCategory( sFinSets, true );
+    
+    SetIsElementaryTopos( sFinSets, true );
+    
+    # this is a workhorse category -> no logic and caching only via IsIdenticalObj
+    CapCategorySwitchLogicOff( sFinSets );
+    
+    if (ValueOption( "no_precompiled_code" ) != true)
+        
+        ## In Julia, `ReinterpretationOfCategory` calls `CategoryConstructor` which installs
+        ## wrapped versions of all primitive operations of the modeling category `UT` for `sFinSets`
+        ## (in this concrete case, the operation `Coproduct`).
+        ## Then calling `ADD_FUNCTIONS_FOR_...Precompiled( sFinSets )` would invoke `AddCoproduct`
+        ## again for the same concrete type, which Julia forbids during module precompilation 
+        ## ("Method overwriting is not permitted during Module precompilation").
+        ## In GAP, the precompiled implementations override the `CategoryConstructor`-installed ones
+        ## at higher weight, which is the desired behavior. In Julia we simply rely on the
+        ## `CategoryConstructor`-installed wrappers, which correctly delegate to `UT`.
+        ## We need to figure out a way to prevent multiple Add's for the same operation.
+        #= comment for Julia
+        ADD_FUNCTIONS_FOR_SkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategoryPrecompiled( sFinSets );
+        # =#
+        
+    end;
+    
+    Finalize( sFinSets );
+    
+    ##
+    @Assert( 0, HasRangeCategoryOfHomomorphismStructure( sFinSets ) );
+    @Assert( 0, IsIdenticalObj( sFinSets, RangeCategoryOfHomomorphismStructure( sFinSets ) ) );
+    
+    if (IsFinalized( sFinSets ))
+        
+        @Assert( 0, [ ] == MissingOperationsForConstructivenessOfCategory( sFinSets, "IsEquippedWithHomomorphismStructure" ) );
+        
+    end;
+    
+    return sFinSets;
+    
+end );
+
+##
+@InstallMethod( ViewString,
+        "for a skeletal finite set",
+        [ IsObjectInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory ],
+        
+  function ( s )
+    return @Concatenation( "|", StringGAP( Cardinality( s ) ), "|" );
+end );
+
+##
+@InstallMethod( ViewString,
+        "for a map of skeletal finite sets",
+        [ IsMorphismInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory ],
+        
+  function ( phi )
+    local arrow;
+    
+    if (HasIsIsomorphism( phi ) && IsIsomorphism( phi ))
+        arrow = "⭇";
+    elseif (HasIsEpimorphism( phi ) && IsEpimorphism( phi ))
+        arrow = "↠";
+    elseif (HasIsMonomorphism( phi ) && IsMonomorphism( phi ))
+        arrow = "↪";
+    else
+        arrow = "→";
+    end;
+    
+    return @Concatenation( "|", StringGAP( Cardinality( Source( phi ) ) ), "| ", arrow, " |", StringGAP( Cardinality( Target( phi ) ) ), "|" );
+    
+end );
+
+# We want lists of skeletal finite sets and maps to be displayed in a "fancy" way.
+# Since `Display` of list redirects to `Print`, we have to make `PrintString` "fancy",
+# even if the documentation of `PrintString` suggests that it should not be "fancy".
+
+##
+@InstallMethod( PrintString,
+        "for a skeletal finite set",
+        [ IsObjectInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory ],
+        
+  function ( s )
+    local l, string;
+    
+    l = Cardinality( s );
+    
+    if (l == 0)
+        return "∅";
+    elseif (l == 1)
+        return "[ 0 ]";
+    elseif (l == 2)
+        return "[ 0, 1 ]";
+    elseif (l == 3)
+        return "[ 0, 1, 2 ]";
+    end;
+    
+    return @Concatenation( "[ 0,..., ", StringGAP( l - 1 ), " ]" );
+    
+end );
+
+##
+@InstallMethod( PrintString,
+        "for a map of skeletal finite sets",
+        [ IsMorphismInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory ],
+        
+  function ( phi )
+    
+    return @Concatenation(
+                   PrintString( Source( phi ) ),
+                   " ⱶ", PrintString( AsList( phi ) ), "→ ",
+                   PrintString( Range( phi ) ) );
+    
+end );
+
+##
+@InstallMethod( DisplayString,
+        "for a skeletal finite set",
+        [ IsObjectInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory ],
+        
+  function ( s )
+    
+    return @Concatenation( PrintString( s ), "\n" );
+    
+end );
+
+##
+@InstallMethod( DisplayString,
+        "for a map of skeletal finite sets",
+        [ IsMorphismInSkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory ],
+        
+  function ( phi )
+    
+    return @Concatenation( PrintString( phi ), "\n" );
+    
+end );
+
+##
+@BindGlobal( "SkeletalFinSetsAsFiniteStrictCoproductCompletionOfTerminalCategory",
+        SkeletalCategoryOfFiniteSetsAsFiniteStrictCoproductCompletionOfTerminalCategory( ) );

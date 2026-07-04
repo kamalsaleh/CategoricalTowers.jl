@@ -1,0 +1,364 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# FiniteCocompletions: Finite (co)product/(co)limit (co)completions
+#
+# Implementations
+#
+
+##
+@InstallMethod( CategoryOfColimitQuivers,
+        "for a category",
+        [ IsCapCategory ],
+        
+  function ( C )
+    local name, category_filter, category_object_filter, category_morphism_filter,
+          object_datum_type, object_constructor, object_datum,
+          morphism_datum_type, morphism_constructor, morphism_datum,
+          UC, ParallelPairsUC,
+          modeling_tower_object_constructor, modeling_tower_object_datum,
+          modeling_tower_morphism_constructor, modeling_tower_morphism_datum,
+          ColimitQuivers;
+    
+    ##
+    name = @Concatenation( "CategoryOfColimitQuivers( ", Name( C ), " )" );
+    
+    ##
+    category_filter = IsCategoryOfColimitQuivers;
+    category_object_filter = IsObjectInCategoryOfColimitQuivers;
+    category_morphism_filter = IsMorphismInCategoryOfColimitQuivers;
+    
+    ##
+    object_datum_type =
+      CapJitDataTypeOfNTupleOf( 2,
+              CapJitDataTypeOfListOf( CapJitDataTypeOfObjectOfCategory( C ) ),
+              CapJitDataTypeOfListOf(
+                      CapJitDataTypeOfNTupleOf( 3,
+                              IsInt,
+                              CapJitDataTypeOfMorphismOfCategory( C ),
+                              IsInt ) ) );
+    
+    object_constructor =
+      function ( ColimitQuivers, pair )
+        
+        return CreateCapCategoryObjectWithAttributes( ColimitQuivers,
+                       DefiningPairOfColimitQuiver, pair );
+        
+    end;
+    
+    object_datum = ( ColimitQuivers, o ) -> DefiningPairOfColimitQuiver( o );
+    
+    ##
+    morphism_datum_type =
+      CapJitDataTypeOfNTupleOf( 2,
+              CapJitDataTypeOfNTupleOf( 2,
+                      CapJitDataTypeOfListOf( IsInt ),
+                      CapJitDataTypeOfListOf( CapJitDataTypeOfMorphismOfCategory( C ) ) ),
+              CapJitDataTypeOfListOf( IsInt ) );
+    
+    morphism_constructor =
+      function ( ColimitQuivers, source, images, target )
+        
+        return CreateCapCategoryMorphismWithAttributes( ColimitQuivers,
+                       source,
+                       target,
+                       DefiningPairOfColimitQuiverMorphism, images );
+        
+    end;
+    
+    morphism_datum = ( ColimitQuivers, m ) -> DefiningPairOfColimitQuiverMorphism( m );
+    
+    ## building the categorical tower:
+    UC = FiniteStrictCoproductCompletion( C; FinalizeCategory = true );
+    
+    ParallelPairsUC = PairOfParallelArrowsCategory( UC; FinalizeCategory = true );
+    
+    ## from the raw object data to the object in the modeling category
+    modeling_tower_object_constructor =
+      function( ColimitQuivers, pair )
+        local ParallelPairsUC, PSh, UC, C, objects, decorated_morphisms, V, A, map_s, mor_s, s, map_t, mor_t, t;
+        
+        ParallelPairsUC = ModelingCategory( ColimitQuivers );
+        
+        PSh = ModelingCategory( ParallelPairsUC );
+        
+        UC = Target( PSh );
+        
+        C = UnderlyingCategory( UC );
+        
+        objects = pair[1];
+        decorated_morphisms = pair[2];
+        
+        V = ObjectConstructor( UC,
+                     PairGAP( Length( objects ), objects ) );
+        
+        A = ObjectConstructor( UC,
+                     PairGAP( Length( decorated_morphisms ),
+                           List( decorated_morphisms, m -> objects[1 + m[1]] ) ) );
+        
+        map_s = List( decorated_morphisms, m -> m[1] );
+        
+        mor_s = List( decorated_morphisms, m -> IdentityMorphism( C, objects[1 + m[1]] ) );
+        
+        s = MorphismConstructor( UC,
+                     A,
+                     PairGAP( map_s, mor_s ),
+                     V );
+        
+        map_t = List( decorated_morphisms, m -> m[3] );
+        
+        mor_t = List( decorated_morphisms, m -> m[2] );
+        
+        t = MorphismConstructor( UC,
+                     A,
+                     PairGAP( map_t, mor_t ),
+                     V );
+        
+        return ObjectConstructor( ParallelPairsUC, PairGAP( PairGAP( V, A ), PairGAP( s, t ) ) );
+        
+    end;
+    
+    ## from the object in the modeling category to the raw object data
+    modeling_tower_object_datum =
+      function( ColimitQuivers, obj )
+        local ParallelPairsUC, PSh, UC, pair, V, s, t, objects, s_datum, t_datum, decorated_morphisms;
+        
+        ParallelPairsUC = ModelingCategory( ColimitQuivers );
+        
+        PSh = ModelingCategory( ParallelPairsUC );
+        
+        UC = Target( PSh );
+        
+        ## PairGAP( PairGAP( V, A ), PairGAP( s, t ) )
+        pair = ObjectDatum( ParallelPairsUC, obj );
+        
+        V = pair[1][1];
+        
+        s = pair[2][1];
+        t = pair[2][2];
+        
+        objects = ObjectDatum( UC, V )[2];
+        
+        s_datum = MorphismDatum( UC, s );
+        t_datum = MorphismDatum( UC, t );
+        
+        decorated_morphisms = ListN( s_datum[1],
+                                      t_datum[2],
+                                      t_datum[1],
+                                      ( s_index, mor, t_index ) -> Triple( s_index, mor, t_index ) );
+        
+        return PairGAP( objects, decorated_morphisms );
+        
+    end;
+    
+    ## from the raw morphism data to the morphism in the modeling category
+    modeling_tower_morphism_constructor =
+      function( ColimitQuivers, source, images, target )
+        local ParallelPairsUC, PSh, UC, source_datum, range_datum, V, source_s_datum, A;
+        
+        ParallelPairsUC = ModelingCategory( ColimitQuivers );
+        
+        PSh = ModelingCategory( ParallelPairsUC );
+        
+        UC = Target( PSh );
+        
+        source_datum = ObjectDatum( ParallelPairsUC, source );
+        range_datum = ObjectDatum( ParallelPairsUC, target );
+        
+        V = MorphismConstructor( UC,
+                     source_datum[1][1],
+                     images[1],
+                     range_datum[1][1] );
+        
+        source_s_datum = MorphismDatum( UC, source_datum[2][1] );
+        
+        A = MorphismConstructor( UC,
+                     source_datum[1][2],
+                     PairGAP( images[2],
+                           source_s_datum[2] ),
+                     range_datum[1][2] );
+        
+        return MorphismConstructor( ParallelPairsUC,
+                       source,
+                       PairGAP( V, A ),
+                       target );
+        
+    end;
+    
+    ## from the morphism in the modeling category to the raw morphism data
+    modeling_tower_morphism_datum =
+      function( ColimitQuivers, mor )
+        local ParallelPairsUC, PSh, UC, mor_datum, V_datum, A_datum;
+        
+        ParallelPairsUC = ModelingCategory( ColimitQuivers );
+        
+        PSh = ModelingCategory( ParallelPairsUC );
+        
+        UC = Target( PSh );
+        
+        mor_datum = MorphismDatum( ParallelPairsUC, mor );
+        
+        V_datum = MorphismDatum( UC, mor_datum[1] );
+        A_datum = MorphismDatum( UC, mor_datum[2] );
+        
+        return PairGAP( V_datum, A_datum[1] );
+        
+    end;
+    
+    ##
+    ColimitQuivers =
+      ReinterpretationOfCategory( ParallelPairsUC,
+              @rec( name = name,
+                   category_filter = category_filter,
+                   category_object_filter = category_object_filter,
+                   category_morphism_filter = category_morphism_filter,
+                   object_datum_type = object_datum_type,
+                   morphism_datum_type = morphism_datum_type,
+                   object_constructor = object_constructor,
+                   object_datum = object_datum,
+                   morphism_constructor = morphism_constructor,
+                   morphism_datum = morphism_datum,
+                   modeling_tower_object_constructor = modeling_tower_object_constructor,
+                   modeling_tower_object_datum = modeling_tower_object_datum,
+                   modeling_tower_morphism_constructor = modeling_tower_morphism_constructor,
+                   modeling_tower_morphism_datum = modeling_tower_morphism_datum,
+                   only_primitive_operations = true )
+             ; FinalizeCategory = false );
+    
+    SetUnderlyingCategory( ColimitQuivers, C );
+    
+    Append( ColimitQuivers.compiler_hints.category_attribute_names,
+            [ "UnderlyingCategory",
+              "FiniteColimitCompletionWithStrictCoproductsOfUnderlyingCategory",
+              "CategoryOfPreSheavesOfUnderlyingCategory",
+              ] );
+    
+    if (ValueOption( "no_precompiled_code" ) != true)
+        
+    end;
+    
+    Finalize( ColimitQuivers );
+    
+    return ColimitQuivers;
+    
+end );
+
+##
+@InstallMethod( EmbeddingOfUnderlyingCategory,
+        "for the category of colimit quivers in a category",
+        [ IsCategoryOfColimitQuivers ],
+        
+  function( ColimitQuivers )
+    local Y;
+    
+    Y = CapFunctor( "Embedding functor", UnderlyingCategory( ColimitQuivers ), ColimitQuivers );
+    
+    AddObjectFunction( Y, objC -> ObjectConstructor( ColimitQuivers, PairGAP( [ objC ], [ ] ) ) );
+    
+    AddMorphismFunction( Y, ( source, morC, target ) -> MorphismConstructor( ColimitQuivers, source, PairGAP( [ [ 0 ], [ morC ] ], [ ] ), target ) );
+    
+    return Y;
+    
+end );
+
+##
+@InstallMethod( /,
+        "for a string and a category of colimit quivers",
+        [ IsString, IsCategoryOfColimitQuivers ],
+        
+  function( name, ColimitQuivers )
+    local C, Y, Yc;
+    
+    C = UnderlyingCategory( ColimitQuivers );
+    
+    Y = EmbeddingOfUnderlyingCategory( ColimitQuivers );
+    
+    Yc = Y( C[name] );
+    
+    if (IsObjectInCategoryOfColimitQuivers( Yc ))
+        
+        SetIsProjective( Yc, true );
+        
+    elseif (IsMorphismInCategoryOfColimitQuivers( Yc ))
+        
+        if (CanCompute( ColimitQuivers, "IsMonomorphism" ))
+            IsMonomorphism( Yc );
+        end;
+        
+        if (CanCompute( ColimitQuivers, "IsSplitMonomorphism" ))
+            IsSplitMonomorphism( Yc );
+        end;
+        
+        if (CanCompute( ColimitQuivers, "IsEpimorphism" ))
+            IsEpimorphism( Yc );
+        end;
+        
+        if (CanCompute( ColimitQuivers, "IsSplitEpimorphism" ))
+            IsSplitEpimorphism( Yc );
+        end;
+        
+        ## IsIsomorphism == IsSplitMonomorphism and IsSplitEpimorphism
+        ## we add this here in case the logic is deactivated
+        if (CanCompute( ColimitQuivers, "IsIsomorphism" ))
+            IsIsomorphism( Yc );
+        end;
+        
+    end;
+    
+    return Yc;
+    
+end );
+
+#= comment for Julia
+INSTALL_DOT_METHOD( IsCategoryOfColimitQuivers );
+# =#
+
+##
+@InstallMethod( FiniteColimitCompletionWithStrictCoproductsOfUnderlyingCategory,
+        [ IsCategoryOfColimitQuivers ],
+        
+  function( ColimitQuiversC )
+    
+    return FiniteColimitCompletionWithStrictCoproducts( UnderlyingCategory( ColimitQuiversC ) );
+    
+end );
+
+##
+@InstallMethod( CategoryOfPreSheavesOfUnderlyingCategory,
+        [ IsCategoryOfColimitQuivers ],
+        
+  function( ColimitQuiversC )
+    
+    return PreSheaves( UnderlyingCategory( ColimitQuiversC ) );
+    
+end );
+
+####################################
+#
+# View, Print, Display and LaTeX methods:
+#
+####################################
+
+##
+@InstallMethod( DisplayString,
+        "for an object in the category of colimit quivers in a category",
+        [ IsObjectInCategoryOfColimitQuivers ],
+        
+  function ( quiver )
+    
+    return @Concatenation( StringDisplay( ObjectDatum( quiver ) ), "\nAn object in ", Name( CapCategory( quiver ) ), " given by the above data\n" );
+    
+end );
+
+##
+@InstallMethod( DisplayString,
+        "for a morphism in the category of colimit quivers in a category",
+        [ IsMorphismInCategoryOfColimitQuivers ],
+        
+  function ( quiver_morphism )
+    
+    return @Concatenation(
+        "Source: ", DisplayString( Source( quiver_morphism ) ),
+        "\nDatum:  ", StringDisplay( MorphismDatum( quiver_morphism ) ), "\n",
+        "\nRange:  ", DisplayString( Target( quiver_morphism ) ),
+        "\nA morphism in ", Name( CapCategory( quiver_morphism ) ), " given by the above data\n" );
+    
+end );
