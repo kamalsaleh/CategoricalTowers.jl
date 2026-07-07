@@ -1,0 +1,466 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# FunctorCategories: Categories of functors
+#
+# Implementations
+#
+
+##
+@InstallMethod( ExternalHomOnObjectsEqualizerDataUsingOptimizedCoYonedaLemma,
+        [ IsPreSheafCategoryOfFpEnrichedCategory, IsObjectInPreSheafCategoryOfFpEnrichedCategory, IsObjectInPreSheafCategoryOfFpEnrichedCategory ],
+        
+  function ( PSh, F, G )
+    local F_Vst, D, V, st;
+    
+    F_Vst = CoequalizerDataOfPreSheafUsingOptimizedCoYonedaLemma( PSh, F );
+    
+    D = Target( PSh );
+    
+    V = ApplyPreSheafToObjectInFiniteStrictCoproductCompletion( PSh, G, F_Vst[1] );
+    
+    st = List( F_Vst[2], mor -> ApplyPreSheafToMorphismInFiniteStrictCoproductCompletion( PSh, G, mor ) );
+    
+    return PairGAP( V, st );
+    
+end );
+
+##
+@InstallMethod( ExternalHomOnObjectsEqualizerDataUsingCoYonedaLemma,
+        [ IsPreSheafCategoryOfFpEnrichedCategory, IsObjectInPreSheafCategoryOfFpEnrichedCategory, IsObjectInPreSheafCategoryOfFpEnrichedCategory ],
+        
+  function ( PSh, F, G )
+    local F_Vst, D, V, st;
+    
+    F_Vst = CoequalizerDataOfPreSheafUsingCoYonedaLemma( PSh, F );
+    
+    D = Target( PSh );
+    
+    V = ApplyPreSheafToObjectInFiniteStrictCoproductCompletion( PSh, G, F_Vst[1] );
+    
+    st = List( F_Vst[2], mor -> ApplyPreSheafToMorphismInFiniteStrictCoproductCompletion( PSh, G, mor ) );
+    
+    return PairGAP( V, st );
+    
+end );
+
+## η: F → G, ρ: S → T
+@InstallMethod( ExternalHomOnMorphismsEqualizerFunctorialDataUsingCoYonedaLemma,
+        [ IsPreSheafCategoryOfFpEnrichedCategory, IsMorphismInPreSheafCategoryOfFpEnrichedCategory, IsMorphismInPreSheafCategoryOfFpEnrichedCategory ],
+        
+  function ( PSh, eta, rho )
+    local colimit_completion_C, UC, F, G,
+          eta_coequalizer_object_morphism, eta_coequalizer_object_as_presheaf_morphism_datum,
+          S, eta_V_S, F_data, F_V, F_V_data, diagram_F_V_S, T, diagram_F_V_T, D, F_V_rho;
+    
+    colimit_completion_C = FiniteColimitCompletionWithStrictCoproductsOfSourceCategory( PSh );
+    
+    UC = FiniteStrictCoproductCompletionOfUnderlyingCategory( colimit_completion_C );
+    
+    F = Source( eta );
+    G = Target( eta );
+    
+    eta_coequalizer_object_morphism = CoYonedaLemmaOnMorphisms( PSh,
+                                               CoYonedaLemmaOnObjects( PSh, F ),
+                                               eta,
+                                               CoYonedaLemmaOnObjects( PSh, G ) );
+    
+    eta_coequalizer_object_as_presheaf_morphism_datum = MorphismDatum( colimit_completion_C, eta_coequalizer_object_morphism );
+    
+    S = Source( rho );
+    
+    eta_V_S = ApplyPreSheafToMorphismInFiniteStrictCoproductCompletion( PSh, S, eta_coequalizer_object_as_presheaf_morphism_datum[1] );
+    
+    F_data = CoequalizerDataOfPreSheafUsingCoYonedaLemma( PSh, F );
+    
+    F_V = F_data[1];
+    
+    F_V_data = ObjectDatum( UC, F_V )[2];
+    
+    diagram_F_V_S = List( F_V_data, objB -> ApplyObjectInPreSheafCategoryOfFpEnrichedCategoryToObject( PSh, S, objB ) );
+    
+    T = Target( rho );
+    
+    diagram_F_V_T = List( F_V_data, objB -> ApplyObjectInPreSheafCategoryOfFpEnrichedCategoryToObject( PSh, T, objB ) );
+    
+    D = Target( PSh );
+    
+    F_V_rho = DirectProductFunctorialWithGivenDirectProducts( D,
+                       DirectProduct( D, diagram_F_V_S ),
+                       diagram_F_V_S,
+                       List( F_V_data, objB -> ApplyMorphismInPreSheafCategoryOfFpEnrichedCategoryToObject( PSh, rho, objB ) ),
+                       diagram_F_V_T,
+                       DirectProduct( D, diagram_F_V_T ) );
+    
+    return PreCompose( D,
+                   eta_V_S,
+                   F_V_rho );
+    
+end );
+
+##
+@InstallMethod( ExternalHomDiagram,
+        [ IsPreSheafCategory, IsObjectInPreSheafCategory, IsObjectInPreSheafCategory ],
+        
+  function ( PSh, F, G )
+    local defining_triple, nr_o, nr_m, mors, F_o, G_o, D, sources,
+          F_m, G_m, mor_pair, morphisms, objects;
+    
+    defining_triple = DefiningTripleOfUnderlyingQuiver( Source( PSh ) );
+    
+    nr_o = defining_triple[1];
+    nr_m = defining_triple[2];
+    mors = defining_triple[3];
+    
+    F_o = ValuesOfPreSheaf( F )[1];
+    G_o = ValuesOfPreSheaf( G )[1];
+    
+    D = Target( PSh );
+    
+    sources = List( (1):(nr_o),
+                     i -> HomomorphismStructureOnObjects( D,
+                             F_o[i],
+                             G_o[i] ) );
+    
+    F_m = ValuesOfPreSheaf( F )[2];
+    G_m = ValuesOfPreSheaf( G )[2];
+    
+    #          F(t(m)) --F(m)-> F(s(m))
+    #             |                |
+    #  eta_[t(m)] |                | eta_[s(m)]
+    #             v                v
+    #          G(t(m)) --G(m)-> G(s(m))
+    
+    mor_pair =
+      function ( i )
+        
+        return [ Triple( mors[i][1],
+                         HomomorphismStructureOnMorphisms( D, ## Hom( F(s(m)), G(s(m)) ) -> Hom( F(t(m)), G(s(m)) )
+                                 F_m[i],
+                                 IdentityMorphism( D, Target( G_m[i] ) ) ),
+                         nr_o - 1 + i ),
+                 Triple( mors[i][2],
+                         HomomorphismStructureOnMorphisms( D, ## Hom( F(t(m)), G(t(m)) ) -> Hom( F(t(m)), G(s(m)) )
+                                 IdentityMorphism( D, Source( F_m[i] ) ),
+                                 G_m[i] ),
+                         nr_o - 1 + i ) ];
+        
+    end;
+    
+    morphisms = List( (1):(nr_m), mor_pair );
+    
+    objects = @Concatenation( [ sources, List( morphisms, m -> Target( m[1][2] ) ) ] );
+    
+    return PairGAP( objects, @Concatenation( morphisms ) );
+    
+end );
+
+##
+@InstallMethod( AuxiliaryMorphism,
+        [ IsPreSheafCategory, IsObjectInPreSheafCategory, IsObjectInPreSheafCategory ],
+        
+  function ( PSh, S, R )
+    local B, D, objs, nr_o, S_o_vals, R_o_vals, mors, nr_m, S_m_vals, R_m_vals,
+          source_summands, range_summands, H, map, i, j;
+    
+    B = Source( PSh );
+    
+    D = Target( PSh );
+    
+    objs = SetOfObjects( B );
+    nr_o = Length( objs );
+    
+    S_o_vals = ValuesOfPreSheaf( S )[1];
+    R_o_vals = ValuesOfPreSheaf( R )[1];
+    
+    mors = SetOfGeneratingMorphisms( B );
+    nr_m = Length( mors );
+    
+    S_m_vals = ValuesOfPreSheaf( S )[2];
+    R_m_vals = ValuesOfPreSheaf( R )[2];
+    
+    source_summands = List( (1):(nr_o), i ->
+                             HomomorphismStructureOnObjects( D,
+                                     S_o_vals[i],
+                                     R_o_vals[i] ) );
+    
+    range_summands = List( (1):(nr_m), i ->
+                            HomomorphismStructureOnObjects( D,
+                                    Source( S_m_vals[i] ),
+                                    Target( R_m_vals[i] ) ) );
+    
+    H = RangeCategoryOfHomomorphismStructure( D );
+    
+    map =
+      function( i, j )
+        
+        if (objs[i] == Source( mors[j] ) && objs[i] == Target( mors[j] ))
+            
+            return SubtractionForMorphisms( H,
+                           HomomorphismStructureOnMorphismsWithGivenObjects( D,
+                                   source_summands[i],
+                                   S_m_vals[j],
+                                   IdentityMorphism( D, R_o_vals[i] ),
+                                   range_summands[j] ),
+                           HomomorphismStructureOnMorphismsWithGivenObjects( D,
+                                   source_summands[i],
+                                   IdentityMorphism( D, S_o_vals[i] ),
+                                   R_m_vals[j],
+                                   range_summands[j] ) );
+            
+        elseif (@not objs[i] == Source( mors[j] ) && objs[i] == Target( mors[j] ))
+            
+            return AdditiveInverseForMorphisms( H,
+                           HomomorphismStructureOnMorphismsWithGivenObjects( D,
+                                   source_summands[i],
+                                   IdentityMorphism( D, S_o_vals[i] ),
+                                   R_m_vals[j],
+                                   range_summands[j] ) );
+            
+        elseif (objs[i] == Source( mors[j] ) && @not objs[i] == Target( mors[j] ))
+            
+            return HomomorphismStructureOnMorphismsWithGivenObjects( D,
+                           source_summands[i],
+                           S_m_vals[j],
+                           IdentityMorphism( D, R_o_vals[i] ),
+                           range_summands[j] );
+            
+        else
+            
+            return ZeroMorphism( H,
+                           source_summands[i],
+                           range_summands[j] );
+            
+        end;
+        
+    end;
+    
+    return MorphismBetweenDirectSumsWithGivenDirectSums( H,
+                   DirectSum( H, source_summands ),
+                   source_summands,
+                   List( (1):(nr_o), i -> List( (1):(nr_m), j -> map( i, j ) ) ),
+                   range_summands,
+                   DirectSum( H, range_summands ) );
+    
+end );
+
+##
+@InstallGlobalFunction( ADD_FUNCTIONS_FOR_HOMOMORPHISM_STRUCTURE_TO_PRESHEAF_CATEGORY,
+  
+  function ( PSh )
+    local D, H;
+    
+    D = Target( PSh );
+    
+    if (@not HasRangeCategoryOfHomomorphismStructure( D ))
+      
+      return;
+      
+    end;
+    
+    H = RangeCategoryOfHomomorphismStructure( D );
+    
+    if (!(HasIsAbelianCategory( H ) && IsAbelianCategory( H )))
+        return;
+    end;
+    
+    if (@not HasRangeCategoryOfHomomorphismStructure( PSh ))
+        SET_RANGE_CATEGORY_Of_HOMOMORPHISM_STRUCTURE( PSh, H );
+    end;
+    
+    ## Be sure the above assignment succeeded:
+    @Assert( 0, IsIdenticalObj( H, RangeCategoryOfHomomorphismStructure( PSh ) ) );
+    
+    ##
+    AddDistinguishedObjectOfHomomorphismStructure( PSh,
+            ( PSh ) -> DistinguishedObjectOfHomomorphismStructure( Target( PSh ) ) );
+    
+    ##
+    AddHomomorphismStructureOnObjects( PSh,
+      function ( PSh, S, R )
+        
+        return KernelObject( RangeCategoryOfHomomorphismStructure( PSh ),
+                       AuxiliaryMorphism( PSh, S, R ) );
+        
+    end );
+    
+    ##
+    AddInterpretMorphismAsMorphismFromDistinguishedObjectToHomomorphismStructure( PSh,
+      function ( PSh, eta )
+        local D, H, distinguished_object, tau, diagram;
+        
+        D = Target( PSh );
+        
+        H = RangeCategoryOfHomomorphismStructure( PSh );
+        
+        distinguished_object = DistinguishedObjectOfHomomorphismStructure( PSh );
+        
+        tau = List( ListOfValues( ValuesOnAllObjects( eta ) ),
+                     eta_o -> InterpretMorphismAsMorphismFromDistinguishedObjectToHomomorphismStructure( D, eta_o ) );
+        
+        diagram = List( tau, Range );
+        
+        return KernelLift( H,
+                       AuxiliaryMorphism( PSh,
+                               Source( eta ),
+                               Target( eta ) ),
+                       distinguished_object,
+                       UniversalMorphismIntoDirectSum( H,
+                               diagram,
+                               distinguished_object,
+                               tau ) );
+        
+    end );
+    
+    ##
+    AddInterpretMorphismFromDistinguishedObjectToHomomorphismStructureAsMorphism( PSh,
+      function ( PSh, S, R, iota )
+        local D, H, S_o_vals, R_o_vals, map, cmp, o, summands, cmps;
+        
+        D = Target( PSh );
+        
+        H = RangeCategoryOfHomomorphismStructure( PSh );
+        
+        S_o_vals = ValuesOfPreSheaf( S )[1];
+        
+        R_o_vals = ValuesOfPreSheaf( R )[1];
+        
+        map = AuxiliaryMorphism( PSh, S, R );
+        
+        cmp = PreCompose( H,
+                        iota,
+                        KernelEmbedding( H,
+                                map ) );
+        
+        o = Length( SetOfObjects( Source( PSh ) ) );
+        
+        summands = List( (1):(o),
+                          i -> HomomorphismStructureOnObjects( D,
+                                  S_o_vals[i],
+                                  R_o_vals[i] ) );
+        
+        cmps = List( (1):(o),
+                      i -> PreCompose( H,
+                              cmp,
+                              ProjectionInFactorOfDirectSum( H,
+                                      summands,
+                                      i ) )
+                      );
+        
+        return CreatePreSheafMorphismByValues( PSh,
+                       S,
+                       LazyHList( (1):(o),
+                             i -> InterpretMorphismFromDistinguishedObjectToHomomorphismStructureAsMorphism( D,
+                                     S_o_vals[i],
+                                     R_o_vals[i],
+                                     cmps[i] ) ),
+                       R );
+        
+    end );
+    
+    ##
+    AddHomomorphismStructureOnMorphismsWithGivenObjects( PSh,
+      function ( PSh, s, eta, mu, r )
+        local D, H, eta_vals, mu_vals, o, m;
+        
+        D = Target( PSh );
+        
+        H = RangeCategoryOfHomomorphismStructure( PSh );
+        
+        eta_vals = ValuesOnAllObjects( eta );
+        mu_vals = ValuesOnAllObjects( mu );
+        
+        o = Length( SetOfObjects( Source( PSh ) ) );
+        
+        m = List( (1):(o),
+                   i -> HomomorphismStructureOnMorphisms( D,
+                           eta_vals[i],
+                           mu_vals[i] ) );
+        
+        return KernelObjectFunctorialWithGivenKernelObjects( H,
+                       s,
+                       AuxiliaryMorphism( PSh, Target( eta ), Source( mu ) ),
+                       DirectSumFunctorial( H, m ),
+                       AuxiliaryMorphism( PSh, Source( eta ), Target( mu ) ),
+                       r );
+        
+    end );
+    
+    if (CanCompute( H, "BasisOfExternalHom" ) && CanCompute( H, "CoefficientsOfMorphism" ))
+      
+      ##
+      AddBasisOfExternalHom( PSh,
+        function ( PSh, S, R )
+          local D, H, iota, distinguished_object, S_o_vals, R_o_vals, nr_o, summands, direct_sum, prjs, cmps, iotas, basis;
+          
+          D = Target( PSh );
+          
+          H = RangeCategoryOfHomomorphismStructure( PSh );
+          
+          iota = KernelEmbedding( H,
+                          AuxiliaryMorphism( PSh, S, R ) );
+          
+          distinguished_object = DistinguishedObjectOfHomomorphismStructure( PSh );
+          
+          S_o_vals = ValuesOfPreSheaf( S )[1];
+          
+          R_o_vals = ValuesOfPreSheaf( R )[1];
+          
+          nr_o = Length( SetOfObjects( Source( PSh ) ) );
+          
+          summands = List( (1):(nr_o),
+                            i -> HomomorphismStructureOnObjects( D,
+                                    S_o_vals[i],
+                                    R_o_vals[i] ) );
+          
+          direct_sum = Target( iota ); # is equal to DirectSum( summands )
+          
+          prjs = List( (1):(Length( S_o_vals )),
+                        i -> ProjectionInFactorOfDirectSumWithGivenDirectSum( H,
+                                summands,
+                                i,
+                                direct_sum ) );
+          
+          cmps = List( prjs,
+                        s -> PreCompose( H,
+                                iota,
+                                s ) );
+          
+          basis = BasisOfExternalHom( H,
+                           distinguished_object,
+                           Source( iota ) );
+          
+          iotas = List( cmps,
+                         iota -> List( basis,
+                                 b -> PreCompose( H,
+                                         b,
+                                         iota ) ) );
+          
+          return List( (1):(Length( basis )),
+                       j -> CreatePreSheafMorphismByValues( PSh,
+                               S,
+                               LazyHList( (1):(nr_o),
+                                     i -> InterpretMorphismFromDistinguishedObjectToHomomorphismStructureAsMorphism( D,
+                                             S_o_vals[i],
+                                             R_o_vals[i],
+                                             iotas[i][j] )
+                                     ),
+                               R ) );
+          
+      end );
+      
+      ##
+      AddCoefficientsOfMorphism( PSh,
+        function( PSh, eta )
+          local iota, H;
+          
+          iota = InterpretMorphismAsMorphismFromDistinguishedObjectToHomomorphismStructure( PSh, eta );
+          
+          H = RangeCategoryOfHomomorphismStructure( PSh );
+          
+          return CoefficientsOfMorphism( H, iota );
+          
+      end );
+      
+    end;
+    
+end );
+

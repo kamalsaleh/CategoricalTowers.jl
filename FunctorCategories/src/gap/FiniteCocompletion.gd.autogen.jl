@@ -1,0 +1,71 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# FunctorCategories: Categories of functors
+#
+# Declarations
+#
+
+#! @Chapter Finite cocompletion of a finitely presented (linear) category
+
+####################################
+#
+#! @Section &GAP; Categories
+#
+####################################
+
+#! @Description
+#!  The &GAP; category of a finite cocompletion category.
+#! @Arguments category
+@DeclareFilter( "IsFiniteCocompletion",
+        IsCapCategory );
+
+#! @Description
+#!  The &GAP; category of cells in a finite cocompletion category.
+#! @Arguments cell
+@DeclareFilter( "IsCellInFiniteCocompletion",
+        IsCapCategoryCell );
+
+#! @Description
+#!  The &GAP; category of objects in a finite cocompletion category.
+#! @Arguments obj
+@DeclareFilter( "IsObjectInFiniteCocompletion",
+        FilterIntersection( IsCapCategoryObject, IsCellInFiniteCocompletion ) );
+
+#! @Description
+#!  The &GAP; category of morphisms in a finite cocompletion category.
+#! @Arguments mor
+@DeclareFilter( "IsMorphismInFiniteCocompletion",
+        FilterIntersection( IsCapCategoryMorphism, IsCellInFiniteCocompletion ) );
+
+####################################
+#
+#! @Section Attributes
+#
+####################################
+
+#! @Arguments finite_cocompletion
+@DeclareAttribute( "UnderlyingCategory",
+        IsFiniteCocompletion );
+
+#! @Arguments finite_cocompletion
+#! @Returns a &CAP; functor
+@DeclareAttribute( "EmbeddingOfUnderlyingCategory",
+        IsFiniteCocompletion );
+
+####################################
+#
+#! @Section Constructors
+#
+####################################
+
+#! @Description
+#!  Construct a finite cocompletion category.
+#! @Returns a &CAP; category
+#! @Arguments B
+#! @Group FiniteCocompletion
+@DeclareOperation( "FiniteCocompletion",
+        [ IsCapCategory ] );
+
+#! @Arguments B, H
+#! @Group FiniteCocompletion
+@DeclareOperation( "FiniteCocompletion",
+        [ IsCapCategory, IsCapCategory ] );
