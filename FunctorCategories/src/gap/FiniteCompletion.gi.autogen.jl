@@ -1,0 +1,155 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# FunctorCategories: Categories of functors
+#
+# Implementations
+#
+
+##
+InstallMethodWithCache( FiniteCompletion,
+        "for a CAP category",
+        [ IsCapCategory, IsCapCategory ],
+        
+  function( fp_category, range_category_of_hom_structure )
+    local name, category_filter, category_object_filter, category_morphism_filter,
+          coPSh,
+          finite_completion;
+    
+    ##
+    name = @Concatenation( "FiniteCompletion( ", Name( fp_category ), " )" );
+    
+    ##
+    category_filter = IsFiniteCompletion && IsWrapperCapCategory;
+    category_object_filter = IsObjectInFiniteCompletion && IsWrapperCapCategoryObject;
+    category_morphism_filter = IsMorphismInFiniteCompletion && IsWrapperCapCategoryMorphism;
+    
+    ## building the categorical tower:
+    
+    coPSh = CoPreSheaves( fp_category, range_category_of_hom_structure; FinalizeCategory = true, overhead = false );
+    
+    ##
+    finite_completion =
+      WrapperCategory( coPSh,
+              @rec( name = name,
+                   category_filter = category_filter,
+                   category_object_filter = category_object_filter,
+                   category_morphism_filter = category_morphism_filter,
+                   only_primitive_operations = true )
+              );
+    
+    SetUnderlyingCategory( finite_completion, fp_category );
+    
+    if (HasIsInitialCategory( fp_category ) && IsInitialCategory( fp_category ))
+        @Assert( 0, [ ] == MissingOperationsForConstructivenessOfCategory( finite_completion, "IsEquippedWithHomomorphismStructure" ) );
+    end;
+    
+    return finite_completion;
+    
+end );
+
+##
+@InstallMethod( FiniteCompletion,
+        "for a CAP category",
+        [ IsCapCategory && HasRangeCategoryOfHomomorphismStructure ],
+        
+  function( fp_category )
+    
+    return FiniteCompletion( fp_category, RangeCategoryOfHomomorphismStructure( fp_category ) );
+    
+end );
+
+##
+@InstallMethod( EmbeddingOfUnderlyingCategory,
+        "for a finite completion category",
+        [ IsFiniteCompletion ],
+        
+  function( finite_completion )
+    local Y;
+    
+    Y = CoYonedaEmbedding( UnderlyingCategory( finite_completion ) );
+    
+    return PreCompose( Y, WrappingFunctor( finite_completion ) );
+    
+end );
+
+##
+@InstallMethod( \.,
+        "for a finite completion category and a positive integer",
+        [ IsFiniteCompletion, IsPosInt ],
+        
+  function( finite_completion, string_as_int )
+    local name, F, Y, Yc;
+    
+    name = NameRNam( string_as_int );
+    
+    F = UnderlyingCategory( finite_completion );
+    
+    Y = EmbeddingOfUnderlyingCategory( finite_completion );
+    
+    Yc = Y( F[name] );
+    
+    if (IsObjectInFiniteCompletion( Yc ))
+        
+        SetIsInjective( Yc, true );
+        
+    elseif (IsMorphismInFiniteCompletion( Yc ))
+        
+        #if CanCompute( finite_completion, "IsMonomorphism" ))
+        #    IsMonomorphism( Yc );
+        #fi;
+        
+        #if CanCompute( finite_completion, "IsSplitMonomorphism" ))
+        #    IsSplitMonomorphism( Yc );
+        #fi;
+        
+        #if CanCompute( finite_completion, "IsEpimorphism" ))
+        #    IsEpimorphism( Yc );
+        #fi;
+        
+        #if CanCompute( finite_completion, "IsSplitEpimorphism" ))
+        #    IsSplitEpimorphism( Yc );
+        #fi;
+        
+        ## IsIsomorphism == IsSplitMonomorphism and IsSplitEpimorphism
+        ## we add this here in case the logic is deactivated
+        #if CanCompute( finite_completion, "IsIsomorphism" ))
+        #    IsIsomorphism( Yc );
+        #fi;
+        
+    end;
+    
+    return Yc;
+    
+end );
+
+##
+@InstallMethod( \.,
+        "for a cell in a finite completion category and a positive integer",
+        [ IsCellInFiniteCompletion, IsPosInt ],
+        
+  function( cell, string_as_int )
+    
+    return UnderlyingCell( cell )[NameRNam( string_as_int ]);
+    
+end );
+
+##
+@InstallMethod( SetOfObjects,
+        "for a finite completion category",
+        [ IsFiniteCompletion ],
+        
+  function( finite_completion )
+    
+    return SetOfObjectsOfCategory( finite_completion );
+    
+end );
+
+##
+@InstallMethod( SetOfGeneratingMorphisms,
+        "for a finite completion category",
+        [ IsFiniteCompletion ],
+        
+  function( finite_completion )
+    
+    return SetOfGeneratingMorphismsOfCategory( finite_completion );
+    
+end );
