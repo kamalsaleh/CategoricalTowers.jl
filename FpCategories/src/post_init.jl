@@ -70,3 +70,35 @@ InstallMethod( /,
   function( i, C )
     return CreateObject( C, i );
 end );
+
+# For doctests you pass mod = @__MODULE__ explicitly at the call site, where the macro expands to the doctest sandbox correctly.
+##
+function AssignSetOfObjects( C, label::String = ""; mod::Module = Main )
+    if !HasUnderlyingQuiver( C )
+        error( "the category does not have the attribute 'UnderlyingQuiver'" )
+    end
+    names = LabelsOfObjects( UnderlyingQuiver( C ) )
+    if label == "" && any( name -> tryparse( Int, string( name ) ) !== nothing, names )
+        error( "the <label> passed to 'AssignSetOfObjects' must be a non-empty string!" )
+    end
+    for (name, o) in zip( names, SetOfObjects( C ) )
+        varname = Symbol( label * replace( string( name ), "-" => "m" ) )
+        Core.eval( mod, :( $(varname) = $(o) ) )
+    end
+end
+
+##
+function AssignSetOfGeneratingMorphisms( C, label::String = ""; mod::Module = Main )
+    if !HasUnderlyingQuiver( C )
+        error( "the category does not have the attribute 'UnderlyingQuiver'" )
+    end
+    names = LabelsOfMorphisms( UnderlyingQuiver( C ) )
+    if label == "" && any( name -> tryparse( Int, string( name ) ) !== nothing, names )
+        error( "the <label> passed to 'AssignSetOfGeneratingMorphisms' must be a non-empty string!" )
+    end
+    morphisms = SetOfGeneratingMorphisms( C )
+    for (name, m) in zip( names, morphisms )
+        varname = Symbol( label * replace( string( name ), "-" => "m" ) )
+        Core.eval( mod, :( $(varname) = $(m) ) )
+    end
+end
