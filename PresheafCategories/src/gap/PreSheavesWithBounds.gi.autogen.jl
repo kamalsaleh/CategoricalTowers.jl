@@ -9,7 +9,12 @@
         "for two categories",
         [ IsCapCategory, IsCapCategory, IsStringRep ],
         
-  function ( C, D, type_of_boundedness )
+  @FunctionWithNamedArguments(
+  [
+    [ "FinalizeCategory", true ],
+    [ "overhead", true ],
+  ],
+  function( CAP_NAMED_ARGUMENTS, C, D, type_of_boundedness )
     local PSh, name, is_computable, category_filter, category_object_filter, category_morphism_filter,
           object_datum_type, morphism_datum_type, category_constructor_options,
           additional_properties, properties,
@@ -18,7 +23,7 @@
           create_func_bool, create_func_object, create_func_morphism, supports_empty_limits,
           xPSh;
     
-    PSh = PreSheaves( C, D );
+    PSh = PreSheaves( C, D; overhead = false );
     
     if (type_of_boundedness == "lower")
         name = "PreSheavesWithLowerBounds( ";
@@ -261,7 +266,11 @@
         category_constructor_options.commutative_semiring_of_linear_category = CommutativeSemiringOfLinearCategory( PSh );
     end;
     
-    xPSh = CategoryConstructor( category_constructor_options );
+    xPSh = CategoryConstructor( category_constructor_options
+                #= comment for Julia
+               ; overhead = overhead
+                # =#
+                );
     
     SetSource( xPSh, C );
     SetTarget( xPSh, D );
@@ -400,8 +409,10 @@
         
     end;
     
-    Finalize( xPSh );
+    if (FinalizeCategory)
+        Finalize( xPSh );
+    end;
     
     return xPSh;
     
-end );
+end ) );

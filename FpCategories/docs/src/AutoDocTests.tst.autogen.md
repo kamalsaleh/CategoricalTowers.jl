@@ -347,12 +347,12 @@ julia> ViewObj( List( mors, DecompositionOfMorphismInCategory ) )
   [  ], [ (C1)-[(id)]->(C0), (C0)-[(s)]->(C1) ],
   [ (C1)-[(id)]->(C0), (C0)-[(t)]->(C1) ] ]
 
-julia> C_op = OppositeCategoryFromDataTables( C )
+julia> C_op = OppositeOfObjectFiniteCategory( C )
 Opposite(
 PathCategory( FinQuiver( "Delta(C0,C1)[id:C1→C0,s:C0→C1,t:C0→C1]" ) )
 / [ s⋅id == id(C0), t⋅id == id(C0) ] )
 
-julia> IsIdenticalObj( OppositeCategoryFromDataTables( C_op ), C )
+julia> IsIdenticalObj( OppositeOfObjectFiniteCategory( C_op ), C )
 true
 
 julia> ViewObj( IndicesOfGeneratingMorphisms( C_op ) )
@@ -679,7 +679,7 @@ julia> Display( HomStructure( tau, idC1 ) )
 julia> Display( HomStructure( idC1, idC1 ) )
 [ 0, 1, 2 ] ⱶ[ 0, 1, 2 ]→ [ 0, 1, 2 ]
 
-julia> C_op = OppositeCategoryFromNerveData( C )
+julia> C_op = OppositeOfObjectFiniteCategory( C )
 Opposite(
 PathCategory( FinQuiver( "Delta(C0,C1)[id:C1→C0,s:C0→C1,t:C0→C1]" ) )
 / [ s⋅id == id(C0), t⋅id == id(C0) ] )
@@ -687,7 +687,7 @@ PathCategory( FinQuiver( "Delta(C0,C1)[id:C1→C0,s:C0→C1,t:C0→C1]" ) )
 julia> NerveData( C_op ) == NerveTruncatedInDegree2Data( C_op )
 true
 
-julia> IsIdenticalObj( OppositeCategoryFromNerveData( C_op ), C )
+julia> IsIdenticalObj( OppositeOfObjectFiniteCategory( C_op ), C )
 true
 
 julia> Display( IndicesOfGeneratingMorphisms( C_op ) )
@@ -806,18 +806,18 @@ julia> Display( List( SetOfGeneratingMorphisms( qC ), IsMonomorphism ) )
 julia> Display( List( SetOfGeneratingMorphisms( qC ), IsEpimorphism ) )
 [ false, true, true, true, true, true, true, true, false ]
 
-julia> C_op = OppositePathCategory( C )
+julia> C_op = OppositeOfObjectFiniteCategory( C )
 PathCategory( FinQuiver( "q_op(0,1,2,3,4,5)[x:0→0,s:1→0,a:2→1,c:3→1,e:4→1,b:4→2,
 d:4→3,t:5→4,y:5→5]" ) )
 
-julia> IsIdenticalObj( OppositePathCategory( C_op ), C )
+julia> IsIdenticalObj( OppositeOfObjectFiniteCategory( C_op ), C )
 true
 
-julia> qC_op = OppositeQuotientOfPathCategory( qC )
+julia> qC_op = OppositeOfObjectFiniteCategory( qC )
 PathCategory( FinQuiver( "q_op(0,1,2,3,4,5)[x:0→0,s:1→0,a:2→1,c:3→1,e:4→1,b:4→2,
 d:4→3,t:5→4,y:5→5]" ) ) / [ x^5 == x, y^5 == y^2 ]
 
-julia> IsIdenticalObj( OppositeQuotientOfPathCategory( qC_op ), qC )
+julia> IsIdenticalObj( OppositeOfObjectFiniteCategory( qC_op ), qC )
 true
 
 ```

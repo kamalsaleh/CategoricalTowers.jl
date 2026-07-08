@@ -9,7 +9,12 @@
         "for a record",
         [ IsRecord ],
         
-  function( input_record )
+  @FunctionWithNamedArguments(
+  [
+    [ "no_precompiled_code", false ],
+    [ "FinalizeCategory", true ],
+  ],
+  function( CAP_NAMED_ARGUMENTS, input_record )
     local known_keys_with_filters, key, filter, nerve_data, C0, C, prop, V, s, t;
     
     ## check the keys of the given input record
@@ -532,18 +537,20 @@
     end );
     
     #if false)
-    if (ValueOption( "no_precompiled_code" ) != true)
+    if (no_precompiled_code != true)
         
         ADD_FUNCTIONS_FOR_CategoryFromNerveDataPrecompiled( C );
         ADD_FUNCTIONS_FOR_CategoryFromNerveDataHomStructureOnMorphismsPrecompiled( C );
         
     end;
     
-    Finalize( C );
+    if (FinalizeCategory)
+        Finalize( C );
+    end;
     
     return C;
     
-end );
+  end ) );
 
 ##
 @InstallMethod( SetOfObjects,
@@ -781,7 +788,7 @@ INSTALL_DOT_METHOD( IsCategoryFromNerveData );
 end );
 
 ##
-@InstallMethod( OppositeCategoryFromNerveData,
+@InstallMethod( OppositeOfObjectFiniteCategory,
         "for a category from nerve data",
         [ IsCategoryFromNerveData ],
         
@@ -811,7 +818,7 @@ end );
                          labels = Cop.labels,
                          properties = ListKnownCategoricalProperties( Cop ) ) );
     
-    SetOppositeCategoryFromNerveData( C_op, C );
+    SetOppositeOfObjectFiniteCategory( C_op, C );
     
     return C_op;
     

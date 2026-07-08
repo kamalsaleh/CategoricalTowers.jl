@@ -11,7 +11,7 @@
     [ "colors", fail ],
   ],
   function ( CAP_NAMED_ARGUMENTS, rows, C )
-    local k, sorting_func, order, kC;
+    local k, sorting_func, order, kC, category_filter, category_object_filter, category_morphism_filter;
     
     k = CommutativeSemiringOfLinearCategory( rows );
     
@@ -45,15 +45,29 @@
     
     if (IsPathCategory( C ))
         
+        category_filter = IsLinearClosureOfPathCategory;
+        category_object_filter = IsObjectInLinearClosureOfPathCategory;
+        category_morphism_filter = IsMorphismInLinearClosureOfPathCategory;
+        
+        # every morphism starts by its maximum monomial
         sorting_func = ( mor_1, mor_2 ) -> IsDescendingForMorphisms( C, mor_1, mor_2, order );
         
     else
         
+        category_filter = IsLinearClosureOfQuotientOfPathCategory;
+        category_object_filter = IsObjectInLinearClosureOfQuotientOfPathCategory;
+        category_morphism_filter = IsMorphismInLinearClosureOfQuotientOfPathCategory;
+        
+        # every morphism starts by its maximum monomial
         sorting_func = ( mor_1, mor_2 ) -> IsDescendingForMorphisms( AmbientCategory( C ), CanonicalRepresentative( mor_1 ), CanonicalRepresentative( mor_2 ), order );
         
     end;
     
-    kC = LINEAR_CLOSURE_CONSTRUCTOR_USING_CategoryOfRows( rows, C, sorting_func; FinalizeCategory = false ); # every morphism starts by its maximum monomial
+    kC = LINEAR_CLOSURE_CONSTRUCTOR_USING_CategoryOfRows( rows, C, sorting_func,
+            category_filter = category_filter,
+            category_object_filter = category_object_filter,
+            category_morphism_filter = category_morphism_filter,
+            FinalizeCategory = false );
     
     SetIsObjectFiniteCategory( kC, true );
     
@@ -155,7 +169,7 @@
 end ) );
 
 ##
-@InstallMethod( LinearClosure,
+InstallMethodWithCache( LinearClosure,
           [ IsCategoryOfRows, IsPathCategory ],
           
   @FunctionWithNamedArguments(
@@ -549,5 +563,90 @@ end );
                        V );
     
     return functor[2][2]( rep_obj, morphism, rep_obj );
+    
+end );
+
+##
+@InstallMethod( IsAdmissibleAlgebroid,
+        [ IsLinearClosureOfPathCategory ],
+  
+  function( kC )
+    local kC_op, is_admissible;
+    
+    if (HasOppositeOfObjectFiniteCategory( kC ))
+        
+        kC_op = OppositeOfObjectFiniteCategory( kC );
+        
+        if (HasIsAdmissibleAlgebroid( kC_op ))
+            return IsAdmissibleAlgebroid( kC_op );
+        end;
+        
+    end;
+    
+    is_admissible = HasFiniteNumberOfMacaulayMorphisms( UnderlyingCategory( kC ), [] );
+    
+    if (HasOppositeOfObjectFiniteCategory( kC ))
+        
+        kC_op = OppositeOfObjectFiniteCategory( kC );
+        
+        SetIsAdmissibleAlgebroid( kC_op, is_admissible );
+        
+    end;
+    
+    return is_admissible;
+    
+end );
+
+##
+@InstallMethod( IsAdmissibleAlgebroid,
+        [ IsLinearClosureOfQuotientOfPathCategory ],
+  
+  function( kC )
+    local kC_op, C, P, k, kP, objs_kP, rels, rel_mors, is_admissible;
+    
+    if (HasOppositeOfObjectFiniteCategory( kC ))
+        
+        kC_op = OppositeOfObjectFiniteCategory( kC );
+        
+        if (HasIsAdmissibleAlgebroid( kC_op ))
+            return IsAdmissibleAlgebroid( kC_op );
+        end;
+        
+    end;
+    
+    C = UnderlyingCategory( kC );
+    
+    P = AmbientCategory( C );
+    
+    k = UnderlyingRing( kC );
+    
+    kP = LinearClosure( k, P );
+    
+    objs_kP = SetOfObjects( kP );
+    
+    rels = DefiningRelations( C );
+    
+    rel_mors = List( rels, pair ->
+        SubtractionForMorphisms( kP,
+            MorphismConstructor( kP,
+                objs_kP[ObjectIndex( Source( pair[1] ) )],
+                PairGAP( [ One( k ) ], [ pair[1] ] ),
+                objs_kP[ObjectIndex( Target( pair[1] ) )] ),
+            MorphismConstructor( kP,
+                objs_kP[ObjectIndex( Source( pair[2] ) )],
+                PairGAP( [ One( k ) ], [ pair[2] ] ),
+                objs_kP[ObjectIndex( Target( pair[2] ) )] ) ) );
+    
+    is_admissible = IsAdmissibleAlgebroid( QuotientCategory( kP, rel_mors ) );
+    
+    if (HasOppositeOfObjectFiniteCategory( kC ))
+        
+        kC_op = OppositeOfObjectFiniteCategory( kC );
+        
+        SetIsAdmissibleAlgebroid( kC_op, is_admissible );
+        
+    end;
+    
+    return is_admissible;
     
 end );

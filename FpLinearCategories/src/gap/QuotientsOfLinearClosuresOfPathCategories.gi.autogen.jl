@@ -13,6 +13,7 @@
   function ( CAP_NAMED_ARGUMENTS, kC, relations )
     local C, q, name,
           reduced_gb, leading_monomials, congruence_func,
+          category_filter, category_object_filter, category_morphism_filter,
           quo_kC, homQ, range_HomStructure, k;
     
     C = UnderlyingCategory( kC );
@@ -37,13 +38,20 @@
     
     congruence_func = m -> IsZeroForMorphisms( kC, ReductionOfMorphism( kC, m, reduced_gb ) );
     
+    category_filter = IsQuotientCategoryOfLinearClosureOfPathCategory;
+    category_object_filter = IsObjectInQuotientCategoryOfLinearClosureOfPathCategory;
+    category_morphism_filter = IsMorphismInQuotientCategoryOfLinearClosureOfPathCategory;
+    
     ##
     quo_kC =
       QuotientCategory(
               @rec( name = name,
                    nr_arguments_of_congruence_func = 1,
                    congruence_func = congruence_func,
-                   underlying_category = kC )
+                   underlying_category = kC,
+                   category_filter = category_filter,
+                   category_object_filter = category_object_filter,
+                   category_morphism_filter = category_morphism_filter )
              ; FinalizeCategory = false );
     
     SetUnderlyingQuiver( quo_kC, UnderlyingQuiver( C ) );
@@ -169,6 +177,7 @@
     
 end ) );
 
+##
 @BindGlobal( "QUOTIENT_CATEGORY_OF_LINEAR_CLOSURE_OF_QUOTIENT_OF_PATH_CATEGORY",
   
   function ( k_quo_C, relations )
@@ -211,9 +220,9 @@ end ) );
     name = @Concatenation( Name( k_quo_C ), " / [ ", JoinStringsWithSeparator( name, ", " ), " ]" );
     
     ##
-    category_filter = IsQuotientCategory;
-    category_object_filter = IsQuotientCategoryObject;
-    category_morphism_filter = IsQuotientCategoryMorphism;
+    category_filter = IsQuotientCategoryOfLinearClosureOfQuotientOfPathCategory;
+    category_object_filter = IsObjectInQuotientCategoryOfLinearClosureOfQuotientOfPathCategory;
+    category_morphism_filter = IsMorphismInQuotientCategoryOfLinearClosureOfQuotientOfPathCategory;
     
     ##
     object_constructor =
@@ -541,5 +550,127 @@ end );
                   @Concatenation( colors.reset, "]", colors.other, ":") );
         
     end );
+    
+end );
+
+##
+@InstallMethod( IsAdmissibleAlgebroid,
+        [ IsQuotientCategoryOfLinearClosureOfQuotientOfPathCategory ],
+        
+  function( quo_cat )
+    local quo_cat_op, is_admissible;
+    
+    if (HasOppositeOfObjectFiniteCategory( quo_cat ))
+        
+        quo_cat_op = OppositeOfObjectFiniteCategory( quo_cat );
+        
+        if (HasIsAdmissibleAlgebroid( quo_cat_op ))
+            return IsAdmissibleAlgebroid( quo_cat_op );
+        end;
+        
+    end;
+    
+    is_admissible = IsAdmissibleAlgebroid( ModelingCategory( quo_cat ) );
+    
+    if (HasOppositeOfObjectFiniteCategory( quo_cat ))
+        
+        quo_cat_op = OppositeOfObjectFiniteCategory( quo_cat );
+        
+        SetIsAdmissibleAlgebroid( quo_cat_op, is_admissible );
+        
+    end;
+    
+    return is_admissible;
+    
+end );
+
+##
+@InstallMethod( IsAdmissibleAlgebroid,
+        [ IsQuotientCategoryOfLinearClosureOfPathCategory ],
+        
+  function( quo_cat )
+    local quo_cat_op, kC, ring, C, q, I, dim_func, current_dim, dim, power, is_admissible;
+    
+    if (HasOppositeOfObjectFiniteCategory( quo_cat ))
+        
+        quo_cat_op = OppositeOfObjectFiniteCategory( quo_cat );
+        
+        if (HasIsAdmissibleAlgebroid( quo_cat_op ))
+            return IsAdmissibleAlgebroid( quo_cat_op );
+        end;
+        
+    end;
+    
+    kC = AmbientCategory( quo_cat );
+    
+    ring = UnderlyingRing( kC );
+    
+    C = UnderlyingCategory( kC );
+    
+    q = UnderlyingQuiver( C );
+    
+    I = GroebnerBasisOfDefiningRelations( quo_cat );
+    
+    if (IsEmpty( I ))
+        
+        is_admissible = IsAdmissibleAlgebroid( kC );
+        
+    else
+        
+        dim_func =
+          function( power )
+            local power_ideal, reduced_gb, leading_monomials, homQ;
+            
+            power_ideal =
+              @Concatenation( List( (1):(NumberOfObjects( q )), s ->
+                @Concatenation( List( (1):(NumberOfObjects( q )), t ->
+                  List( ExternalHomsWithGivenLength( C, power )[s][t], m ->
+                    MorphismConstructor( kC, SetOfObjects( kC )[s], PairGAP( [ One( ring ) ], [ m ] ), SetOfObjects( kC )[t] ) ) ) ) ) );
+            
+            reduced_gb = ReducedGroebnerBasis( kC, @Concatenation( I, power_ideal ) );
+            
+            leading_monomials = List( reduced_gb, g -> SupportMorphisms( g )[1] );
+            
+            homQ = MacaulayMorphisms( C, leading_monomials );
+            
+            return Sum( List( ListOfValues( homQ ), l -> Sum( List( ListOfValues( l ), Length ) ) ) );
+            
+          end;
+        
+        power = BigInt( 2 );
+        
+        current_dim = dim_func( power );
+        
+        # i.e., we can reduce an identity or an arrow using the PowerOfArrowIdeal(A, 2)
+        if (current_dim < NumberOfObjects( q ) + NumberOfMorphisms( q ))
+            return false;
+        end;
+        
+        while true
+          
+          power = power + 1;
+          dim = dim_func( power );
+          
+          if (dim == current_dim)
+              break;
+          end;
+          
+          current_dim = dim;
+          
+        end;
+        
+        is_admissible = current_dim == Dimension( quo_cat );
+        
+    end;
+    
+    if (HasOppositeOfObjectFiniteCategory( quo_cat ))
+        
+        quo_cat_op = OppositeOfObjectFiniteCategory( quo_cat );
+        
+        SetIsAdmissibleAlgebroid( quo_cat_op, is_admissible );
+        
+    end;
+    
+    return is_admissible;
     
 end );

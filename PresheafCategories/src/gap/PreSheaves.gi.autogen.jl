@@ -284,7 +284,12 @@ InstallMethodWithCache( PreSheaves,
         "for two CAP categories",
         [ IsCapCategory, IsCapCategory ],
         
-  function ( B, D )
+  @FunctionWithNamedArguments(
+  [
+    [ "FinalizeCategory", true ],
+    [ "overhead", true ],
+  ],
+  function( CAP_NAMED_ARGUMENTS, B, D )
     local name, category_filter, category_object_filter, category_morphism_filter,
           object_constructor, object_datum, morphism_constructor, morphism_datum,
           create_func_bool, create_func_object, create_func_morphism,
@@ -783,7 +788,11 @@ InstallMethodWithCache( PreSheaves,
         
     end;
     
-    PSh = CategoryConstructor( category_constructor_options );
+    PSh = CategoryConstructor( category_constructor_options
+    #= comment for Julia
+   ; overhead = overhead
+    # =#
+    );
     
     if (HasIsFiniteCategory( B ) && IsFiniteCategory( B ) &&
        HasIsFiniteCategory( D ) && IsFiniteCategory( D ))
@@ -843,11 +852,13 @@ InstallMethodWithCache( PreSheaves,
     AddToToDoList( ToDoListEntry( [ [ PSh, "IsFinalized", true ] ], function ( ) IdentityFunctor( PSh ).UnderlyingFunctor = IdentityFunctor( D ); end ) );
     # =#
     
-    Finalize( PSh );
+    if (FinalizeCategory)
+      Finalize( PSh );
+    end;
     
     return PSh;
     
-end );
+  end ) );
 
 # Filters can not be defined inside functions in Julia, hence we define it here and retrieve it in the function:
 @FilterIntersection( IsCapCategory, IsInitialCategory )
@@ -858,7 +869,12 @@ InstallMethodWithCache( PreSheaves,
         "for two CAP categories",
         [ FilterIntersection( IsCapCategory, IsInitialCategory ), IsCapCategory ],
         
-  function ( I, D )
+  @FunctionWithNamedArguments(
+  [
+    [ "FinalizeCategory", true ],
+    [ "overhead", true ],
+  ],
+  function( CAP_NAMED_ARGUMENTS, I, D )
     local name, category_filter, category_object_filter, category_morphism_filter,
           object_constructor, object_datum, morphism_constructor, morphism_datum,
           create_func_object, create_func_morphism,
@@ -953,8 +969,11 @@ InstallMethodWithCache( PreSheaves,
               object_datum = object_datum,
               morphism_constructor = morphism_constructor,
               morphism_datum = morphism_datum,
-              range_category_of_homomorphism_structure = H,
-              ) );
+              range_category_of_homomorphism_structure = H )
+              #= comment for Julia
+             ; overhead = overhead
+              # =#
+              );
     
     ##
     SetSource( PSh_I_I, I );
@@ -1067,22 +1086,29 @@ InstallMethodWithCache( PreSheaves,
         
     end, OperationWeight( PSh_I_I, "IdentityMorphism" ) );
     
-    Finalize( PSh_I_I );
+    if (FinalizeCategory)
+      Finalize( PSh_I_I );
+    end;
     
     return PSh_I_I;
     
-end );
+  end ) );
 
 ##
 @InstallMethod( PreSheaves,
         "for a CAP category",
         [ FilterIntersection( IsCapCategory, HasRangeCategoryOfHomomorphismStructure ) ],
         
-  function( B )
+  @FunctionWithNamedArguments(
+  [
+    [ "FinalizeCategory", true ],
+    [ "overhead", true ],
+  ],
+  function( CAP_NAMED_ARGUMENTS, B )
     
-    return PreSheaves( B, RangeCategoryOfHomomorphismStructure( B ) );
+    return PreSheaves( B, RangeCategoryOfHomomorphismStructure( B ); FinalizeCategory = FinalizeCategory, overhead = overhead );
     
-end );
+end ) );
 
 ####################################
 #

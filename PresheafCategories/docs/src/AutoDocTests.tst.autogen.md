@@ -1,6 +1,6 @@
 
 ```jldoctest AutoDocTests
-julia> using CAP, MatricesForHomalg, MonoidalCategories, CartesianCategories, ToolsForCategoricalTowers, Toposes, FinSetsForCAP, PresheafCategories
+julia> using CAP, MatricesForHomalg, LinearAlgebraForCAP, MonoidalCategories, CartesianCategories, ToolsForCategoricalTowers, Toposes, FinSetsForCAP, PresheafCategories
 
 julia> true
 true
@@ -101,7 +101,7 @@ true
 ```
 
 ```jldoctest AutoDocTests
-julia> using CAP, MatricesForHomalg, MonoidalCategories, CartesianCategories, ToolsForCategoricalTowers, Toposes, FinSetsForCAP, PresheafCategories
+julia> using CAP, MatricesForHomalg, LinearAlgebraForCAP, MonoidalCategories, CartesianCategories, ToolsForCategoricalTowers, Toposes, FinSetsForCAP, PresheafCategories
 
 julia> true
 true

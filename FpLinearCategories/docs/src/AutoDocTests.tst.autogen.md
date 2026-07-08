@@ -152,7 +152,7 @@ e:3→3] ) defined by 4 objects and 5 generating morphisms ) )
 julia> IsAbelianCategory( freyd_B )
 true
 
-julia> A_op = OppositeAlgebroid( A )
+julia> A_op = OppositeOfObjectFiniteCategory( A )
 Q-algebroid( [0,1,2,3][a:1→0,b:3→1,c:2→0,d:3→2,e:3→3] ) defined by
 4 objects and 5 generating morphisms
 
@@ -229,6 +229,9 @@ julia> kC = LinearClosure( k, C )
 Q-LinearClosure( PathCategory( FinQuiver( "q(0,1,2,3,4,5)[x:0→0,s:0→1,a:1→2,
 c:1→3,e:1→4,b:2→4,d:3→4,t:4→5,y:5→5]" ) ) )
 
+julia> IsAdmissibleAlgebroid( kC )
+false
+
 julia> rels = [ kC.x^10 - kC.x^5, kC.abt - kC.et, kC.y^10 - kC.y^5, kC.x^5, kC.y^5 ];
 
 julia> Perform( rels, Display )
@@ -242,6 +245,9 @@ julia> quo_kC = QuotientCategory( kC, rels )
 Q-LinearClosure( PathCategory( FinQuiver( "q(0,1,2,3,4,5)[x:0→0,s:0→1,a:1→2,
 c:1→3,e:1→4,b:2→4,d:3→4,t:4→5,y:5→5]" ) ) ) / [ 1*x^10 + (-1)*x^5,
 1*a⋅b⋅t + (-1)*e⋅t, 1*y^10 + (-1)*y^5, ... ]
+
+julia> IsAdmissibleAlgebroid( quo_kC )
+true
 
 julia> HomStructure( quo_kC["0"], quo_kC["5"] )
 <A row module over Q of rank 50>
@@ -272,6 +278,9 @@ julia> HomStructure( quo_k_quo_C["0"], quo_k_quo_C["5"] )
 
 julia> Dimension( quo_k_quo_C )
 126
+
+julia> IsAdmissibleAlgebroid( quo_k_quo_C )
+true
 
 julia> ModelingCategory( quo_k_quo_C )
 Q-LinearClosure( PathCategory( FinQuiver( "q(0,1,2,3,4,5)[x:0→0,s:0→1,a:1→2,

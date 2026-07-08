@@ -129,9 +129,9 @@ end );
     name = CREATE_NAME_FOR_ALGEBROID_FROM_DATA_TABLES( ring, q );
     
     A = CreateCapCategoryWithDataTypes( name,
-             IsAlgebroidFromDataTables,
-             IsObjectInAlgebroidFromDataTables,
-             IsMorphismInAlgebroidFromDataTables,
+             IsFpAlgebroidFromDataTables,
+             IsObjectInFpAlgebroidFromDataTables,
+             IsMorphismInFpAlgebroidFromDataTables,
              IsCapCategoryTwoCell,
              IsInt,
              CapJitDataTypeOfListOf( CapJitDataTypeOfElementOfRing( ring ) ),
@@ -613,6 +613,10 @@ end );
         
     end );
     
+    if (Length( input_data ) >= 6 && input_data[6] != fail)
+        SetIsAdmissibleAlgebroid( A, input_data[6] );
+    end;
+    
     if (FinalizeCategory)
        Finalize( A );
     end;
@@ -639,7 +643,7 @@ end ) );
 ##
 @InstallMethod( SetOfObjects,
         "for an algebroid from data tables",
-        [ IsAlgebroidFromDataTables ],
+        [ IsFpAlgebroidFromDataTables ],
         
   function( cat )
     
@@ -650,7 +654,7 @@ end );
 ##
 @InstallMethod( SetOfGeneratingMorphisms,
         "for an algebroid from data tables",
-        [ IsAlgebroidFromDataTables ],
+        [ IsFpAlgebroidFromDataTables ],
         
   function( cat )
     
@@ -660,7 +664,7 @@ end );
 
 ##
 @InstallMethod( Dimension,
-          [ IsAlgebroidFromDataTables ],
+          [ IsFpAlgebroidFromDataTables ],
   
   function ( A )
     
@@ -670,7 +674,7 @@ end );
 
 ##
 @InstallMethod( getindex,
-          [ IsAlgebroidFromDataTables, IsInt ],
+          [ IsFpAlgebroidFromDataTables, IsInt ],
   
   function ( A, index )
     
@@ -680,7 +684,7 @@ end );
 
 ##
 @InstallMethod( ^,
-          [ IsAlgebroidFromDataTables, IsInt ],
+          [ IsFpAlgebroidFromDataTables, IsInt ],
   
   function ( A, index )
     
@@ -690,7 +694,7 @@ end );
 
 ##
 @InstallMethod( MorphismConstructor,
-          [ IsAlgebroidFromDataTables, IsObjectInAlgebroidFromDataTables, IsDenseList, IsDenseList, IsObjectInAlgebroidFromDataTables ],
+          [ IsFpAlgebroidFromDataTables, IsObjectInFpAlgebroidFromDataTables, IsDenseList, IsDenseList, IsObjectInFpAlgebroidFromDataTables ],
   
   function ( A, source, coeffs, indices_nonzero_coeffs, target )
     
@@ -703,7 +707,7 @@ end );
 
 ##
 @InstallMethod( IndicesOfSupportMorphisms,
-          [ IsMorphismInAlgebroidFromDataTables ],
+          [ IsMorphismInFpAlgebroidFromDataTables ],
   
   function ( alpha )
     
@@ -713,7 +717,7 @@ end );
 
 ##
 @InstallMethod( SupportMorphisms,
-          [ IsMorphismInAlgebroidFromDataTables ],
+          [ IsMorphismInFpAlgebroidFromDataTables ],
   
   function ( alpha )
     
@@ -723,7 +727,7 @@ end );
 
 ##
 @InstallMethod( CoefficientsOfSupportMorphisms,
-          [ IsMorphismInAlgebroidFromDataTables ],
+          [ IsMorphismInFpAlgebroidFromDataTables ],
   
   function ( alpha )
     
@@ -734,7 +738,7 @@ end );
 #= comment for Julia
 ##
 @InstallMethod( AssignSetOfObjects,
-        [ IsAlgebroidFromDataTables, IsString ],
+        [ IsFpAlgebroidFromDataTables, IsString ],
   
   function ( A, label )
     local names, func;
@@ -761,7 +765,7 @@ end );
 
 ##
 @InstallMethod( AssignSetOfObjects,
-        [ IsAlgebroidFromDataTables ],
+        [ IsFpAlgebroidFromDataTables ],
   
   function ( A )
     
@@ -771,7 +775,7 @@ end );
 
 ##
 @InstallMethod( AssignSetOfGeneratingMorphisms,
-        [ IsAlgebroidFromDataTables, IsString ],
+        [ IsFpAlgebroidFromDataTables, IsString ],
   
   function ( A, label )
     local names, morphisms, func;
@@ -800,7 +804,7 @@ end );
 
 ##
 @InstallMethod( AssignSetOfGeneratingMorphisms,
-        [ IsAlgebroidFromDataTables ],
+        [ IsFpAlgebroidFromDataTables ],
   
   function ( A )
     
@@ -811,7 +815,7 @@ end );
 
 ##
 @InstallMethod( /,
-        [ IsString, IsAlgebroidFromDataTables ],
+        [ IsString, IsFpAlgebroidFromDataTables ],
   
   function ( name, A )
     local q, objs_labels, mors_labels, p, id_mors_labels, label, labels, l, m, power;
@@ -935,12 +939,12 @@ end );
 
 #= comment for Julia
 ##
-INSTALL_DOT_METHOD( IsAlgebroidFromDataTables );
+INSTALL_DOT_METHOD( IsFpAlgebroidFromDataTables );
 # =#
 
 ##
 @InstallMethod( DecompositionIndicesOfMorphismInAlgebroid,
-          [ IsMorphismInAlgebroidFromDataTables ],
+          [ IsMorphismInFpAlgebroidFromDataTables ],
   
   function ( mor )
     local A, s, t, indices;
@@ -958,7 +962,7 @@ end );
 
 ##
 @InstallMethod( DecompositionOfMorphismInAlgebroid,
-          [ IsMorphismInAlgebroidFromDataTables ],
+          [ IsMorphismInFpAlgebroidFromDataTables ],
   
   function ( mor )
     local A, s, t;
@@ -978,7 +982,7 @@ end );
 
 ##
 @InstallMethod( BasesElements,
-          [ IsAlgebroidFromDataTables ],
+          [ IsFpAlgebroidFromDataTables ],
   
   function ( A )
     local q, ranks;
@@ -996,7 +1000,7 @@ end );
 
 ##
 @InstallMethod( LabelsOfBasesElements,
-          [ IsAlgebroidFromDataTables ],
+          [ IsFpAlgebroidFromDataTables ],
   
   function ( A )
     local q, dec;
@@ -1034,7 +1038,7 @@ end );
 
 ##
 @InstallMethod( LaTeXStringsOfBasesElements,
-          [ IsAlgebroidFromDataTables ],
+          [ IsFpAlgebroidFromDataTables ],
   
   function ( A )
     local q, indices;
@@ -1075,7 +1079,7 @@ end );
 
 ##
 @InstallMethod( PowerOfArrowIdealOp,
-          [ IsAlgebroidFromDataTables, IsInt ],
+          [ IsFpAlgebroidFromDataTables, IsInt ],
   function ( A, n )
     
     if (n == 0)
@@ -1092,14 +1096,14 @@ end );
 #= comment for Julia
 ##
 @InstallMethod( IsAdmissibleAlgebroid,
-          [ IsAlgebroidFromDataTables ],
+          [ IsFpAlgebroidFromDataTables ],
   
   function ( A )
     local q, A_op, dim, i, bool;
     
     q = UnderlyingQuiver( A );
     
-    A_op = OppositeAlgebroid( A );
+    A_op = OppositeOfObjectFiniteCategory( A );
     
     if (HasIsAdmissibleAlgebroid( A_op ))
         
@@ -1149,7 +1153,7 @@ end );
 ##
 @InstallMethod( CapFunctor,
         "for an algebroid from data tables, two lists, a CAP Category",
-        [ IsAlgebroidFromDataTables, IsList, IsList, IsCapCategory ],
+        [ IsFpAlgebroidFromDataTables, IsList, IsList, IsCapCategory ],
 
   function( A, imgs_of_objs, imgs_of_gmors, C )
     local F;
@@ -1184,26 +1188,29 @@ end );
 ####################################
 
 ##
-@InstallMethod( OppositeAlgebroid,
-          [ IsAlgebroidFromDataTables ],
+@InstallMethod( OppositeOfObjectFiniteCategory,
+          [ IsFpAlgebroidFromDataTables ],
   
   function ( A )
-    local data_tables, A_op;
+    local is_admissible, data_tables, A_op;
     
-    data_tables = @NTupleGAP( 5,
+    if (HasIsAdmissibleAlgebroid( A ))
+        is_admissible = IsAdmissibleAlgebroid( A );
+    else
+        is_admissible = CategoryDatum( A )[6];
+    end;
+    
+    data_tables = @NTupleGAP( 6,
                     CategoryDatum( A )[1],
                     OppositeQuiver( UnderlyingQuiver( A ) ),
                     TransposedMat( List( CategoryDatum( A )[3], s -> List( s, hom_st -> List( hom_st, indices -> Reversed( indices ) ) ) ) ),
                     CategoryDatum( A )[5],
-                    CategoryDatum( A )[4] );
+                    CategoryDatum( A )[4],
+                    is_admissible );
     
     A_op = AlgebroidFromDataTables( data_tables; colors = A.colors, range_of_HomStructure = RangeCategoryOfHomomorphismStructure( A ) );
     
-    SetOppositeAlgebroid( A_op, A );
-    
-    if (HasIsAdmissibleAlgebroid( A ))
-        SetIsAdmissibleAlgebroid( A_op, IsAdmissibleAlgebroid( A ) );
-    end;
+    SetOppositeOfObjectFiniteCategory( A_op, A );
     
     return A_op;
     
@@ -1217,7 +1224,7 @@ end );
 
 ##
 InstallMethodWithCache( TensorProductOfAlgebroids,
-          [ IsAlgebroidFromDataTables, IsAlgebroidFromDataTables ],
+          [ IsFpAlgebroidFromDataTables, IsFpAlgebroidFromDataTables ],
   
   function ( A_1, A_2 )
     local ring, q1, q2, data_tables, labels_of_bases_elements, T;
@@ -1231,7 +1238,7 @@ InstallMethodWithCache( TensorProductOfAlgebroids,
     q1 = UnderlyingQuiver( A_1 );
     q2 = UnderlyingQuiver( A_2 );
     
-    data_tables = @NTupleGAP( 5,
+    data_tables = @NTupleGAP( 6,
         ring,
         ## quiver
         TensorProductOfFinQuivers( q1, q2 ),
@@ -1314,7 +1321,9 @@ InstallMethodWithCache( TensorProductOfAlgebroids,
                                                 HomomorphismStructureOnObjectsRanks( A_1 )[IndicesOfSources( q1 )[index_1]][i],
                                                 HomomorphismStructureOnObjectsRanks( A_2 )[q][p],
                                                 IdentityMat( HomomorphismStructureOnObjectsRanks( A_2 )[q][p], ring ),
-                                                HomomorphismStructureOnObjectsRanks( A_2 )[q][p] ) ) ) ) ] ) ) ) ) );
+                                                HomomorphismStructureOnObjectsRanks( A_2 )[q][p] ) ) ) ) ] ) ) ) ),
+        
+        fail );
     
     labels_of_bases_elements = LazyHList( (1):(NumberOfObjects( q1 ) * NumberOfObjects( q2 )),
           s_u -> LazyHList( (1):(NumberOfObjects( q1 ) * NumberOfObjects( q2 )),
@@ -1343,7 +1352,7 @@ end );
 
 ##
 @InstallMethod( *,
-          [ IsAlgebroidFromDataTables, IsAlgebroidFromDataTables ],
+          [ IsFpAlgebroidFromDataTables, IsFpAlgebroidFromDataTables ],
   
   ( A_1, A_2 ) -> TensorProductOfAlgebroids( A_1, A_2,
                       #= comment for Julia
@@ -1354,7 +1363,7 @@ end );
 
 ##
 @InstallMethod( ElementaryTensor,
-        [ IsObjectInAlgebroidFromDataTables, IsObjectInAlgebroidFromDataTables, IsAlgebroidFromDataTables ],
+        [ IsObjectInFpAlgebroidFromDataTables, IsObjectInFpAlgebroidFromDataTables, IsFpAlgebroidFromDataTables ],
   
   function ( obj_1, obj_2, A_1_x_A_2 )
     local q2;
@@ -1367,7 +1376,7 @@ end );
 
 ##
 @InstallMethod( ElementaryTensor,
-        [ IsMorphismInAlgebroidFromDataTables, IsMorphismInAlgebroidFromDataTables, IsAlgebroidFromDataTables ],
+        [ IsMorphismInFpAlgebroidFromDataTables, IsMorphismInFpAlgebroidFromDataTables, IsFpAlgebroidFromDataTables ],
   
   function ( mor_1, mor_2, A_1_x_A_2 )
     
@@ -1385,35 +1394,35 @@ end );
 
 ##
 @InstallMethod( ElementaryTensor,
-        [ IsObjectInAlgebroidFromDataTables, IsObjectInAlgebroidFromDataTables ],
+        [ IsObjectInFpAlgebroidFromDataTables, IsObjectInFpAlgebroidFromDataTables ],
   
   ( obj_1, obj_2 ) -> CallFuncListAtRuntime( ElementaryTensor, [ obj_1, obj_2, TensorProductOfAlgebroids( CapCategory( obj_1 ), CapCategory( obj_2 ) ) ] )
 );
 
 ##
 @InstallMethod( ElementaryTensor,
-        [ IsMorphismInAlgebroidFromDataTables, IsMorphismInAlgebroidFromDataTables ],
+        [ IsMorphismInFpAlgebroidFromDataTables, IsMorphismInFpAlgebroidFromDataTables ],
   
   ( mor_1, mor_2 ) -> CallFuncListAtRuntime( ElementaryTensor,  [ mor_1, mor_2, TensorProductOfAlgebroids( CapCategory( mor_1 ), CapCategory( mor_2 ) ) ] )
 );
 
 ##
 @InstallMethod( ElementaryTensor,
-        [ IsObjectInAlgebroidFromDataTables, IsMorphismInAlgebroidFromDataTables ],
+        [ IsObjectInFpAlgebroidFromDataTables, IsMorphismInFpAlgebroidFromDataTables ],
   
   ( obj_1, mor_2 ) -> ElementaryTensor( IdentityMorphism( obj_1 ), mor_2 )
 );
 
 ##
 @InstallMethod( ElementaryTensor,
-        [ IsMorphismInAlgebroidFromDataTables, IsObjectInAlgebroidFromDataTables ],
+        [ IsMorphismInFpAlgebroidFromDataTables, IsObjectInFpAlgebroidFromDataTables ],
   
   ( mor_1, obj_2 ) -> ElementaryTensor( mor_1, IdentityMorphism( obj_2 ) )
 );
 
 ##
 #InstallMethod( CellAsEvaluatableString,
-#        [ IsMorphismInAlgebroidFromDataTables, IsList ], ## not HasHasGenesisOfCell
+#        [ IsMorphismInFpAlgebroidFromDataTables, IsList ], ## not HasHasGenesisOfCell
 #        
 #  _MorphismInAlgebroid_CellAsEvaluatableString );
 
@@ -1425,7 +1434,7 @@ end );
 
 ##
 @InstallMethod( ViewString,
-          [ IsObjectInAlgebroidFromDataTables ],
+          [ IsObjectInFpAlgebroidFromDataTables ],
   
   function ( obj )
     local A;
@@ -1438,13 +1447,13 @@ end );
 
 ##
 @InstallMethod( DisplayString,
-          [ IsObjectInAlgebroidFromDataTables ],
+          [ IsObjectInFpAlgebroidFromDataTables ],
   
   o -> @Concatenation( ViewString( o ), "\n" ) );
 
 ##
 @InstallMethod( LaTeXOutput,
-          [ IsObjectInAlgebroidFromDataTables ],
+          [ IsObjectInFpAlgebroidFromDataTables ],
   
   function ( obj )
     
@@ -1454,7 +1463,7 @@ end );
 
 ##
 @InstallMethod( ViewString,
-          [ IsMorphismInAlgebroidFromDataTables ],
+          [ IsMorphismInFpAlgebroidFromDataTables ],
   
   function ( alpha )
     local A, q, i, j, coeffs, indices_nonzero_coeffs, colors, datum_string, labels;
@@ -1508,13 +1517,13 @@ end );
 
 ##
 @InstallMethod( DisplayString,
-          [ IsMorphismInAlgebroidFromDataTables ],
+          [ IsMorphismInFpAlgebroidFromDataTables ],
   
   m -> @Concatenation( ViewString( m ), "\n" ) );
 
 ##
 @InstallMethod( LaTeXOutput,
-          [ IsMorphismInAlgebroidFromDataTables ],
+          [ IsMorphismInFpAlgebroidFromDataTables ],
   
   function ( alpha )
     local A, q, i, j, coeffs, support, string;

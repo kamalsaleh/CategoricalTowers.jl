@@ -6,7 +6,7 @@
 
 ##
 @InstallMethod( QuotientCategory,
-        [ IsAlgebroidFromDataTables, IsDenseList ],
+        [ IsFpAlgebroidFromDataTables, IsDenseList ],
   
   function ( A, relations )
     local A_op, A_as_presheaf, eager, PSh, tau, S, H, pi, congruence_func, name, quo_A, FinalizeCategory, range_of_HomStructure, ring;
@@ -17,7 +17,7 @@
         
     end;
     
-    A_op = OppositeAlgebroid( A );
+    A_op = OppositeOfObjectFiniteCategory( A );
     
     A_as_presheaf = ValueGlobal( "AlgebroidAsObjectInPreSheavesCategory" )( A; eager = false );
     
@@ -71,6 +71,9 @@
                   @rec( underlying_category = A,
                         name = name,
                         congruence_func = congruence_func,
+                        category_filter = IsQuotientCategoryOfFpAlgebroidFromDataTables,
+                        category_object_filter = IsObjectInQuotientCategoryOfFpAlgebroidFromDataTables,
+                        category_morphism_filter = IsMorphismInQuotientCategoryOfFpAlgebroidFromDataTables,
                         nr_arguments_of_congruence_func = 1 ); FinalizeCategory = false );
     
     ##
@@ -282,7 +285,7 @@ end );
 
 ##
 @InstallMethod( AlgebroidFromDataTables,
-        [ IsAlgebroidFromDataTables, IsDenseList ],
+        [ IsFpAlgebroidFromDataTables, IsDenseList ],
   
   function ( A, relations )
     
@@ -292,7 +295,7 @@ end );
 
 ##
 @InstallMethod( /,
-        [ IsAlgebroidFromDataTables, IsDenseList ],
+        [ IsFpAlgebroidFromDataTables, IsDenseList ],
   
   function ( A, relations )
     

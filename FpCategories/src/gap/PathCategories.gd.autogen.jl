@@ -87,7 +87,7 @@ end;
 #!  Returns the opposite category of the path category <A>C</A>.
 #! @Arguments C
 #! @Returns a path category
-@DeclareAttribute( "OppositePathCategory", IsPathCategory );
+@DeclareAttribute( "OppositeOfObjectFiniteCategory", IsCapCategory );
 
 #! @Arguments C
 @DeclareAttribute( "CategoryFromNerveData", IsPathCategory );
@@ -154,12 +154,6 @@ CapJitAddTypeSignature( "MorphismIndices", [ IsPathCategoryMorphism ], CapJitDat
 
 @DeclareAttribute( "DecompositionOfMorphismInCategory",
         IsPathCategoryMorphism );
-
-#! @Description
-#!  Returns whether <A>C</A> can be enriched over the category of finite sets.
-#! @Arguments C
-#! @Returns a boolean
-@DeclareProperty( "IsFinitePathCategory", IsPathCategory );
 
 #! @Description
 #!  The input is a path category <A>C</A> and a list of morphisms <A>mors</A> in <A>C</A>

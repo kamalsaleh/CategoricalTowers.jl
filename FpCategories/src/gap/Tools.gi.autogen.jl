@@ -616,7 +616,7 @@ end;
     Delta2 = ValueGlobal( "SimplicialCategoryTruncatedInDegree2" );
     
     ## Delta_op(C0,C1,C2)[id:C0->C1,s:C1->C0,t:C1->C0,is:C1->C2,it:C1->C2,ps:C2->C1,pt:C2->C1,mu:C2->C1]
-    Delta2op = OppositeQuotientOfPathCategory( Delta2 );
+    Delta2op = OppositeOfObjectFiniteCategory( Delta2 );
     
     return CapFunctor( Delta2op, nerve_ValuesOnAllObjects, nerve_ValuesOnAllGeneratingMorphisms, RangeCategoryOfHomomorphismStructure( C ) );
     
@@ -679,13 +679,17 @@ end );
         "for a finite category",
         [ IsCapCategory ],
         
-  function( C )
+  @FunctionWithNamedArguments(
+    [
+        [ "FinalizeCategory", true ],
+    ],
+  function ( CAP_NAMED_ARGUMENTS, C )
     local C_op, defining_triple;
     
     if (!( HasIsFiniteCategory( C ) && IsFiniteCategory( C ) ))
         TryNextMethod( );
     end;
-    
+
     C_op = Opposite( C );
     
     defining_triple = DefiningTripleOfUnderlyingQuiver( C );
@@ -695,10 +699,44 @@ end );
                                List( defining_triple[3], a -> PairGAP( a[2], a[1] ) ) );
     
     SetDefiningTripleOfUnderlyingQuiver( C_op, defining_triple );
+
+    SetOppositeFiniteCategory( C_op, C );
     
     return C_op;
     
-end );
+end ) );
+
+##
+@InstallMethod( OppositeOfObjectFiniteCategory,
+        "for a finite category",
+        [ IsCapCategory ],
+        
+  @FunctionWithNamedArguments(
+    [
+        [ "FinalizeCategory", true ],
+    ],
+  function ( CAP_NAMED_ARGUMENTS, C )
+    local C_op, defining_triple;
+    
+    if (!( HasIsObjectFiniteCategory( C ) && IsObjectFiniteCategory( C ) ))
+        TryNextMethod( );
+    end;
+    
+    C_op = Opposite( C; only_primitive_operations_and_hom_structure = true, FinalizeCategory = FinalizeCategory );
+    
+    defining_triple = DefiningTripleOfUnderlyingQuiver( C );
+    
+    defining_triple = Triple( defining_triple[1],
+                               defining_triple[2],
+                               List( defining_triple[3], a -> PairGAP( a[2], a[1] ) ) );
+    
+    SetDefiningTripleOfUnderlyingQuiver( C_op, defining_triple );
+    
+    SetOppositeOfObjectFiniteCategory( C_op, C );
+    
+    return C_op;
+    
+end ) );
 
 ##
 @InstallMethod( YonedaNaturalEpimorphisms,

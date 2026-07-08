@@ -145,13 +145,6 @@ CapJitAddTypeSignature( "IndexOfObject", [ IsObjectInCategoryFromDataTables ], I
 
 CapJitAddTypeSignature( "IndexOfMorphism", [ IsMorphismInCategoryFromDataTables ], IsBigInt );
 
-#! @Description
-#!  The opposite category of the category <A>C</A> defined by nerve data.
-#! @Arguments C
-#! @Returns a &CAP; category
-@DeclareAttribute( "OppositeCategoryFromDataTables",
-        IsCategoryFromDataTables );
-
 ####################################
 #
 #! @Section Constructors
