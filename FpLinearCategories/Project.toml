@@ -5,8 +5,8 @@ authors = [
 	"Kamal Saleh <kamal.saleh@uni-siegen.de>"
 ]
 
-# Transpiled from GAP's FpLinearCategories v2026.05-02
-version = "0.2.2"
+# Transpiled from GAP's FpLinearCategories v2026.07-03
+version = "0.2.3"
 
 [deps]
 MatricesForHomalg = "29b9b1b6-efa6-450e-8188-a5a2c25df071"
@@ -37,7 +37,7 @@ ToolsForCategoricalTowers = "0.1"
 Toposes = "~0.1.14"
 FinSetsForCAP = "0.2, 0.3"
 QuotientCategories = "0.2"
-FpCategories = "~0.1.2"
+FpCategories = "~0.1.13"
 LinearClosuresForCAP = "0.2"
 AdditiveClosuresForCAP = "0.2"
 LinearAlgebraForCAP = "0.2"

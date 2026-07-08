@@ -8,10 +8,10 @@
 @BindGlobal( "DATA_TABLES_OF_CATEGORY_FOR_LINEAR_CLOSURE_OF_PATH_CATEGORY_OR_QUOTIENT_OF_PATH_CATEGORY",
   
   function ( kC )
-    local C, q, objs, gmors, external_homs;
+    local C, q, objs, gmors, external_homs, is_admissible;
     
     if (@not HasRangeCategoryOfHomomorphismStructure( kC ))
-        Error( "the linear closure category passed to 'DataTablesOfCategory' must be hom-finite!\n" );
+        Error( "the linear closure category passed to 'DataTablesOfLinearCategory' must be hom-finite!\n" );
     end;
     
     C = UnderlyingCategory( kC );
@@ -24,7 +24,13 @@
     
     external_homs =  List( objs, s -> List( objs, t -> BasisOfExternalHom( kC, s, t ) ) );
     
-    return @NTupleGAP( 5,
+    if (HasIsAdmissibleAlgebroid( kC ))
+        is_admissible = IsAdmissibleAlgebroid( kC );
+    else
+        is_admissible = fail;
+    end;
+    
+    return @NTupleGAP( 6,
               #coefficients_ring,
               UnderlyingRing( kC ),
               #quiver
@@ -39,7 +45,8 @@
               #hom_structure_gmors_objs
               List( objs,
                 o -> List( gmors,
-                  gm -> EntriesOfHomalgMatrixAsListList( UnderlyingMatrix( HomomorphismStructureOnMorphisms( kC, gm, IdentityMorphism( kC, o ) ) ) ) ) ) );
+                  gm -> EntriesOfHomalgMatrixAsListList( UnderlyingMatrix( HomomorphismStructureOnMorphisms( kC, gm, IdentityMorphism( kC, o ) ) ) ) ) ),
+              is_admissible );
     
 end );
 
@@ -47,10 +54,16 @@ end );
 @BindGlobal( "DATA_TABLES_OF_CATEGORY_FOR_QUOTIENT_CATEGORY_OF_LINEAR_CLOSURE_OF_PATH_CATEGORY_OR_QUOTIENT_OF_PATH_CATEGORY",
   
   function ( quo_kC )
-    local kC, C, all_objs, support_objs, objs, all_gmors, support_gmors, gmors, q;
+    local kC, C, all_objs, support_objs, objs, all_gmors, support_gmors, gmors, q, is_admissible;
     
     if (@not HasRangeCategoryOfHomomorphismStructure( quo_kC ))
-        Error( "the quotient category passed to 'DataTablesOfCategory' must be hom-finite!" );
+        Error( "the quotient category passed to 'DataTablesOfLinearCategory' must be hom-finite!" );
+    end;
+    
+    if (HasIsAdmissibleAlgebroid( quo_kC ))
+        is_admissible = IsAdmissibleAlgebroid( quo_kC );
+    else
+        is_admissible = fail;
     end;
     
     all_objs = SetOfObjects( quo_kC );
@@ -81,7 +94,7 @@ end );
       
     end;
     
-    return @NTupleGAP( 5,
+    return @NTupleGAP( 6,
               #coefficients_ring,
               CommutativeSemiringOfLinearCategory( quo_kC ),
               #quiver
@@ -94,7 +107,8 @@ end );
                 EntriesOfHomalgMatrixAsListList( UnderlyingMatrix( HomomorphismStructureOnMorphisms( quo_kC, IdentityMorphism( quo_kC, o ), gm ) ) ) ) ),
               #hom_structure_gmors_objs
               List( objs, o -> List( gmors, gm ->
-                EntriesOfHomalgMatrixAsListList( UnderlyingMatrix( HomomorphismStructureOnMorphisms( quo_kC, gm, IdentityMorphism( quo_kC, o ) ) ) ) ) ) );
+                EntriesOfHomalgMatrixAsListList( UnderlyingMatrix( HomomorphismStructureOnMorphisms( quo_kC, gm, IdentityMorphism( quo_kC, o ) ) ) ) ) ),
+              is_admissible );
     
 end );
 
@@ -102,10 +116,10 @@ end );
 @BindGlobal( "DATA_TABLES_OF_CATEGORY_FOR_QUOTIENT_CATEGORY_OF_ALGEBROID_FROM_DATA_TABLES",
   
   function ( qA )
-    local A, all_objs, support_objs, objs, all_gmors, support_gmors, gmors, q;
+    local A, all_objs, support_objs, objs, all_gmors, support_gmors, gmors, q, is_admissible;
     
     if (@not HasRangeCategoryOfHomomorphismStructure( qA ))
-        Error( "the quotient category passed to 'DataTablesOfCategory' must be hom-finite!\n" );
+        Error( "the quotient category passed to 'DataTablesOfLinearCategory' must be hom-finite!\n" );
     end;
     
     if (@not IsCategoryOfRows( RangeCategoryOfHomomorphismStructure( qA ) ))
@@ -114,8 +128,14 @@ end );
     
     A = AmbientCategory( qA );
     
-    if (@not IsAlgebroidFromDataTables( A ))
+    if (@not IsFpAlgebroidFromDataTables( A ))
         Error( "the ambient category of the passed category must be an algebroid from data-tables!\n" );
+    end;
+    
+    if (HasIsAdmissibleAlgebroid( qA ))
+        is_admissible = IsAdmissibleAlgebroid( qA );
+    else
+        is_admissible = fail;
     end;
     
     all_objs = List( SetOfObjects( A ), o -> ObjectConstructor( qA, o ) );
@@ -146,7 +166,7 @@ end );
       
     end;
     
-    return @NTupleGAP( 5,
+    return @NTupleGAP( 6,
               CommutativeSemiringOfLinearCategory( A ),
               q,
               List( objs, s -> List( objs, t -> List( BasisOfExternalHom( qA, s, t ), m ->
@@ -154,7 +174,8 @@ end );
               List( objs, o -> List( gmors, gm ->
                 EntriesOfHomalgMatrixAsListList( UnderlyingMatrix( HomomorphismStructureOnMorphisms( qA, IdentityMorphism( qA, o ), gm ) ) ) ) ),
               List( objs, o -> List( gmors, gm ->
-                EntriesOfHomalgMatrixAsListList( UnderlyingMatrix( HomomorphismStructureOnMorphisms( qA, gm, IdentityMorphism( qA, o ) ) ) ) ) ) );
+                EntriesOfHomalgMatrixAsListList( UnderlyingMatrix( HomomorphismStructureOnMorphisms( qA, gm, IdentityMorphism( qA, o ) ) ) ) ) ),
+              is_admissible );
     
 end );
 
@@ -179,7 +200,7 @@ end );
         
         C = AmbientCategory( kC );
         
-        if (IsAlgebroidFromDataTables( C ))
+        if (IsFpAlgebroidFromDataTables( C ))
             
             return DATA_TABLES_OF_CATEGORY_FOR_QUOTIENT_CATEGORY_OF_ALGEBROID_FROM_DATA_TABLES( kC );
             
