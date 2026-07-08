@@ -6,6 +6,8 @@ using CAP
 
 using MatricesForHomalg
 
+using LinearAlgebraForCAP
+
 using MonoidalCategories
 
 using CartesianCategories
