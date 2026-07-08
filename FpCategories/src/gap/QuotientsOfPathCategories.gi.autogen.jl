@@ -291,7 +291,7 @@ end );
 end );
 
 ##
-@InstallMethod( OppositeQuotientOfPathCategory,
+@InstallMethod( OppositeOfObjectFiniteCategory,
         "for a quotient of a path category",
         [ IsQuotientOfPathCategory ],
         
@@ -300,7 +300,7 @@ end );
     
     C = AmbientCategory( quo_C );
     
-    C_op = OppositePathCategory( C );
+    C_op = OppositeOfObjectFiniteCategory( C );
     
     relations_op =  List( DefiningRelations( quo_C ), pair ->
                               PairGAP(
@@ -319,7 +319,7 @@ end );
     
     quo_C_op = CallFuncListAtRuntime( QuotientCategory, [ C_op, relations_op ] );
     
-    SetOppositeQuotientOfPathCategory( quo_C_op, quo_C );
+    SetOppositeOfObjectFiniteCategory( quo_C_op, quo_C );
     
     return quo_C_op;
     
@@ -459,7 +459,12 @@ end );
         "for a quotient of a path category",
         [ IsQuotientOfPathCategory ],
         
-  function( C )
+  @FunctionWithNamedArguments(
+  [
+    [ "no_precompiled_code", false ],
+    [ "FinalizeCategory", true ],
+  ],
+  function( CAP_NAMED_ARGUMENTS, C )
     
     if (!( HasIsFiniteCategory( C ) && IsFiniteCategory( C ) ))
         TryNextMethod( );
@@ -473,9 +478,11 @@ end );
                         relations = RelationsAmongGeneratingMorphisms( C ),
                         labels = [ List( SetOfObjects( C ), o -> ObjectLabel( UnderlyingCell( o ) ) ),
                                 List( SetOfGeneratingMorphisms( C ), m -> MorphismLabel( CanonicalRepresentative( m ) ) ) ],
-                        properties = ListKnownCategoricalProperties( C ) ) );
+                        properties = ListKnownCategoricalProperties( C ) )
+                  ; no_precompiled_code = no_precompiled_code,
+                     FinalizeCategory = FinalizeCategory );
     
-end );
+end ) );
 
 ##
 @InstallMethod( DataTablesOfCategory,

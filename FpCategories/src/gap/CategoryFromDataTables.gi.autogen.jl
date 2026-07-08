@@ -9,7 +9,13 @@
         "for a record",
         [ IsRecord ],
         
-  function( input_record )
+  @FunctionWithNamedArguments(
+  [
+    [ "no_precompiled_code", false ],
+    [ "FinalizeCategory", true ],
+    [ "set_category_attribute_resolving_functions", false ],
+  ],
+  function( CAP_NAMED_ARGUMENTS, input_record )
     local known_keys_with_filters, key, filter, C, prop, V, data_tables, C0, s, t;
     
     ## check the keys of the given input record
@@ -98,7 +104,7 @@
              "DataTables",
              ] );
     
-    if (IsIdenticalObj( ValueOption( "set_category_attribute_resolving_functions" ), true ))
+    if (set_category_attribute_resolving_functions)
        
        ## specify the attributes the compiler should fully resolve during compilation
        C.compiler_hints.category_attribute_resolving_functions =
@@ -325,24 +331,32 @@
     end );
     
     #if false)
-    if (ValueOption( "no_precompiled_code" ) != true)
+    if (no_precompiled_code != true)
         
         ADD_FUNCTIONS_FOR_CategoryFromDataTablesPrecompiled( C );
         
     end;
     
-    Finalize( C );
+    if (FinalizeCategory)
+        Finalize( C );
+    end;
     
     return C;
     
-end );
+end ) );
 
 ##
 @InstallMethod( CategoryFromDataTables,
         "for a path category",
         [ IsPathCategory ],
         
-  function( C )
+  @FunctionWithNamedArguments(
+  [
+    [ "no_precompiled_code", false ],
+    [ "FinalizeCategory", true ],
+    [ "set_category_attribute_resolving_functions", false ],
+  ],
+  function( CAP_NAMED_ARGUMENTS, C )
     
     return CategoryFromDataTables(
                    @rec( name = Name( C ),
@@ -352,16 +366,25 @@ end );
                         decomposition_of_all_morphisms = DecompositionIndicesOfAllMorphismsFromHomStructure( C ),
                         relations = RelationsAmongGeneratingMorphisms( C ),
                         labels = [ List( SetOfObjects( C ), ObjectLabel ), List( SetOfGeneratingMorphisms( C ), MorphismLabel ) ],
-                        properties = ListKnownCategoricalProperties( C ) ) );
+                        properties = ListKnownCategoricalProperties( C ) )
+                  ; no_precompiled_code = no_precompiled_code,
+                     FinalizeCategory = FinalizeCategory,
+                     set_category_attribute_resolving_functions = set_category_attribute_resolving_functions );
     
-end );
+end ) );
 
 ##
 @InstallMethod( CategoryFromDataTables,
         "for a quotient of a path category",
         [ IsQuotientOfPathCategory ],
         
-  function( C )
+  @FunctionWithNamedArguments(
+  [
+    [ "no_precompiled_code", false ],
+    [ "FinalizeCategory", true ],
+    [ "set_category_attribute_resolving_functions", false ],
+  ],
+  function( CAP_NAMED_ARGUMENTS, C )
     
     return CategoryFromDataTables(
                    @rec( name = Name( C ),
@@ -372,16 +395,25 @@ end );
                         relations = RelationsAmongGeneratingMorphisms( C ),
                         labels = [ List( SetOfObjects( C ), o -> ObjectLabel( UnderlyingCell( o ) ) ),
                                 List( SetOfGeneratingMorphisms( C ), m -> MorphismLabel( CanonicalRepresentative( m ) ) ) ],
-                        properties = ListKnownCategoricalProperties( C ) ) );
+                        properties = ListKnownCategoricalProperties( C ) )
+                  ; no_precompiled_code = no_precompiled_code,
+                     FinalizeCategory = FinalizeCategory,
+                     set_category_attribute_resolving_functions = set_category_attribute_resolving_functions );
     
-end );
+end ) );
 
 ##
 @InstallMethod( CategoryFromDataTables,
         "for a category from nerve data",
         [ IsCategoryFromNerveData ],
         
-  function( C )
+  @FunctionWithNamedArguments(
+  [
+    [ "no_precompiled_code", false ],
+    [ "FinalizeCategory", true ],
+    [ "set_category_attribute_resolving_functions", false ],
+  ],
+  function( CAP_NAMED_ARGUMENTS, C )
     
     return CategoryFromDataTables(
                    @rec( name = Name( C ),
@@ -391,9 +423,12 @@ end );
                         decomposition_of_all_morphisms = DecompositionIndicesOfAllMorphisms( C ),
                         relations = RelationsAmongGeneratingMorphisms( C ),
                         labels = C.labels,
-                        properties = ListKnownCategoricalProperties( C ) ) );
+                        properties = ListKnownCategoricalProperties( C ) )
+                  ; no_precompiled_code = no_precompiled_code,
+                     FinalizeCategory = FinalizeCategory,
+                     set_category_attribute_resolving_functions = set_category_attribute_resolving_functions );
     
-end );
+end ) );
 
 ##
 @InstallMethod( SetOfObjects,
@@ -526,7 +561,12 @@ INSTALL_DOT_METHOD( IsCategoryFromDataTables );
         "for a category from data tables",
         [ IsCategoryFromDataTables ],
         
-  function( C )
+  @FunctionWithNamedArguments(
+  [
+    [ "no_precompiled_code", false ],
+    [ "FinalizeCategory", true ],
+  ],
+  function( CAP_NAMED_ARGUMENTS, C )
     
     return CategoryFromNerveData(
                    @rec( name = Name( C ),
@@ -535,12 +575,14 @@ INSTALL_DOT_METHOD( IsCategoryFromDataTables );
                         decomposition_of_all_morphisms = DecompositionIndicesOfAllMorphisms( C ),
                         relations = RelationsAmongGeneratingMorphisms( C ),
                         labels = C.labels,
-                        properties = ListKnownCategoricalProperties( C ) ) );
+                        properties = ListKnownCategoricalProperties( C ) )
+                  ; no_precompiled_code = no_precompiled_code,
+                     FinalizeCategory = FinalizeCategory );
     
-end );
+end ) );
 
 ##
-@InstallMethod( OppositeCategoryFromDataTables,
+@InstallMethod( OppositeOfObjectFiniteCategory,
         "for a category from data tables",
         [ IsCategoryFromDataTables ],
         
@@ -549,12 +591,12 @@ end );
     
     C_from_nerve = CategoryFromNerveData( C );
     
-    Cop = OppositeCategoryFromNerveData( C_from_nerve );
+    Cop = OppositeOfObjectFiniteCategory( C_from_nerve );
     
     C_op = CategoryFromDataTables( Cop );
     
-    SetOppositeCategoryFromDataTables( C_op, C );
-    
+    SetOppositeOfObjectFiniteCategory( C_op, C );
+
     return C_op;
     
 end );
@@ -613,7 +655,7 @@ end );
     end;
     
     #% CAP_JIT_DROP_NEXT_STATEMENT
-    if (@not IsIdenticalObj( C_op, OppositeCategoryFromDataTables( C ) ))
+    if (@not IsIdenticalObj( C_op, OppositeOfObjectFiniteCategory( C ) ))
         Error( "the opposite category of `C` is not the category `C_op`\n" );
     end;
     
@@ -637,7 +679,7 @@ end );
     
     C = CapCategory( mor );
     
-    C_op = OppositeCategoryFromDataTables( C );
+    C_op = OppositeOfObjectFiniteCategory( C );
     
     return CallFuncListAtRuntime( OppositeMorphismInOppositeCategoryFromDataTables, [ C_op, C, mor ] );
     

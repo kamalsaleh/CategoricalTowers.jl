@@ -267,11 +267,11 @@
         
     end );
     
-    SetIsFiniteCategory( C, IsFinitePathCategory( C ) );
-    
     # Homomorphism Structure - Only for path categories with underlying acyclic quivers
-    
-    if (IsFiniteCategory( C ) )
+    #
+    if (HasFiniteNumberOfMacaulayMorphisms( C, [ ] ) )
+        
+        SetIsFiniteCategory( C,  true );
         
         range_cat = range_of_HomStructure;
         
@@ -803,7 +803,18 @@ INSTALL_DOT_METHOD( IsPathCategory );
 # =#
 
 ##
-@InstallMethod( OppositePathCategory,
+@InstallMethod( OppositeOfObjectFiniteCategory,
+        "for a category that was created as an opposite category",
+        [ WasCreatedAsOppositeCategory ],
+        
+  function( C )
+    
+    return OppositeCategory( C );
+    
+end );
+
+##
+@InstallMethod( OppositeOfObjectFiniteCategory,
         "for a path category",
         [ IsPathCategory ],
         
@@ -818,7 +829,7 @@ INSTALL_DOT_METHOD( IsPathCategory );
         C_op = PathCategory( quiver_op );
     end;
     
-    SetOppositePathCategory( C_op, C );
+    SetOppositeOfObjectFiniteCategory( C_op, C );
     
     return C_op;
     
@@ -998,16 +1009,6 @@ end );
 # Hom-Structure in Path Categories and their Quotients
 #
 #######################################################
-
-##
-@InstallMethod( IsFinitePathCategory,
-          [ IsPathCategory ],
-  
-  function ( C )
-    
-    return HasFiniteNumberOfMacaulayMorphisms( C, [ ] );
-    
-end );
 
 ##
 @InstallMethod( HasFiniteNumberOfMacaulayMorphisms,
@@ -1324,7 +1325,12 @@ end );
         "for a path category",
         [ IsPathCategory ],
         
-  function( C )
+  @FunctionWithNamedArguments(
+  [
+    [ "no_precompiled_code", false ],
+    [ "FinalizeCategory", true ],
+  ],
+  function( CAP_NAMED_ARGUMENTS, C )
     
     if (@not IsFiniteCategory( C ))
         TryNextMethod( );
@@ -1337,9 +1343,11 @@ end );
                         decomposition_of_all_morphisms = DecompositionIndicesOfAllMorphismsFromHomStructure( C ),
                         relations = RelationsAmongGeneratingMorphisms( C ),
                         labels = [ List( SetOfObjects( C ), ObjectLabel ), List( SetOfGeneratingMorphisms( C ), MorphismLabel ) ],
-                        properties = ListKnownCategoricalProperties( C ) ) );
+                        properties = ListKnownCategoricalProperties( C ) )
+                  ; no_precompiled_code = no_precompiled_code,
+                     FinalizeCategory = FinalizeCategory );
     
-end );
+end ) );
 
 ##
 @InstallMethod( DataTablesOfCategory,
