@@ -20,7 +20,7 @@
 
 if (IsPackageMarkedForLoading( "Digraphs", ">= 1.3.1" ))
 
-#! @Arguments cell
+#! @Arguments D
 @DeclareAttribute( "SvgString",
         IsDigraph && IsDigraphOfDoctrines );
 
