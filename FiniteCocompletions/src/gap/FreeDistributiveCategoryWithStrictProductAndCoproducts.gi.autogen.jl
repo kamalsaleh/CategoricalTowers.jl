@@ -1,0 +1,195 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# FiniteCocompletions: Finite (co)product/(co)limit (co)completions
+#
+# Implementations
+#
+
+##
+@InstallMethod( FreeDistributiveCategoryWithStrictProductAndCoproducts,
+        [ IsCapCategory ],
+        
+  function( C )
+    local name, category_filter, category_object_filter, category_morphism_filter,
+          PC, UPC,
+          DC;
+    
+    ##
+    name = @Concatenation( "FreeDistributiveCategoryWithStrictProductAndCoproducts( ", Name( C ), " )" );
+    
+    ##
+    category_filter = IsFreeDistributiveCategoryWithStrictProductAndCoproducts && IsWrapperCapCategory;
+    category_object_filter = IsObjectInFreeDistributiveCategoryWithStrictProductAndCoproducts && IsWrapperCapCategoryObject;
+    category_morphism_filter = IsMorphismInFreeDistributiveCategoryWithStrictProductAndCoproducts && IsWrapperCapCategoryMorphism;
+    
+    ## building the categorical tower:
+    
+    ## the finite strict product completion of the category C:
+    PC = FiniteStrictProductCompletion( C; FinalizeCategory = true );
+    
+    ## the finite strict coproduct completion of the finite strict product completion of the category C:
+    UPC = FiniteStrictCoproductCompletion( PC; FinalizeCategory = true );
+    
+    ## UPC is a model for the free distributive closure category with strict products and coproducts of the category C:
+    DC =
+      WrapperCategory( UPC,
+              @rec( name = name,
+                   category_filter = category_filter,
+                   category_object_filter = category_object_filter,
+                   category_morphism_filter = category_morphism_filter,
+                   only_primitive_operations = true )
+              );
+    
+    SetUnderlyingCategory( DC, C );
+    
+    Append( DC.compiler_hints.category_attribute_names,
+            [ "UnderlyingCategory" ] );
+    
+    return DC;
+    
+end );
+
+##
+@InstallMethod( EmbeddingOfUnderlyingCategoryData,
+        "for the free distributive closure category with strict products and coproducts of a category",
+        [ IsFreeDistributiveCategoryWithStrictProductAndCoproducts ],
+        
+  function( DC )
+    local UPC, PC;
+    
+    UPC = ModelingCategory( DC );
+    
+    PC = UnderlyingCategory( UPC );
+    
+    return PreComposeWithWrappingFunctorData( DC,
+                   PreComposeFunctorsByData( UPC,
+                           EmbeddingOfUnderlyingCategoryData( PC ),
+                           EmbeddingOfUnderlyingCategoryData( UPC ) ) );
+    
+end );
+
+##
+@InstallMethod( EmbeddingOfUnderlyingCategory,
+        "for the free distributive closure category with strict products and coproducts of a category",
+        [ IsFreeDistributiveCategoryWithStrictProductAndCoproducts ],
+        
+  function( DC )
+    local data, Y;
+    
+    data = EmbeddingOfUnderlyingCategoryData( DC );
+    
+    Y = CapFunctor( "Embedding functor into a free distributive closure category with strict products and coproducts", data[1], DC );
+    
+    AddObjectFunction( Y, data[2][1] );
+    
+    AddMorphismFunction( Y, data[2][2] );
+    
+    return Y;
+    
+end );
+
+##
+@InstallMethod( /,
+        "for the free distributive closure category with strict products and coproducts of a category and a positive integer",
+        [ IsString, IsFreeDistributiveCategoryWithStrictProductAndCoproducts ],
+        
+  function( name, DC )
+    local C, Y, Yc;
+    
+    C = UnderlyingCategory( DC );
+    
+    Y = EmbeddingOfUnderlyingCategory( DC );
+    
+    Yc = Y( C[name] );
+    
+    if (IsObjectInFiniteStrictCoproductCompletion( Yc ))
+
+        #TODO: is this true?
+        #SetIsProjective( Yc, true );
+        
+    elseif (IsMorphismInFiniteStrictCoproductCompletion( Yc ))
+        
+        if (CanCompute( DC, "IsMonomorphism" ))
+            IsMonomorphism( Yc );
+        end;
+        
+        if (CanCompute( DC, "IsSplitMonomorphism" ))
+            IsSplitMonomorphism( Yc );
+        end;
+        
+        if (CanCompute( DC, "IsEpimorphism" ))
+            IsEpimorphism( Yc );
+        end;
+        
+        if (CanCompute( DC, "IsSplitEpimorphism" ))
+            IsSplitEpimorphism( Yc );
+        end;
+        
+        ## IsIsomorphism == IsSplitMonomorphism and IsSplitEpimorphism
+        ## we add this here in case the logic is deactivated
+        if (CanCompute( DC, "IsIsomorphism" ))
+            IsIsomorphism( Yc );
+        end;
+        
+    end;
+    
+    return Yc;
+    
+end );
+
+#= comment for Julia
+INSTALL_DOT_METHOD( IsFreeDistributiveCategoryWithStrictProductAndCoproducts );
+# =#
+
+##
+@InstallMethod( ExtendFunctorToFreeDistributiveCategoryWithStrictProductAndCoproductsData,
+        "for a two categories and a pair of functions",
+        [ IsFreeDistributiveCategoryWithStrictProductAndCoproducts, IsList, FilterIntersection( IsCapCategory, IsDistributiveCategory ) ], ## IsStrict(Co)cartesianCategory would exclude the lazy category
+        
+  function( DC, pair_of_funcs, distributive_category_with_strict_products_and_coproducts )
+    local UPC, PC;
+    
+    UPC = ModelingCategory( DC );
+    PC = UnderlyingCategory( UPC );
+    
+    return ExtendFunctorToWrapperCategoryData(
+                   DC,
+                   ExtendFunctorToFiniteStrictCoproductCompletionData(
+                           UPC,
+                           ExtendFunctorToFiniteStrictProductCompletionData(
+                                   PC,
+                                   pair_of_funcs,
+                                   distributive_category_with_strict_products_and_coproducts )[2],
+                           distributive_category_with_strict_products_and_coproducts )[2],
+                   distributive_category_with_strict_products_and_coproducts );
+    
+end );
+
+##
+@InstallMethod( ExtendFunctorToFreeDistributiveCategoryWithStrictProductAndCoproducts,
+        "for a functor",
+        [ IsCapFunctor ],
+        
+  function( F )
+    local C, D, DC, data, DF;
+    
+    C = SourceOfFunctor( F );
+    D = RangeOfFunctor( F );
+    
+    DC = FreeDistributiveCategoryWithStrictProductAndCoproducts( C );
+    
+    data = ExtendFunctorToFreeDistributiveCategoryWithStrictProductAndCoproductsData(
+                    DC,
+                    PairGAP( FunctorObjectOperation( F ), FunctorMorphismOperation( F ) ),
+                    D );
+    
+    DF = CapFunctor( @Concatenation( "Extension to FreeDistributiveCategoryWithStrictProductAndCoproducts( Source( ", Name( F ), " ) )" ), DC, D );
+    
+    AddObjectFunction( DF,
+            data[2][1] );
+    
+    AddMorphismFunction( DF,
+            data[2][2] );
+    
+    return DF;
+    
+end );

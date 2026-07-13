@@ -55,3 +55,8 @@ echo "Pushed to SubcategoriesForCAP.jl"
 git subtree split --prefix=PresheafCategories -b PresheafCategories-split
 git push git@github.com:${GITHUB_USER}/PresheafCategories.jl.git PresheafCategories-split:master
 echo "Pushed to PresheafCategories.jl"
+
+# FiniteCocompletions
+git subtree split --prefix=FiniteCocompletions -b FiniteCocompletions-split
+git push git@github.com:${GITHUB_USER}/FiniteCocompletions.jl.git FiniteCocompletions-split:master
+echo "Pushed to FiniteCocompletions.jl"
