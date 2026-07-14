@@ -711,18 +711,14 @@ end ) );
         "for a finite category",
         [ IsCapCategory ],
         
-  @FunctionWithNamedArguments(
-    [
-        [ "FinalizeCategory", true ],
-    ],
-  function ( CAP_NAMED_ARGUMENTS, C )
+  function ( C )
     local C_op, defining_triple;
     
     if (!( HasIsObjectFiniteCategory( C ) && IsObjectFiniteCategory( C ) ))
         TryNextMethod( );
     end;
     
-    C_op = Opposite( C; only_primitive_operations_and_hom_structure = true, FinalizeCategory = FinalizeCategory );
+    C_op = Opposite( C; only_primitive_operations_and_hom_structure = true );
     
     defining_triple = DefiningTripleOfUnderlyingQuiver( C );
     
@@ -736,7 +732,7 @@ end ) );
     
     return C_op;
     
-end ) );
+end );
 
 ##
 @InstallMethod( YonedaNaturalEpimorphisms,
