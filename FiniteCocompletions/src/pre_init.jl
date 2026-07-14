@@ -32,4 +32,10 @@ append!(ExcludedNames, [
   :UnderlyingMorphism,
   :UnderlyingMorphism_OPERATION,
   :TheJuliaAttributeTypeUnderlyingMorphism,
+  :Visualize,
+  :HasUnderlyingDatum,
+  :SetUnderlyingDatum,
+  :UnderlyingDatum,
+  :UnderlyingDatum_OPERATION,
+  :TheJuliaAttributeTypeUnderlyingDatum,
 ])

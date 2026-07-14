@@ -631,11 +631,18 @@ end ) );
   
   @FunctionWithNamedArguments(
   [
-    [ "colors", fail ]
+    [ "colors", fail ],
+    [ "range_of_HomStructure", fail ],
+    [ "eager", false ],
+    [ "FinalizeCategory", true ],
   ],
   function ( CAP_NAMED_ARGUMENTS, C )
     
-    return AlgebroidFromDataTables( DataTablesOfLinearCategory( C ); colors = colors );
+    return AlgebroidFromDataTables( DataTablesOfLinearCategory( C )
+             ; colors = colors,
+                range_of_HomStructure = range_of_HomStructure,
+                eager = eager,
+                FinalizeCategory = FinalizeCategory );
     
 end ) );
 

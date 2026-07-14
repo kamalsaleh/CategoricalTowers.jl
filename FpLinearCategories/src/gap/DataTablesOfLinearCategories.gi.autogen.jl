@@ -192,7 +192,7 @@ end );
           
         if ((IsPathCategory( C ) || IsQuotientOfPathCategory( C )) )
           
-          return DATA_TABLES_OF_CATEGORY_FOR_LINEAR_CLOSURE_OF_PATH_CATEGORY_OR_QUOTIENT_OF_PATH_CATEGORY( kC );
+          return CallFuncListAtRuntime( DATA_TABLES_OF_CATEGORY_FOR_LINEAR_CLOSURE_OF_PATH_CATEGORY_OR_QUOTIENT_OF_PATH_CATEGORY, [ kC ] );
           
         end;
         
@@ -202,13 +202,13 @@ end );
         
         if (IsFpAlgebroidFromDataTables( C ))
             
-            return DATA_TABLES_OF_CATEGORY_FOR_QUOTIENT_CATEGORY_OF_ALGEBROID_FROM_DATA_TABLES( kC );
+            return CallFuncListAtRuntime( DATA_TABLES_OF_CATEGORY_FOR_QUOTIENT_CATEGORY_OF_ALGEBROID_FROM_DATA_TABLES, [ kC ] );
             
         elseif (IsLinearClosure( C ))
             
             if (IsPathCategory( UnderlyingCategory( C ) ) || IsQuotientOfPathCategory( UnderlyingCategory( C ) ))
                 
-                return DATA_TABLES_OF_CATEGORY_FOR_QUOTIENT_CATEGORY_OF_LINEAR_CLOSURE_OF_PATH_CATEGORY_OR_QUOTIENT_OF_PATH_CATEGORY( kC );
+                return CallFuncListAtRuntime( DATA_TABLES_OF_CATEGORY_FOR_QUOTIENT_CATEGORY_OF_LINEAR_CLOSURE_OF_PATH_CATEGORY_OR_QUOTIENT_OF_PATH_CATEGORY, [ kC ] );
                 
             end;
             

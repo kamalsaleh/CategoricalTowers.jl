@@ -1,0 +1,145 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# FunctorCategories: Categories of functors
+#
+# Declarations
+#
+
+#! @Chapter The elementary topos of finite reflexive quivers
+
+####################################
+#
+#! @Section &GAP; Categories
+#
+####################################
+
+#! @Description
+#!  The &GAP; category of the category of reflexive quivers.
+#! @Arguments category
+@DeclareFilter( "IsCategoryOfReflexiveQuivers",
+        IsCapCategory );
+
+#! @Description
+#!  The &GAP; category of cells in the category of reflexive quivers.
+#! @Arguments cell
+@DeclareFilter( "IsCellInCategoryOfReflexiveQuivers",
+        IsCapCategoryCell );
+
+#! @Description
+#!  The &GAP; category of objects in the category of reflexive quivers.
+#! @Arguments obj
+@DeclareFilter( "IsObjectInCategoryOfReflexiveQuivers",
+        FilterIntersection( IsCapCategoryObject, IsCellInCategoryOfReflexiveQuivers ) );
+
+#! @Description
+#!  The &GAP; category of morphisms in the category of reflexive quivers.
+#! @Arguments mor
+@DeclareFilter( "IsMorphismInCategoryOfReflexiveQuivers",
+        FilterIntersection( IsCapCategoryMorphism, IsCellInCategoryOfReflexiveQuivers ) );
+
+####################################
+#
+#! @Section Global variables
+#
+####################################
+
+if (false)
+#! The quiver generating the category of reflexive quivers
+DeclareGlobalVariable( "QuiverOfCategoryOfReflexiveQuivers" );
+
+#! The category of reflexive quivers as a category of presheaves with values in <C>SkeletalFinSets</C>.
+DeclareGlobalVariable( "FinReflexiveQuivers" );
+end;
+
+####################################
+#
+#! @Section Attributes
+#
+####################################
+
+#! @Arguments fin_reflexive_quivers
+@DeclareAttribute( "UnderlyingCategory",
+        IsCategoryOfReflexiveQuivers );
+
+#! @Arguments fin_reflexive_quivers
+@DeclareAttribute( "EmbeddingOfUnderlyingCategory",
+        IsCategoryOfReflexiveQuivers );
+
+@DeclareAttribute( "DefiningQuadrupleOfReflexiveQuiverEnrichedOverSkeletalFinSets",
+        IsObjectInCategoryOfReflexiveQuivers );
+
+CapJitAddTypeSignature( "DefiningQuadrupleOfReflexiveQuiverEnrichedOverSkeletalFinSets", [ IsObjectInCategoryOfReflexiveQuivers ], function ( input_types )
+    
+    @Assert( 0, IsCategoryOfReflexiveQuivers( input_types[1].category ) );
+    
+    return CapJitDataTypeOfNTupleOf( 4,
+                   IsInt,
+                   IsInt,
+                   CapJitDataTypeOfListOf( IsInt ),
+                   CapJitDataTypeOfListOf(
+                           CapJitDataTypeOfNTupleOf( 2,
+                                   IsInt,
+                                   IsInt ) ) );
+    
+end );
+
+@DeclareAttribute( "DefiningPairOfReflexiveQuiverMorphismEnrichedOverSkeletalFinSets",
+        IsObjectInCategoryOfReflexiveQuivers );
+
+CapJitAddTypeSignature( "DefiningPairOfReflexiveQuiverMorphismEnrichedOverSkeletalFinSets", [ IsMorphismInCategoryOfReflexiveQuivers ], function ( input_types )
+    
+    @Assert( 0, IsCategoryOfReflexiveQuivers( input_types[1].category ) );
+    
+    return CapJitDataTypeOfNTupleOf( 2,
+                   CapJitDataTypeOfListOf( IsInt ),
+                   CapJitDataTypeOfListOf( IsInt ) );
+    
+end );
+
+#! @Arguments quiver
+@DeclareAttribute( "Loops",
+        IsObjectInCategoryOfReflexiveQuivers );
+
+#! @Arguments quiver
+@DeclareAttribute( "Arrows",
+        IsObjectInCategoryOfReflexiveQuivers );
+
+#! @Arguments cell
+@DeclareAttribute( "SvgString",
+        IsCellInCategoryOfReflexiveQuivers );
+
+#! @Arguments cell
+@DeclareOperation( "DotVertexLabelledDigraph",
+        [ IsCellInCategoryOfReflexiveQuivers ] );
+
+####################################
+#
+#! @Section Constructors
+#
+####################################
+
+#! @Description
+#!  Construct the category of reflexive quivers enriched over the category <A>V</A>.
+#! @Returns a &CAP; category
+#! @Arguments V
+@DeclareAttribute( "CategoryOfReflexiveQuiversEnrichedOver",
+        IsCapCategory );
+
+#!
+@DeclareOperation( "CreateReflexiveQuiver",
+        [ IsCategoryOfReflexiveQuivers, IsInt, IsList, IsList ] );
+
+#!
+@DeclareOperation( "CreateReflexiveQuiver",
+        [ IsInt, IsList, IsList ] );
+
+#!
+@DeclareOperation( "CreateReflexiveQuiverMorphism",
+        [ IsObjectInCategoryOfReflexiveQuivers, IsList, IsList, IsObjectInCategoryOfReflexiveQuivers ] );
+
+#!
+@DeclareOperation( "Subobject",
+        [ IsObjectInCategoryOfReflexiveQuivers, IsList, IsList ] );
+
+#!
+@DeclareOperation( "Subobject",
+        [ IsObjectInCategoryOfReflexiveQuivers, IsList ] );

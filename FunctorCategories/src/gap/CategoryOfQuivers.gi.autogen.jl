@@ -1,0 +1,602 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# FunctorCategories: Categories of functors
+#
+# Implementations
+#
+
+##
+@InstallMethod( CreateQuiver,
+        "for a category of quivers and a triple",
+        [ IsCategoryOfQuivers, IsList ],
+        
+  function ( category_of_quivers, triple )
+    
+    #% CAP_JIT_DROP_NEXT_STATEMENT
+    @Assert( 0, Length( triple ) == 3 && IsList( triple[3] ) && ForAll( triple[3], IsList ) );
+    
+    return CreateCapCategoryObjectWithAttributes( category_of_quivers,
+                   DefiningTripleOfQuiverEnrichedOverSkeletalFinSets, triple );
+    
+end );
+
+##
+@InstallMethod( CreateQuiver,
+        "for a category of quivers, an integer, and a list of pairs of integers",
+        [ IsCategoryOfQuivers, IsInt, IsList ],
+        
+  function ( category_of_quivers, n, arrows )
+    local arr;
+    
+    if (ForAll( arrows, IsInt ))
+        @Assert( 0, IsEvenInt( Length( arrows ) ) );
+        arr = List( (1):(Length( arrows ) / 2), i -> PairGAP( arrows[2 * i - 1], arrows[2 * i] ) );
+    else
+        arr = arrows;
+    end;
+    
+    return CreateQuiver( category_of_quivers,
+                   Triple( n, Length( arr ), arr ) );
+    
+end );
+
+##
+@InstallMethod( CreateQuiverMorphism,
+        "for a category of quivers, two objects in a category of quivers, and a pair",
+        [ IsCategoryOfQuivers, IsObjectInCategoryOfQuivers, IsList, IsObjectInCategoryOfQuivers ],
+        
+  function ( category_of_quivers, source, images, range )
+    
+    return CreateCapCategoryMorphismWithAttributes( category_of_quivers,
+                   source,
+                   range,
+                   DefiningPairOfQuiverMorphismEnrichedOverSkeletalFinSets, images );
+    
+end );
+
+##
+@InstallMethod( CreateQuiverMorphism,
+        "for two objects in a category of quivers and two lists",
+        [ IsObjectInCategoryOfQuivers, IsList, IsList, IsObjectInCategoryOfQuivers ],
+        
+  function ( source, images_of_vertices, images_of_arrows, range )
+    
+    return CreateQuiverMorphism( CapCategory( source ), source, PairGAP( images_of_vertices, images_of_arrows ), range );
+    
+end );
+
+##
+@InstallMethod( CategoryOfQuiversEnrichedOver,
+        "for a category of sekelal finite sets",
+        [ IsSkeletalCategoryOfFiniteSets ],
+        
+  function ( category_of_skeletal_finsets )
+    local name, category_filter, category_object_filter, category_morphism_filter,
+          object_datum_type, object_constructor, object_datum,
+          morphism_datum_type, morphism_constructor, morphism_datum,
+          F, F_hat,
+          modeling_tower_object_constructor, modeling_tower_object_datum,
+          modeling_tower_morphism_constructor, modeling_tower_morphism_datum,
+          Quivers;
+    
+    ##
+    name = @Concatenation( "CategoryOfQuiversEnrichedOver( ", Name( category_of_skeletal_finsets ), " )" );
+    
+    ##
+    category_filter = IsCategoryOfQuivers;
+    category_object_filter = IsObjectInCategoryOfQuivers;
+    category_morphism_filter = IsMorphismInCategoryOfQuivers;
+    
+    ##
+    object_datum_type =
+      CapJitDataTypeOfNTupleOf( 3,
+              IsInt,
+              IsInt,
+              CapJitDataTypeOfListOf(
+                      CapJitDataTypeOfNTupleOf( 2,
+                              IsInt,
+                              IsInt ) ) );
+    
+    object_constructor = CreateQuiver;
+    
+    object_datum = ( Quivers, o ) -> DefiningTripleOfQuiverEnrichedOverSkeletalFinSets( o );
+    
+    ##
+    morphism_datum_type =
+      CapJitDataTypeOfNTupleOf( 2,
+              CapJitDataTypeOfListOf( IsInt ),
+              CapJitDataTypeOfListOf( IsInt ) );
+    
+    morphism_constructor = CreateQuiverMorphism;
+    
+    morphism_datum = ( Quivers, m ) -> DefiningPairOfQuiverMorphismEnrichedOverSkeletalFinSets( m );
+    
+    ## building the categorical tower:
+    
+    F = PathCategory( QuiverOfCategoryOfQuivers; range_of_HomStructure = category_of_skeletal_finsets, FinalizeCategory = true );
+    
+    F = CategoryFromDataTables( F; set_category_attribute_resolving_functions = true, FinalizeCategory = true );
+    
+    F_hat = FiniteCocompletion( F; FinalizeCategory = true );
+    
+    @Assert( 0, IsIdenticalObj( RangeCategoryOfHomomorphismStructure( F ), category_of_skeletal_finsets ) );
+    
+    ## from the raw object data to the object in the modeling category
+    modeling_tower_object_constructor =
+      function( Quivers, triple )
+        local F_hat, PSh, sFinSets, V, A, arrows, s, t;
+        
+        F_hat = ModelingCategory( Quivers );
+        
+        PSh = ModelingCategory( F_hat );
+        
+        sFinSets = Target( PSh );
+        
+        V = ObjectConstructor( sFinSets, triple[1] );
+        
+        A = ObjectConstructor( sFinSets, triple[2] );
+        
+        arrows = triple[3];
+        
+        s = MorphismConstructor( sFinSets, A, List( arrows, a -> a[1] ), V );
+        
+        t = MorphismConstructor( sFinSets, A, List( arrows, a -> a[2] ), V );
+        
+        return ObjectConstructor( F_hat,
+                       ObjectConstructor( PSh, PairGAP( [ V, A ], [ s, t ] ) ) );
+        
+    end;
+    
+    ## from the object in the modeling category to the raw object data
+    modeling_tower_object_datum =
+      function( Quivers, obj )
+        local F_hat, PSh, F, values_of_functor;
+        
+        F_hat = ModelingCategory( Quivers );
+        
+        PSh = ModelingCategory( F_hat );
+        
+        F = ObjectDatum( F_hat, obj );
+        
+        values_of_functor = ObjectDatum( PSh, F );
+        
+        return Triple( Cardinality( values_of_functor[1][1] ),
+                       Cardinality( values_of_functor[1][2] ),
+                       ListN( AsList( values_of_functor[2][1] ), AsList( values_of_functor[2][2] ), ( s, t ) -> PairGAP( s, t ) ) );
+        
+    end;
+    
+    ## from the raw morphism data to the morphism in the modeling category
+    modeling_tower_morphism_constructor =
+      function( Quivers, source, images, range )
+        local F_hat, PSh, sFinSets, S, T, Sobj, Tobj;
+        
+        F_hat = ModelingCategory( Quivers );
+        
+        PSh = ModelingCategory( F_hat );
+        
+        sFinSets = Target( PSh );
+        
+        S = ObjectDatum( F_hat, source );
+        T = ObjectDatum( F_hat, range );
+        
+        Sobj = ObjectDatum( PSh, S )[1];
+        Tobj = ObjectDatum( PSh, T )[1];
+        
+        return MorphismConstructor( F_hat,
+                       source,
+                       MorphismConstructor( PSh,
+                               S,
+                               [ MorphismConstructor( sFinSets, Sobj[1], images[1], Tobj[1] ),
+                                 MorphismConstructor( sFinSets, Sobj[2], images[2], Tobj[2] ) ],
+                               T ),
+                       range );
+        
+    end;
+    
+    ## from the morphism in the modeling category to the raw morphism data
+    modeling_tower_morphism_datum =
+      function( Quivers, mor )
+        local F_hat, PSh, eta, values_on_all_objects;
+        
+        F_hat = ModelingCategory( Quivers );
+        
+        PSh = ModelingCategory( F_hat );
+        
+        eta = MorphismDatum( F_hat, mor );
+        
+        values_on_all_objects = MorphismDatum( PSh, eta );
+        
+        return PairGAP( AsList( values_on_all_objects[1] ), AsList( values_on_all_objects[2] ) );
+        
+    end;
+    
+    ##
+    Quivers =
+      ReinterpretationOfCategory( F_hat,
+              @rec( name = name,
+                   category_filter = category_filter,
+                   category_object_filter = category_object_filter,
+                   category_morphism_filter = category_morphism_filter,
+                   object_datum_type = object_datum_type,
+                   morphism_datum_type = morphism_datum_type,
+                   object_constructor = object_constructor,
+                   object_datum = object_datum,
+                   morphism_constructor = morphism_constructor,
+                   morphism_datum = morphism_datum,
+                   modeling_tower_object_constructor = modeling_tower_object_constructor,
+                   modeling_tower_object_datum = modeling_tower_object_datum,
+                   modeling_tower_morphism_constructor = modeling_tower_morphism_constructor,
+                   modeling_tower_morphism_datum = modeling_tower_morphism_datum,
+                   only_primitive_operations = true )
+             ; FinalizeCategory = false );
+    
+    SetUnderlyingCategory( Quivers, F );
+    
+    Append( Quivers.compiler_hints.category_attribute_names,
+            [ "UnderlyingCategory",
+              ] );
+    
+    if (ValueOption( "no_precompiled_code" ) != true)
+        ADD_FUNCTIONS_FOR_FinQuiversPrecompiled( Quivers );
+        ADD_FUNCTIONS_FOR_FinQuiversAsCCCPrecompiled( Quivers );
+    end;
+    
+    Finalize( Quivers );
+    
+    return Quivers;
+    
+end );
+
+##
+@BindGlobal( "FinQuivers",
+         CategoryOfQuiversEnrichedOver( SkeletalFinSets ) );
+
+FinQuivers.Name = "FinQuivers";
+
+##
+@InstallMethod( CreateQuiver,
+        "for an integer, and a list of pairs of integers",
+        [ IsInt, IsList ],
+        
+  function ( n, arrows )
+    
+    return CreateQuiver( FinQuivers, n, arrows );
+    
+end );
+
+##
+@InstallMethod( Arrows,
+        "for an object in a category of quivers",
+        [ IsObjectInCategoryOfQuivers ],
+        
+  function ( quiver )
+    
+    return ObjectDatum( quiver )[3];
+    
+end );
+
+##
+@InstallMethod( Subobject,
+        "for an object in a category of quivers and two lists",
+        [ IsObjectInCategoryOfQuivers, IsList, IsList ],
+        
+  function ( quiver, images_of_vertices, images_of_arrows )
+    local arrows, arrows_as_pairs, vertices, source, subquiver;
+    
+    arrows = DuplicateFreeList( images_of_arrows );
+    
+    arrows_as_pairs = Arrows( quiver )[1 + arrows];
+    
+    vertices = AsList( quiver.V )[1 + SetGAP( @Concatenation( images_of_vertices, @Concatenation( arrows_as_pairs ) ) )];
+    
+    source = CreateQuiver( CapCategory( quiver ),
+                      Length( vertices ),
+                      List( arrows_as_pairs, a -> -1 + [ SafePosition( vertices, a[1] ), SafePosition( vertices, a[2] ) ] ) );
+    
+    subquiver = CreateQuiverMorphism( source, vertices, arrows, quiver );
+    
+    @Assert( 2, IsMonomorphism( subquiver ) );
+    SetIsMonomorphism( subquiver, true );
+    
+    return subquiver;
+    
+end );
+
+##
+@InstallMethod( Subobject,
+        "for an object in a category of quivers and a list",
+        [ IsObjectInCategoryOfQuivers, IsList ],
+        
+  function ( quiver, images_of_arrows )
+    
+    return Subobject( quiver, [ ], images_of_arrows );
+    
+end );
+
+##
+@InstallMethod( EmbeddingOfUnderlyingCategory,
+        "for a category of quivers",
+        [ IsCategoryOfQuivers ],
+        
+  function ( category_of_quivers )
+    local Y, U;
+    
+    Y = YonedaEmbedding( UnderlyingCategory( category_of_quivers ) );
+    
+    U = CapFunctor( "UnwrappingFunctor", RangeOfFunctor( Y ), category_of_quivers );
+    
+    AddObjectFunction( U,
+            F -> CreateQuiver( category_of_quivers, Triple( Cardinality( F.V ), Cardinality( F.A ), ListN( AsList( F.s ), AsList( F.t ), ( s, t ) -> PairGAP( s, t ) ) ) ) );
+    
+    AddMorphismFunction( U,
+            ( source, eta, range ) -> CreateQuiverMorphism( category_of_quivers, source, PairGAP( AsList( eta.V ), AsList( eta.A ) ), range ) );
+    
+    return PreCompose( Y, U );
+    
+end );
+
+##
+@InstallMethod( \.,
+        "for a category of quivers and a positive integer",
+        [ IsCategoryOfQuivers, IsPosInt ],
+        
+  function ( category_of_quivers, string_as_int )
+    local name, F, Y, Yc;
+    
+    name = NameRNam( string_as_int );
+    
+    F = UnderlyingCategory( category_of_quivers );
+    
+    Y = EmbeddingOfUnderlyingCategory( category_of_quivers );
+    
+    Yc = Y( F[name] );
+    
+    if (IsObjectInCategoryOfQuivers( Yc ))
+        
+        SetIsProjective( Yc, true );
+        
+    elseif (IsMorphismInCategoryOfQuivers( Yc ))
+        
+        if (CanCompute( category_of_quivers, "IsMonomorphism" ))
+            IsMonomorphism( Yc );
+        end;
+        
+        if (CanCompute( category_of_quivers, "IsSplitMonomorphism" ))
+            IsSplitMonomorphism( Yc );
+        end;
+        
+        if (CanCompute( category_of_quivers, "IsEpimorphism" ))
+            IsEpimorphism( Yc );
+        end;
+        
+        if (CanCompute( category_of_quivers, "IsSplitEpimorphism" ))
+            IsSplitEpimorphism( Yc );
+        end;
+        
+        ## IsIsomorphism == IsSplitMonomorphism and IsSplitEpimorphism
+        ## we add this here in case the logic is deactivated
+        if (CanCompute( category_of_quivers, "IsIsomorphism" ))
+            IsIsomorphism( Yc );
+        end;
+        
+    end;
+    
+    return Yc;
+    
+end );
+
+##
+@InstallMethod( \.,
+        "for an object in a category of quivers and a positive integer",
+        [ IsObjectInCategoryOfQuivers, IsPosInt ],
+        
+  function ( quiver, string_as_int )
+    local datum, n, m, arrows, name;
+    
+    datum = ObjectDatum( quiver );
+    
+    name = NameRNam( string_as_int );
+    
+    n = datum[1];
+    
+    m = datum[2];
+    
+    arrows = datum[3];
+    
+    if (name == "V")
+        return FinSet( n );
+    elseif (name == "A")
+        return FinSet( Length( arrows ) );
+    elseif (name == "s")
+        return MapOfFinSets( FinSet( m ), List( arrows, a -> a[1] ), FinSet( n ) );
+    elseif (name == "t")
+        return MapOfFinSets( FinSet( m ), List( arrows, a -> a[2] ), FinSet( n ) );
+    end;
+    
+    Error( "the quiver has no component with the name \"", name, "\"\n" );
+    
+end );
+
+##
+@InstallMethod( \.,
+        "for a morphism in a category of quivers and a positive integer",
+        [ IsMorphismInCategoryOfQuivers, IsPosInt ],
+        
+  function ( mor, string_as_int )
+    local datum, name;
+    
+    datum = MorphismDatum( mor );
+    
+    name = NameRNam( string_as_int );
+    
+    if (name == "V")
+        return MapOfFinSets( Source( mor ).V, datum[1], Target( mor ).V );
+    elseif (name == "A")
+        return MapOfFinSets( Source( mor ).A, datum[2], Target( mor ).A );
+    end;
+    
+    Error( "the quiver morphism has no component with the name \"", name, "\"\n" );
+    
+end );
+
+##
+MakeShowable( [ "image/svg+xml" ], IsObjectInCategoryOfQuivers );
+MakeShowable( [ "image/svg+xml" ], IsMorphismInCategoryOfQuivers && IsMonomorphism );
+
+##
+@InstallMethod( DotVertexLabelledDigraph,
+        "for an object in a category of quivers",
+        [ IsObjectInCategoryOfQuivers ],
+        
+  function ( quiver )
+    local str, arrows, i;
+    
+    # Copied from DotVertexLabeledDigraph() at Digraphs/gap/display.gi
+    str = "//dot\n";
+    
+    Append( str, "digraph quiver[\n" );
+    Append( str, "rankdir=\"LR\"\n" );
+    Append( str, "minlen=0\n" );
+    Append( str, "node [shape=circle width=0 height=0 fontsize=12 margin=0.01 fontname=\"DejaVu Serif,serif\"]\n" );
+    Append( str, "edge [arrowsize=0.5 fontsize=10 fontname=\"DejaVu Serif,serif\"]\n" );
+    
+    for i in AsList( quiver.V )
+        Append( str, StringGAP( i ) );
+        Append( str, " [label=\"" );
+        Append( str, StringGAP( i ) );
+        Append( str, "\"]\n" );
+    end;
+    
+    arrows = Arrows( quiver );
+    
+    for i in AsList( quiver.A )
+        ## https://graphviz.org/docs/attrs/fontsize/
+        Append( str,
+                @Concatenation(
+                        StringGAP( arrows[1 + i][1] ),
+                        " -> ",
+                        StringGAP( arrows[1 + i][2] ),
+                        " [label=\"",
+                        StringGAP( i ),
+                        "\"]\n" ) );
+    end;
+    
+    Append( str, "]\n" );
+    
+    return str;
+    
+end );
+
+##
+@InstallMethod( DotVertexLabelledDigraph,
+        "for a morphism in a category of quivers",
+        [ IsMorphismInCategoryOfQuivers && IsMonomorphism ],
+        
+  function ( monomorphism )
+    local quiver, vertices, arrows, str, arrows_as_pairs, i;
+    
+    quiver = Target( monomorphism );
+    
+    vertices = AsList( monomorphism.V );
+    arrows = AsList( monomorphism.A );
+    
+    # Copied from DotVertexLabeledDigraph() at Digraphs/gap/display.gi
+    str = "//dot\n";
+    
+    Append( str, "digraph subquiver[\n" );
+    Append( str, "rankdir=\"LR\"\n" );
+    Append( str, "minlen=0\n" );
+    Append( str, "node [shape=circle width=0 height=0 fontsize=12 margin=0.01 fontname=\"DejaVu Serif,serif\"]\n" );
+    Append( str, "edge [arrowsize=0.5 fontsize=10 fontname=\"DejaVu Serif,serif\"]\n" );
+    
+    for i in AsList( quiver.V )
+        Append( str, StringGAP( i ) );
+        Append( str, " [label=\"" );
+        Append( str, StringGAP( i ) );
+        Append( str, "\"" );
+        if (@not i in vertices)
+            ## https://graphviz.org/doc/info/colors/
+            Append( str, " fontcolor=\"azure3\"" );
+            Append( str, " color=\"azure3\"" );
+        end;
+        Append( str, "]\n" );
+    end;
+    
+    arrows_as_pairs = Arrows( quiver );
+    
+    for i in AsList( quiver.A )
+        ## https://graphviz.org/docs/attrs/fontsize/
+        Append( str,
+                @Concatenation(
+                        StringGAP( arrows_as_pairs[1 + i][1] ),
+                        " -> ",
+                        StringGAP( arrows_as_pairs[1 + i][2] ),
+                        " [label=\"",
+                        StringGAP( i ),
+                        "\"" ) );
+        if (@not i in arrows)
+            Append( str, " fontcolor=\"azure3\"" );
+            Append( str, " color=\"azure3\"" );
+        end;
+        Append( str, "]\n" );
+    end;
+    
+    Append( str, "]\n" );
+    
+    return str;
+    
+end );
+
+##
+@InstallMethod( SvgString,
+        "for a cell in a category of quivers",
+        [ IsCellInCategoryOfQuivers ],
+        
+  function ( cell )
+    
+    return DotToSVG( DotVertexLabelledDigraph( cell ) );
+    
+end );
+
+####################################
+#
+# View, Print, Display and LaTeX methods:
+#
+####################################
+
+##
+@InstallMethod( Display,
+        "for an object in a category of quivers",
+        [ IsObjectInCategoryOfQuivers ],
+        
+  function ( quiver )
+    local datum, arrows;
+    
+    datum = ObjectDatum( quiver );
+    
+    arrows = datum[3];
+    
+    Print( "( ", StringPrint( FinSet( datum[1] ) ), ", [",
+           JoinStringsWithSeparator( List( (1):(datum[2]), i -> @Concatenation( " ", StringGAP( -1 + i ), " = ", StringGAP( arrows[i] ) ) ) ), " ] )\n" );
+    
+end );
+
+##
+@InstallMethod( Display,
+        "for a morphism in a category of quivers",
+        [ IsMorphismInCategoryOfQuivers ],
+        
+  function ( mor )
+    local F;
+
+    F = UnderlyingCategory( CapCategory( mor ) );
+    
+    Print( "Image of ", StringView( F.V ), ":\n" );
+    Display( mor.V );
+    
+    Print( "\nImage of ", StringView( F.A ), ":\n" );
+    Display( mor.A );
+    
+    Print( "\nA morphism in ", Name( CapCategory( mor ) ), " given by the above data\n" );
+    
+end );
