@@ -5,8 +5,8 @@ authors = [
 	"Kamal Saleh <kamal.saleh@uni-siegen.de>"
 ]
 
-# Transpiled from GAP's PresheafCategories v2026.07-03
-version = "0.1.4"
+# Transpiled from GAP's PresheafCategories v2026.07-04
+version = "0.1.6"
 
 [deps]
 CAP = "d64df2ee-d2bb-46f4-8cbc-f03bb858f8cb"
