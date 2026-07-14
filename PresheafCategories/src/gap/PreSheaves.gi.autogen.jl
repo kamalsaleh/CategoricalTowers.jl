@@ -788,11 +788,7 @@ InstallMethodWithCache( PreSheaves,
         
     end;
     
-    PSh = CategoryConstructor( category_constructor_options
-    #= comment for Julia
-   ; overhead = overhead
-    # =#
-    );
+    PSh = CategoryConstructor( category_constructor_options; overhead = overhead );
     
     if (HasIsFiniteCategory( B ) && IsFiniteCategory( B ) &&
        HasIsFiniteCategory( D ) && IsFiniteCategory( D ))
@@ -969,11 +965,7 @@ InstallMethodWithCache( PreSheaves,
               object_datum = object_datum,
               morphism_constructor = morphism_constructor,
               morphism_datum = morphism_datum,
-              range_category_of_homomorphism_structure = H )
-              #= comment for Julia
-             ; overhead = overhead
-              # =#
-              );
+              range_category_of_homomorphism_structure = H ); overhead = overhead );
     
     ##
     SetSource( PSh_I_I, I );
