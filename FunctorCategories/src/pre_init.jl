@@ -32,6 +32,16 @@ append!(ExcludedNames, [
   :HasAmbientCategory,
   :SetAmbientCategory,
   :TheJuliaAttributeTypeAmbientCategory,
+  :HasUnderlyingCategory,
+  :SetUnderlyingCategory,
+  :TheJuliaAttributeTypeUnderlyingCategory,
+  :UnderlyingCategory,
+  :UnderlyingCategory_OPERATION,
+  :HasUnderlyingDatum,
+  :SetUnderlyingDatum,
+  :TheJuliaAttributeTypeUnderlyingDatum,
+  :UnderlyingDatum,
+  :UnderlyingDatum_OPERATION,
   :Visualize,
 ])
 

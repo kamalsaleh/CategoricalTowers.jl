@@ -16,17 +16,18 @@
   function ( category_of_bouquets, triple )
     
     #% CAP_JIT_DROP_NEXT_STATEMENT
-    @Assert( 0, Length( triple ) == 3 && IsList( triple[3] ) && ForAll( triple[3], IsInt ) );
+    @Assert( 0, Length( triple ) == 3 && IsBigInt( triple[1] ) && IsBigInt( triple[2] ) && IsList( triple[3] ) && ForAll( triple[3], IsBigInt ) );
     
     return CreateCapCategoryObjectWithAttributes( category_of_bouquets,
                    DefiningTripleOfBouquetEnrichedOverSkeletalFinSets, triple );
     
 end );
 
+#= comment for Julia
 ##
 @InstallMethod( CreateBouquet,
         "for a category of bouquets, an integer, and a list of integers",
-        [ IsCategoryOfBouquets, IsInt, IsList ],
+        [ IsCategoryOfBouquets, IsBigInt, IsList ],
         
   function ( category_of_bouquets, n, loops )
     
@@ -34,6 +35,7 @@ end );
                    Triple( n, Length( loops ), loops ) );
     
 end );
+# =#
 
 ##
 @InstallMethod( CreateBouquetMorphism,
@@ -49,6 +51,7 @@ end );
     
 end );
 
+#= comment for Julia
 ##
 @InstallMethod( CreateBouquetMorphism,
         "for two objects in a category of bouquets and two lists",
@@ -59,6 +62,7 @@ end );
     return CreateBouquetMorphism( CapCategory( source ), source, PairGAP( images_of_vertices, images_of_loops ), range );
     
 end );
+# =#
 
 ##
 @InstallMethod( CategoryOfBouquetsEnrichedOver,
@@ -85,9 +89,9 @@ end );
     ##
     object_datum_type =
       CapJitDataTypeOfNTupleOf( 3,
-              IsInt,
-              IsInt,
-              CapJitDataTypeOfListOf( IsInt ) );
+              IsBigInt,
+              IsBigInt,
+              CapJitDataTypeOfListOf( IsBigInt ) );
     
     object_constructor = CreateBouquet;
     
@@ -96,8 +100,8 @@ end );
     ##
     morphism_datum_type =
       CapJitDataTypeOfNTupleOf( 2,
-              CapJitDataTypeOfListOf( IsInt ),
-              CapJitDataTypeOfListOf( IsInt ) );
+              CapJitDataTypeOfListOf( IsBigInt ),
+              CapJitDataTypeOfListOf( IsBigInt ) );
     
     morphism_constructor = CreateBouquetMorphism;
     
@@ -107,9 +111,9 @@ end );
     
     F = PathCategory( QuiverOfCategoryOfBouquets; range_of_HomStructure = category_of_skeletal_finsets, FinalizeCategory = true );
     
-    F = CategoryFromDataTables( F; set_category_attribute_resolving_functions = true, FinalizeCategory = true );
+    F = CallFuncListAtRuntime( CategoryFromDataTables, [ F ]; set_category_attribute_resolving_functions = true, FinalizeCategory = true );
     
-    F_hat = FiniteCocompletion( F; FinalizeCategory = true );
+    F_hat = FiniteCocompletion( F );
 
     @Assert( 0, IsIdenticalObj( RangeCategoryOfHomomorphismStructure( F ), category_of_skeletal_finsets ) );
     
@@ -247,7 +251,7 @@ FinBouquets.Name = "FinBouquets";
 ##
 @InstallMethod( CreateBouquet,
         "for an integer, and a list of pairs of integers",
-        [ IsInt, IsList ],
+        [ IsBigInt, IsList ],
         
   function ( n, loops )
     
@@ -327,20 +331,18 @@ end );
 end );
 
 ##
-@InstallMethod( \.,
-        "for a category of bouquets and a positive integer",
-        [ IsCategoryOfBouquets, IsPosInt ],
+@InstallMethod( /,
+        "for a string and a category of bouquets",
+        [ IsString, IsCategoryOfBouquets ],
         
-  function ( category_of_bouquets, string_as_int )
-    local name, F, Y, Yc;
-    
-    name = NameRNam( string_as_int );
+  function ( name, category_of_bouquets )
+    local F, Y, Yc;
     
     F = UnderlyingCategory( category_of_bouquets );
     
     Y = EmbeddingOfUnderlyingCategory( category_of_bouquets );
     
-    Yc = Y( F[name] );
+    Yc = CallFuncListAtRuntime( ApplyFunctor, [ Y, name / F ] );
     
     if (IsObjectInCategoryOfBouquets( Yc ))
         
@@ -376,6 +378,11 @@ end );
     
 end );
 
+#= comment for Julia
+INSTALL_DOT_METHOD( IsCategoryOfBouquets );
+# =#
+
+#= comment for Julia
 ##
 @InstallMethod( \.,
         "for an object in a category of bouquets and a positive integer",
@@ -431,6 +438,7 @@ end );
 ##
 MakeShowable( [ "image/svg+xml" ], IsObjectInCategoryOfBouquets );
 MakeShowable( [ "image/svg+xml" ], IsMorphismInCategoryOfBouquets && IsMonomorphism );
+# =#
 
 ##
 @InstallMethod( DotVertexLabelledDigraph,
@@ -478,11 +486,13 @@ end );
 
 ##
 @InstallMethod( DotVertexLabelledDigraph,
-        "for a morphism in a category of bouquets",
-        [ IsMorphismInCategoryOfBouquets && IsMonomorphism ],
+        "for a monomorphism in a category of bouquets",
+        [ IsMorphismInCategoryOfBouquets ],
         
   function ( monomorphism )
     local bouquet, vertices, loops, str, vertices_of_loops, i;
+    
+    @Assert( 0, IsMonomorphism( monomorphism ) );
     
     bouquet = Target( monomorphism );
     
@@ -548,7 +558,7 @@ end );
 end );
 
 ##
-@InstallMethod( Display,
+@InstallMethod( DisplayString,
         "for an object in a category of bouquets",
         [ IsObjectInCategoryOfBouquets ],
         
@@ -559,13 +569,13 @@ end );
     
     loops = datum[3];
     
-    Print( "( ", StringPrint( FinSet( datum[1] ) ), ", [",
-           JoinStringsWithSeparator( List( (1):(datum[2]), i -> @Concatenation( " ", StringGAP( -1 + i ), " ↦ ", StringGAP( loops[i] ) ) ) ), " ] )\n" );
+    return @Concatenation( "( ", PrintString( FinSet( datum[1] ) ), ", [",
+           JoinStringsWithSeparator( List( (1):(datum[2]), i -> @Concatenation( " ", StringGAP( -1 + i ), " ↦ ", StringGAP( loops[i] ) ) ), ", " ), " ] )\n" );
     
 end );
 
 ##
-@InstallMethod( Display,
+@InstallMethod( DisplayString,
         "for a morphism in a category of bouquets",
         [ IsMorphismInCategoryOfBouquets ],
         
@@ -574,12 +584,11 @@ end );
 
     F = UnderlyingCategory( CapCategory( mor ) );
     
-    Print( "Image of ", StringView( F.P ), ":\n" );
-    Display( mor.P );
-    
-    Print( "\nImage of ", StringView( F.L ), ":\n" );
-    Display( mor.L );
-    
-    Print( "\nA morphism in ", Name( CapCategory( mor ) ), " given by the above data\n" );
+    return @Concatenation(
+           "Image of ", StringView( F.P ), ":\n",
+           DisplayString( mor.P ),
+           "\nImage of ", StringView( F.L ), ":\n",
+           DisplayString( mor.L ),
+           "\nA morphism in ", Name( CapCategory( mor ) ), " given by the above data\n" );
     
 end );

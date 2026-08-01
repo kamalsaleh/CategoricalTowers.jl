@@ -1355,12 +1355,12 @@ end; # IsPackageMarkedForLoading( "Algebroids", ">= 2026.07-04" )
         
         mu = List( (1):(N), i -> @Concatenation(
                 List( (1):(N), j ->
-                  List( (1):(Length( auxiliary_indices[i][j] ) ), s ->
+                  List( (1):(Length( auxiliary_indices[i][j] )), s ->
                     PostComposeList( D, @Concatenation( List( auxiliary_indices[i][j][s], index -> vals_P[2][index] ), [ gens[j] ] ) ) ) ) ) );
         
         nu = List( (1):(N), i -> @Concatenation(
                 List( (1):(N), j ->
-                  List( (1):(Length( auxiliary_indices[i][j] ) ), s ->
+                  List( (1):(Length( auxiliary_indices[i][j] )), s ->
                     PostComposeList( D, @Concatenation( List( auxiliary_indices[i][j][s], index -> vals_G[2][index] ), [ ells[j] ] ) ) ) ) ) );
         
         delta = List( (1):(N), i -> @Concatenation( List( (1):(N), j -> ListWithIdenticalEntries( Length( auxiliary_indices[i][j] ), Target( vals_tP[j] ) ) ) ) );
@@ -1611,7 +1611,7 @@ InstallMethodWithCache( PreSheavesOfFpEnrichedCategory,
                                  ValuesOnAllObjects( eta )[1 + mors[morB_index][1]]           ## ApplyMorphismInPreSheafCategoryOfFpEnrichedCategoryToObject( PSh, eta, Source( morB ) )
                                  ] );
                     
-                    L = List( (1):(4), i -> List( l, mor -> mor[i] ) );
+                    L = List( [ 1 .. 4 ], i -> List( l, mor -> mor[i] ) );
                     
                     return functorial_helper( D, new_source, L[1], L[2], L[3], L[4], new_range );
                     
@@ -1659,7 +1659,7 @@ InstallMethodWithCache( PreSheavesOfFpEnrichedCategory,
                                  ValuesOnAllObjects( eta )[1 + mors[morB_index][1]]           ## ApplyMorphismInPreSheafCategoryOfFpEnrichedCategoryToObject( PSh, eta, Source( morB ) )
                                  ] );
                     
-                    L = List( (1):(4), i -> List( l, mor -> mor[i] ) );
+                    L = List( [ 1 .. 4 ], i -> List( l, mor -> mor[i] ) );
                     
                     return functorial_helper( D, new_source, L[1], L[2], L[3], L[4], new_range );
                     
@@ -2267,7 +2267,7 @@ InstallMethodWithCache( PreSheavesOfFpEnrichedCategory,
                     
                     nr_objs = DefiningTripleOfUnderlyingQuiver( Source( PSh ) )[1];
                     
-                    hom_F_V_G_diagrams = List( (1):(nr_objs), i -> hom_F_V_G_diagram[[ 1 + Sum( F_cardinalities[(1):(i - 1)] ) .. Sum( F_cardinalities[(1):(i)] ) ]] );
+                    hom_F_V_G_diagrams = List( (1):(nr_objs), i -> hom_F_V_G_diagram[(1 + Sum( F_cardinalities[(1):(i - 1)] )):(Sum( F_cardinalities[(1):(i)] ))] );
                     
                     hom_F_V_G_diagram_collected = List( hom_F_V_G_diagrams, L -> DirectProduct( H, L ) );
                     
@@ -2388,6 +2388,10 @@ InstallMethodWithCache( PreSheavesOfFpEnrichedCategory,
     if (FinalizeCategory)
         Finalize( PSh );
     end;
+    
+    # SetGAP these attributes early because an immediate construction and use of them inside other methods might cause Julia world-age problems
+    FiniteStrictCoproductCompletionOfSourceCategory( PSh );
+    # FiniteColimitCompletionWithStrictCoproductsOfSourceCategory( PSh );
     
     return PSh;
     
@@ -3496,8 +3500,8 @@ end );
     nr_mors = defining_triple[2];
     arrows = defining_triple[3];
     
-    map_of_sources_C = List( (0):(nr_mors - 1), m -> arrows[1 + m][1] );
-    map_of_targets_C = List( (0):(nr_mors - 1), m -> arrows[1 + m][2] );
+    map_of_sources_C = List( (0):(nr_mors - 1), m -> IntGAP( arrows[1 + m][1] ) );
+    map_of_targets_C = List( (0):(nr_mors - 1), m -> IntGAP( arrows[1 + m][2] ) );
     
     objs = SetOfObjects( C );
     mors = SetOfGeneratingMorphisms( C );
@@ -3583,8 +3587,7 @@ end );
     
     C_hat = FiniteColimitCompletionWithStrictCoproductsOfSourceCategory( PSh );
     
-    return ObjectConstructor( C_hat,
-                   PairGAP( PairGAP( V, A ), PairGAP( s, t ) ) );
+    return CallFuncListAtRuntime( ObjectConstructor, [ C_hat, PairGAP( PairGAP( V, A ), PairGAP( s, t ) ) ] );
     
 end );
 
@@ -3762,9 +3765,11 @@ end );
         [ IsPreSheafCategoryOfFpEnrichedCategory, IsObjectInPreSheafCategoryOfFpEnrichedCategory ],
         
   function ( PSh, F )
-    local F_VAst;
+    local C_hat, F_VAst;
     
-    F_VAst = ObjectDatum( FiniteColimitCompletionWithStrictCoproductsOfSourceCategory( PSh ), CoYonedaLemmaOnObjects( PSh, F ) );
+    C_hat = FiniteColimitCompletionWithStrictCoproductsOfSourceCategory( PSh );
+    
+    F_VAst = CallFuncListAtRuntime( ObjectDatum, [ C_hat, CoYonedaLemmaOnObjects( PSh, F ) ] );
     
     return PairGAP( F_VAst[1][1],
                  [ F_VAst[2][1], F_VAst[2][2] ] ); ## turn the pair F_VAst[2] into a list
@@ -4944,7 +4949,6 @@ end );
     
 end );
 
-#= comment for Julia
 ##
 @InstallMethod( ApplyPreSheafToObjectInFiniteStrictCoproductCompletion,
         [ IsPreSheafCategoryOfFpEnrichedCategory, IsObjectInPreSheafCategoryOfFpEnrichedCategory, IsObjectInFiniteStrictCoproductCompletion ],
@@ -5011,7 +5015,6 @@ end );
                    G_on_source );
     
 end );
-# =#
 
 ##
 #= comment for Julia (requires Algebroids)

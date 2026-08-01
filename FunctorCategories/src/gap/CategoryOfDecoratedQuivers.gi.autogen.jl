@@ -573,10 +573,10 @@ end );
     decoration_of_arrows = DecorationOfArrows( decorated_fin_quivers );
     
     Print( "( [",
-           JoinStringsWithSeparator( List( (1):(datum[1][1] ), i ->
+           JoinStringsWithSeparator( List( (1):(datum[1][1]), i ->
                    @Concatenation( " ", StringGAP( -1 + i ), " = \"", decoration_of_vertices[1 + datum[2][1][i]], "\"" ) ) ),
            " ], [",
-           JoinStringsWithSeparator( List( (1):(datum[1][2] ), i ->
+           JoinStringsWithSeparator( List( (1):(datum[1][2]), i ->
                    @Concatenation( " ", StringGAP( -1 + i ), " = [ ", StringGAP( arrows[i][1] ), ", ", StringGAP( arrows[i][2] ), ", \"", decoration_of_arrows[1 + datum[2][2][i]], "\" ]" ) ) ), " ] )\n" );
     
 end );
