@@ -1611,7 +1611,7 @@ InstallMethodWithCache( PreSheavesOfFpEnrichedCategory,
                                  ValuesOnAllObjects( eta )[1 + mors[morB_index][1]]           ## ApplyMorphismInPreSheafCategoryOfFpEnrichedCategoryToObject( PSh, eta, Source( morB ) )
                                  ] );
                     
-                    L = List( [ 1 .. 4 ], i -> List( l, mor -> mor[i] ) );
+                    L = List( (1):(4), i -> List( l, mor -> mor[i] ) );
                     
                     return functorial_helper( D, new_source, L[1], L[2], L[3], L[4], new_range );
                     
@@ -1659,7 +1659,7 @@ InstallMethodWithCache( PreSheavesOfFpEnrichedCategory,
                                  ValuesOnAllObjects( eta )[1 + mors[morB_index][1]]           ## ApplyMorphismInPreSheafCategoryOfFpEnrichedCategoryToObject( PSh, eta, Source( morB ) )
                                  ] );
                     
-                    L = List( [ 1 .. 4 ], i -> List( l, mor -> mor[i] ) );
+                    L = List( (1):(4), i -> List( l, mor -> mor[i] ) );
                     
                     return functorial_helper( D, new_source, L[1], L[2], L[3], L[4], new_range );
                     
@@ -2389,9 +2389,12 @@ InstallMethodWithCache( PreSheavesOfFpEnrichedCategory,
         Finalize( PSh );
     end;
     
-    # SetGAP these attributes early because an immediate construction and use of them inside other methods might cause Julia world-age problems
-    FiniteStrictCoproductCompletionOfSourceCategory( PSh );
-    # FiniteColimitCompletionWithStrictCoproductsOfSourceCategory( PSh );
+    # SetGAP this attribute early because immediate use inside other methods might cause Julia world-age problems.
+    if (HasRangeCategoryOfHomomorphismStructure( Source( PSh ) ) &&
+       ApplicableMethod( EnrichmentSpecificFiniteStrictCoproductCompletion,
+               [ Source( PSh ), RangeCategoryOfHomomorphismStructure( Source( PSh ) ) ] ) != fail)
+        FiniteStrictCoproductCompletionOfSourceCategory( PSh );
+    end;
     
     return PSh;
     
@@ -5539,10 +5542,12 @@ end );
 @InstallMethod( LaTeXOutput,
         [ IsMorphismInPreSheafCategoryOfFpEnrichedCategory ],
         
-  function( eta )
-    local only_datum, objs, v_objs, i, datum;
-    
-    only_datum = ValueOption( "OnlyDatum" );
+  @FunctionWithNamedArguments(
+  [
+    [ "OnlyDatum", false ],
+  ],
+  function( CAP_NAMED_ARGUMENTS, eta )
+    local objs, v_objs, i, datum;
     
     objs = SetOfObjects( Source( Source( eta ) ) );
     
@@ -5563,7 +5568,7 @@ end );
     
     datum = @Concatenation( datum, "\\end[array]" );
     
-    if (only_datum == true)
+    if (OnlyDatum == true)
       
       return datum;
       
@@ -5579,4 +5584,4 @@ end );
     
     end;
     
-end );
+end ) );

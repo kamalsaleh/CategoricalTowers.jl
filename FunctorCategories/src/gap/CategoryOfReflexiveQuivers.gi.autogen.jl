@@ -28,6 +28,7 @@
     
 end );
 
+#= comment for Julia
 ##
 @InstallMethod( CreateReflexiveQuiver,
         "for a category of finite reflexive quivers, an integer, a list of integers, and a list of pairs of integers",
@@ -47,6 +48,7 @@ end );
                    @NTupleGAP( 4, n, Length( arr ), loops, arr ) );
     
 end );
+# =#
 
 ##
 @InstallMethod( CreateReflexiveQuiverMorphism,
@@ -62,6 +64,7 @@ end );
     
 end );
 
+#= comment for Julia
 ##
 @InstallMethod( CreateReflexiveQuiverMorphism,
         "for two objects in a category of finite reflexive quivers and two lists",
@@ -72,13 +75,18 @@ end );
     return CreateReflexiveQuiverMorphism( CapCategory( source ), source, PairGAP( images_of_vertices, images_of_arrows ), range );
     
 end );
+# =#
 
 ##
 @InstallMethod( CategoryOfReflexiveQuiversEnrichedOver,
         "for a category of sekelal finite sets",
         [ IsSkeletalCategoryOfFiniteSets ],
         
-  function ( category_of_skeletal_finsets )
+    @FunctionWithNamedArguments(
+    [
+        [ "no_precompiled_code", false ],
+    ],
+    function ( CAP_NAMED_ARGUMENTS, category_of_skeletal_finsets )
     local name, category_filter, category_object_filter, category_morphism_filter,
           object_datum_type, object_constructor, object_datum,
           morphism_datum_type, morphism_constructor, morphism_datum,
@@ -98,13 +106,13 @@ end );
     ##
     object_datum_type =
       CapJitDataTypeOfNTupleOf( 4,
-              IsInt,
-              IsInt,
-              CapJitDataTypeOfListOf( IsInt ),
+              IsBigInt,
+              IsBigInt,
+              CapJitDataTypeOfListOf( IsBigInt ),
               CapJitDataTypeOfListOf(
                       CapJitDataTypeOfNTupleOf( 2,
-                              IsInt,
-                              IsInt ) ) );
+                              IsBigInt,
+                              IsBigInt ) ) );
     
     object_constructor = CreateReflexiveQuiver;
     
@@ -113,8 +121,8 @@ end );
     ##
     morphism_datum_type =
       CapJitDataTypeOfNTupleOf( 2,
-              CapJitDataTypeOfListOf( IsInt ),
-              CapJitDataTypeOfListOf( IsInt ) );
+              CapJitDataTypeOfListOf( IsBigInt ),
+              CapJitDataTypeOfListOf( IsBigInt ) );
     
     morphism_constructor = CreateReflexiveQuiverMorphism;
     
@@ -124,9 +132,9 @@ end );
     
     F = SimplicialCategoryTruncatedInDegree( 1; range_of_HomStructure = category_of_skeletal_finsets, FinalizeCategory = true );
     
-    F = CategoryFromDataTables( F; set_category_attribute_resolving_functions = true, FinalizeCategory = true );
+    F = CallFuncListAtRuntime( CategoryFromDataTables, [ F ]; set_category_attribute_resolving_functions = true, FinalizeCategory = true );
     
-    F_hat = FiniteCocompletion( F; FinalizeCategory = true );
+    F_hat = FiniteCocompletion( F );
     
     @Assert( 0, IsIdenticalObj( RangeCategoryOfHomomorphismStructure( F ), category_of_skeletal_finsets ) );
     
@@ -249,7 +257,7 @@ end );
             [ "UnderlyingCategory",
               ] );
     
-    if (ValueOption( "no_precompiled_code" ) != true)
+    if (no_precompiled_code != true)
         ADD_FUNCTIONS_FOR_FinReflexiveQuiversPrecompiled( Quivers );
         ADD_FUNCTIONS_FOR_FinReflexiveQuiversAsCCCPrecompiled( Quivers );
     end;
@@ -258,7 +266,7 @@ end );
     
     return Quivers;
     
-end );
+end ) );
 
 ##
 @BindGlobal( "FinReflexiveQuivers",
