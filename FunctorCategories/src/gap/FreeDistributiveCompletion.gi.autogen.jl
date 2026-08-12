@@ -36,15 +36,25 @@ InstallMethodWithCache( FreeDistributiveCompletion,
                             # =#
                             );
     
-    ##
+    ## WrapperCategory always finalizes; use ReinterpretationOfCategory directly so properties are set before Finalize triggers derivations.
     free_distributive_completion =
-       WrapperCategory( finite_cocompletion,
+      ReinterpretationOfCategory( finite_cocompletion,
               @rec( name = name,
                    category_filter = category_filter,
                    category_object_filter = category_object_filter,
                    category_morphism_filter = category_morphism_filter,
-              only_primitive_operations = true )
-              );
+                   object_datum_type = CapJitDataTypeOfObjectOfCategory( finite_cocompletion ),
+                   morphism_datum_type = CapJitDataTypeOfMorphismOfCategory( finite_cocompletion ),
+                   object_constructor = ( cat, d ) -> AsObjectInWrapperCategory( cat, d ),
+                   object_datum = ( D, o ) -> UnderlyingCell( o ),
+                   morphism_constructor = ( D, s, d, t ) -> AsMorphismInWrapperCategory( D, s, d, t ),
+                   morphism_datum = ( D, m ) -> UnderlyingCell( m ),
+                   modeling_tower_object_constructor = ( D, d ) -> d,
+                   modeling_tower_object_datum = ( D, o ) -> o,
+                   modeling_tower_morphism_constructor = ( D, s, d, t ) -> d,
+                   modeling_tower_morphism_datum = ( D, m ) -> m,
+                   only_primitive_operations = true )
+             ; FinalizeCategory = false );
     
     SetUnderlyingCategory( free_distributive_completion, fp_category );
 
@@ -101,6 +111,14 @@ InstallMethodWithCache( FreeDistributiveCompletion,
       HasIsSkeletalCategory( free_distributive_completion ) && IsSkeletalCategory( free_distributive_completion ))
       SetIsCoHeytingAlgebra( free_distributive_completion, true );
     end;
+
+    ## BicartesianCategories.gi: InstallTrueMethod( IsFiniteBicompleteCategory, IsFiniteCompleteCategory and IsFiniteCocompleteCategory );
+    if (HasIsFiniteCompleteCategory( free_distributive_completion ) && IsFiniteCompleteCategory( free_distributive_completion ) &&
+      HasIsFiniteCocompleteCategory( free_distributive_completion ) && IsFiniteCocompleteCategory( free_distributive_completion ))
+      SetIsFiniteBicompleteCategory( free_distributive_completion, true );
+    end;
+
+    Finalize( free_distributive_completion );
 
     if (HasIsInitialCategory( fp_category ) && IsInitialCategory( fp_category ))
         @Assert( 0, [ ] == MissingOperationsForConstructivenessOfCategory( free_distributive_completion, "IsEquippedWithHomomorphismStructure" ) );
