@@ -4,8 +4,6 @@
 # Implementations
 #
 
-#= comment for Julia
-
 ##
 @InstallMethod( DigraphOfParents,
         "for a datastructure of a constructible object",
@@ -252,5 +250,3 @@ end );
     Splash( DotVertexLabelledDigraph( DigraphOfPoset( C ) ) );
     
 end );
-
-# =#
