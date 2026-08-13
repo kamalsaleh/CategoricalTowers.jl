@@ -36,89 +36,78 @@ InstallMethodWithCache( FreeDistributiveCompletion,
                             # =#
                             );
     
-    ## WrapperCategory always finalizes; use ReinterpretationOfCategory directly so properties are set before Finalize triggers derivations.
+    ## Required for Julia: set conjunction-derived properties on finite_cocompletion before WrapperCategory,
+    ## since ReinterpretationOfCategory propagates ListKnownCategoricalProperties to the wrapper before Finalize.
+    ## FiniteStrictCoproductCompletion.gi sets IsDistributiveCategory when its source is Cartesian; Julia does not propagate it through the wrapper tower.
+    if (HasIsCartesianCategory( finite_completion ) && IsCartesianCategory( finite_completion ))
+      SetIsDistributiveCategory( finite_cocompletion, true );
+    end;
+
+    ## Lattice.gi: InstallTrueMethod( IsCartesianProset, IsThinCategory and IsCartesianCategory );
+    if (HasIsThinCategory( finite_cocompletion ) && IsThinCategory( finite_cocompletion ) &&
+      HasIsCartesianCategory( finite_cocompletion ) && IsCartesianCategory( finite_cocompletion ))
+      SetIsCartesianProset( finite_cocompletion, true );
+    end;
+
+    ## Lattice.gi: InstallTrueMethod( IsCocartesianProset, IsThinCategory and IsCocartesianCategory );
+    if (HasIsThinCategory( finite_cocompletion ) && IsThinCategory( finite_cocompletion ) &&
+      HasIsCocartesianCategory( finite_cocompletion ) && IsCocartesianCategory( finite_cocompletion ))
+      SetIsCocartesianProset( finite_cocompletion, true );
+    end;
+
+    ## Lattice.gi: InstallTrueMethod( IsBicartesianProset, IsCartesianProset and IsCocartesianProset );
+    if (HasIsCartesianProset( finite_cocompletion ) && IsCartesianProset( finite_cocompletion ) &&
+      HasIsCocartesianProset( finite_cocompletion ) && IsCocartesianProset( finite_cocompletion ))
+      SetIsBicartesianProset( finite_cocompletion, true );
+    end;
+
+    ## Lattice.gi: InstallTrueMethod( IsDistributiveBicartesianProset, IsBicartesianProset and IsDistributiveCategory );
+    if (HasIsBicartesianProset( finite_cocompletion ) && IsBicartesianProset( finite_cocompletion ) &&
+      HasIsDistributiveCategory( finite_cocompletion ) && IsDistributiveCategory( finite_cocompletion ))
+      SetIsDistributiveBicartesianProset( finite_cocompletion, true );
+    end;
+
+    ## Lattice.gi: InstallTrueMethod( IsBiHeytingAlgebroid, IsDistributiveBicartesianProset and IsEquivalentToFiniteCategory );
+    if (HasIsDistributiveBicartesianProset( finite_cocompletion ) && IsDistributiveBicartesianProset( finite_cocompletion ) &&
+      HasIsEquivalentToFiniteCategory( finite_cocompletion ) && IsEquivalentToFiniteCategory( finite_cocompletion ))
+      SetIsBiHeytingAlgebroid( finite_cocompletion, true );
+    end;
+
+    ## BooleanAlgebra.gi: InstallTrueMethod( IsBiHeytingAlgebra, IsBiHeytingAlgebroid and IsSkeletalCategory );
+    if (HasIsBiHeytingAlgebroid( finite_cocompletion ) && IsBiHeytingAlgebroid( finite_cocompletion ) &&
+      HasIsSkeletalCategory( finite_cocompletion ) && IsSkeletalCategory( finite_cocompletion ))
+      SetIsBiHeytingAlgebra( finite_cocompletion, true );
+    end;
+
+    ## HeytingAlgebra.gi: InstallTrueMethod( IsHeytingAlgebra, IsHeytingAlgebroid and IsSkeletalCategory );
+    if (HasIsHeytingAlgebroid( finite_cocompletion ) && IsHeytingAlgebroid( finite_cocompletion ) &&
+      HasIsSkeletalCategory( finite_cocompletion ) && IsSkeletalCategory( finite_cocompletion ))
+      SetIsHeytingAlgebra( finite_cocompletion, true );
+    end;
+
+    ## CoHeytingAlgebra.gi: InstallTrueMethod( IsCoHeytingAlgebra, IsCoHeytingAlgebroid and IsSkeletalCategory );
+    if (HasIsCoHeytingAlgebroid( finite_cocompletion ) && IsCoHeytingAlgebroid( finite_cocompletion ) &&
+      HasIsSkeletalCategory( finite_cocompletion ) && IsSkeletalCategory( finite_cocompletion ))
+      SetIsCoHeytingAlgebra( finite_cocompletion, true );
+    end;
+
+    ## BicartesianCategories.gi: InstallTrueMethod( IsFiniteBicompleteCategory, IsFiniteCompleteCategory and IsFiniteCocompleteCategory );
+    if (HasIsFiniteCompleteCategory( finite_cocompletion ) && IsFiniteCompleteCategory( finite_cocompletion ) &&
+      HasIsFiniteCocompleteCategory( finite_cocompletion ) && IsFiniteCocompleteCategory( finite_cocompletion ))
+      SetIsFiniteBicompleteCategory( finite_cocompletion, true );
+    end;
+
+    ##
     free_distributive_completion =
-      ReinterpretationOfCategory( finite_cocompletion,
+       WrapperCategory( finite_cocompletion,
               @rec( name = name,
                    category_filter = category_filter,
                    category_object_filter = category_object_filter,
                    category_morphism_filter = category_morphism_filter,
-                   object_datum_type = CapJitDataTypeOfObjectOfCategory( finite_cocompletion ),
-                   morphism_datum_type = CapJitDataTypeOfMorphismOfCategory( finite_cocompletion ),
-                   object_constructor = ( cat, d ) -> AsObjectInWrapperCategory( cat, d ),
-                   object_datum = ( D, o ) -> UnderlyingCell( o ),
-                   morphism_constructor = ( D, s, d, t ) -> AsMorphismInWrapperCategory( D, s, d, t ),
-                   morphism_datum = ( D, m ) -> UnderlyingCell( m ),
-                   modeling_tower_object_constructor = ( D, d ) -> d,
-                   modeling_tower_object_datum = ( D, o ) -> o,
-                   modeling_tower_morphism_constructor = ( D, s, d, t ) -> d,
-                   modeling_tower_morphism_datum = ( D, m ) -> m,
-                   only_primitive_operations = true )
-             ; FinalizeCategory = false );
-    
+              only_primitive_operations = true )
+              );
+
     SetUnderlyingCategory( free_distributive_completion, fp_category );
-
-    ## Required for Julia, which does not support all forms of InstallTrueMethod with conjunctions.
-    ## FiniteStrictCoproductCompletion.gi sets IsDistributiveCategory when its source is Cartesian; Julia does not propagate it through the wrapper tower.
-    if (HasIsCartesianCategory( finite_completion ) && IsCartesianCategory( finite_completion ))
-      SetIsDistributiveCategory( free_distributive_completion, true );
-    end;
-
-    ## Lattice.gi: InstallTrueMethod( IsCartesianProset, IsThinCategory and IsCartesianCategory );
-    if (HasIsThinCategory( free_distributive_completion ) && IsThinCategory( free_distributive_completion ) &&
-      HasIsCartesianCategory( free_distributive_completion ) && IsCartesianCategory( free_distributive_completion ))
-      SetIsCartesianProset( free_distributive_completion, true );
-    end;
-
-    ## Lattice.gi: InstallTrueMethod( IsCocartesianProset, IsThinCategory and IsCocartesianCategory );
-    if (HasIsThinCategory( free_distributive_completion ) && IsThinCategory( free_distributive_completion ) &&
-      HasIsCocartesianCategory( free_distributive_completion ) && IsCocartesianCategory( free_distributive_completion ))
-      SetIsCocartesianProset( free_distributive_completion, true );
-    end;
-
-    ## Lattice.gi: InstallTrueMethod( IsBicartesianProset, IsCartesianProset and IsCocartesianProset );
-    if (HasIsCartesianProset( free_distributive_completion ) && IsCartesianProset( free_distributive_completion ) &&
-      HasIsCocartesianProset( free_distributive_completion ) && IsCocartesianProset( free_distributive_completion ))
-      SetIsBicartesianProset( free_distributive_completion, true );
-    end;
-
-    ## Lattice.gi: InstallTrueMethod( IsDistributiveBicartesianProset, IsBicartesianProset and IsDistributiveCategory );
-    if (HasIsBicartesianProset( free_distributive_completion ) && IsBicartesianProset( free_distributive_completion ) &&
-      HasIsDistributiveCategory( free_distributive_completion ) && IsDistributiveCategory( free_distributive_completion ))
-      SetIsDistributiveBicartesianProset( free_distributive_completion, true );
-    end;
-
-    ## Lattice.gi: InstallTrueMethod( IsBiHeytingAlgebroid, IsDistributiveBicartesianProset and IsEquivalentToFiniteCategory );
-    if (HasIsDistributiveBicartesianProset( free_distributive_completion ) && IsDistributiveBicartesianProset( free_distributive_completion ) &&
-      HasIsEquivalentToFiniteCategory( free_distributive_completion ) && IsEquivalentToFiniteCategory( free_distributive_completion ))
-      SetIsBiHeytingAlgebroid( free_distributive_completion, true );
-    end;
-
-    ## BooleanAlgebra.gi: InstallTrueMethod( IsBiHeytingAlgebra, IsBiHeytingAlgebroid and IsSkeletalCategory );
-    if (HasIsBiHeytingAlgebroid( free_distributive_completion ) && IsBiHeytingAlgebroid( free_distributive_completion ) &&
-      HasIsSkeletalCategory( free_distributive_completion ) && IsSkeletalCategory( free_distributive_completion ))
-      SetIsBiHeytingAlgebra( free_distributive_completion, true );
-    end;
-
-    ## HeytingAlgebra.gi: InstallTrueMethod( IsHeytingAlgebra, IsHeytingAlgebroid and IsSkeletalCategory );
-    if (HasIsHeytingAlgebroid( free_distributive_completion ) && IsHeytingAlgebroid( free_distributive_completion ) &&
-      HasIsSkeletalCategory( free_distributive_completion ) && IsSkeletalCategory( free_distributive_completion ))
-      SetIsHeytingAlgebra( free_distributive_completion, true );
-    end;
-
-    ## CoHeytingAlgebra.gi: InstallTrueMethod( IsCoHeytingAlgebra, IsCoHeytingAlgebroid and IsSkeletalCategory );
-    if (HasIsCoHeytingAlgebroid( free_distributive_completion ) && IsCoHeytingAlgebroid( free_distributive_completion ) &&
-      HasIsSkeletalCategory( free_distributive_completion ) && IsSkeletalCategory( free_distributive_completion ))
-      SetIsCoHeytingAlgebra( free_distributive_completion, true );
-    end;
-
-    ## BicartesianCategories.gi: InstallTrueMethod( IsFiniteBicompleteCategory, IsFiniteCompleteCategory and IsFiniteCocompleteCategory );
-    if (HasIsFiniteCompleteCategory( free_distributive_completion ) && IsFiniteCompleteCategory( free_distributive_completion ) &&
-      HasIsFiniteCocompleteCategory( free_distributive_completion ) && IsFiniteCocompleteCategory( free_distributive_completion ))
-      SetIsFiniteBicompleteCategory( free_distributive_completion, true );
-    end;
-
-    Finalize( free_distributive_completion );
 
     if (HasIsInitialCategory( fp_category ) && IsInitialCategory( fp_category ))
         @Assert( 0, [ ] == MissingOperationsForConstructivenessOfCategory( free_distributive_completion, "IsEquippedWithHomomorphismStructure" ) );
