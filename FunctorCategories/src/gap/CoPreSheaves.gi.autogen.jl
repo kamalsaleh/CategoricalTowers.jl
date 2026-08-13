@@ -784,7 +784,7 @@ end );
     
     F = SourceOfFunctor( coY );
     
-    coYc = CallFuncListAtRuntime( ApplyFunctor, [ coY, name / F ] );
+    coYc = CallFuncListAtRuntime( ApplyFunctor, [ coY, F[name] ] );
     
     if (IsObjectInPreSheafCategory( coYc ))
         

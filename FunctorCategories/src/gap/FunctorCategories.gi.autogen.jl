@@ -344,15 +344,10 @@ end );
         
   function ( Hom, values_of_functor )
     
-    return CreateCapCategoryObjectWithAttributes( Hom,
-                   Source, Source( Hom ),
-                   Target, Target( Hom ),
-                   ValuesOfFunctor, values_of_functor );
+    return CallFuncListAtRuntime( ObjectConstructor, [ Hom, values_of_functor ] );
     
 end );
 
-#= comment for Julia
-# Multiple installations of an object-constructor causes issues in julia (ambiguous number of arguments).
 ##
 @InstallMethod( AsObjectInFunctorCategoryByValues,
         "for a functor category and two lists",
@@ -364,7 +359,6 @@ end );
                    PairGAP( values_of_all_objects, values_of_all_generating_morphisms ) );
     
 end );
-# =#
 
 ##
 @InstallMethod( AsObjectInFunctorCategoryByFunctions,
@@ -647,7 +641,11 @@ InstallMethodWithCache( FunctorCategory,
               CapJitDataTypeOfListOf( CapJitDataTypeOfObjectOfCategory( D ) ),
               CapJitDataTypeOfListOf( CapJitDataTypeOfMorphismOfCategory( D ) ) );
     
-    object_constructor = AsObjectInFunctorCategoryByValues;
+    object_constructor =
+        ( Hom, values_of_functor ) -> CreateCapCategoryObjectWithAttributes( Hom,
+                                          Source, Source( Hom ),
+                                          Target, Target( Hom ),
+                                          ValuesOfFunctor, values_of_functor );
     
     object_datum = ( Hom, o ) -> ValuesOfFunctor( o );
     

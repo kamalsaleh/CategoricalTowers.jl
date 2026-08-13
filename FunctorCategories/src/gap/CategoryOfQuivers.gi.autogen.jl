@@ -14,32 +14,29 @@
     #% CAP_JIT_DROP_NEXT_STATEMENT
     @Assert( 0, Length( triple ) == 3 && IsList( triple[3] ) && ForAll( triple[3], IsList ) );
     
-    return CreateCapCategoryObjectWithAttributes( category_of_quivers,
-                   DefiningTripleOfQuiverEnrichedOverSkeletalFinSets, triple );
+    return ObjectConstructor( category_of_quivers, triple );
     
 end );
 
-#= comment for Julia
 ##
 @InstallMethod( CreateQuiver,
         "for a category of quivers, an integer, and a list of pairs of integers",
-        [ IsCategoryOfQuivers, IsInt, IsList ],
+        [ IsCategoryOfQuivers, IsBigInt, IsList ],
         
   function ( category_of_quivers, n, arrows )
     local arr;
     
-    if (ForAll( arrows, IsInt ))
+    if (ForAll( arrows, IsBigInt ))
         @Assert( 0, IsEvenInt( Length( arrows ) ) );
-        arr = List( (1):(Length( arrows ) / 2), i -> PairGAP( arrows[2 * i - 1], arrows[2 * i] ) );
+        arr = List( (1):(QuoInt( Length( arrows ), 2 )), i -> PairGAP( arrows[2 * i - 1], arrows[2 * i] ) );
     else
         arr = arrows;
     end;
     
     return CreateQuiver( category_of_quivers,
-                   Triple( n, Length( arr ), arr ) );
+                   Triple( n, BigInt( Length( arr ) ), arr ) );
     
 end );
-# =#
 
 ##
 @InstallMethod( CreateQuiverMorphism,
@@ -48,14 +45,10 @@ end );
         
   function ( category_of_quivers, source, images, range )
     
-    return CreateCapCategoryMorphismWithAttributes( category_of_quivers,
-                   source,
-                   range,
-                   DefiningPairOfQuiverMorphismEnrichedOverSkeletalFinSets, images );
+    return MorphismConstructor( category_of_quivers, source, images, range );
     
 end );
 
-#= comment for Julia
 ##
 @InstallMethod( CreateQuiverMorphism,
         "for two objects in a category of quivers and two lists",
@@ -66,7 +59,6 @@ end );
     return CreateQuiverMorphism( CapCategory( source ), source, PairGAP( images_of_vertices, images_of_arrows ), range );
     
 end );
-# =#
 
 ##
 @InstallMethod( CategoryOfQuiversEnrichedOver,
@@ -76,6 +68,7 @@ end );
   @FunctionWithNamedArguments(
   [
     [ "no_precompiled_code", false ],
+    [ "FinalizeCategory", true ],
   ],
   function ( CAP_NAMED_ARGUMENTS, category_of_skeletal_finsets )
     local name, category_filter, category_object_filter, category_morphism_filter,
@@ -104,7 +97,9 @@ end );
                               IsBigInt,
                               IsBigInt ) ) );
     
-    object_constructor = CreateQuiver;
+    object_constructor =
+        ( Quivers, triple ) -> CreateCapCategoryObjectWithAttributes( Quivers,
+                                    DefiningTripleOfQuiverEnrichedOverSkeletalFinSets, triple );
     
     object_datum = ( Quivers, o ) -> DefiningTripleOfQuiverEnrichedOverSkeletalFinSets( o );
     
@@ -114,7 +109,12 @@ end );
               CapJitDataTypeOfListOf( IsBigInt ),
               CapJitDataTypeOfListOf( IsBigInt ) );
     
-    morphism_constructor = CreateQuiverMorphism;
+    morphism_constructor =
+        ( Quivers, source, images, range ) ->
+                CreateCapCategoryMorphismWithAttributes( Quivers,
+                        source,
+                        range,
+                        DefiningPairOfQuiverMorphismEnrichedOverSkeletalFinSets, images );
     
     morphism_datum = ( Quivers, m ) -> DefiningPairOfQuiverMorphismEnrichedOverSkeletalFinSets( m );
     
@@ -249,7 +249,9 @@ end );
         ADD_FUNCTIONS_FOR_FinQuiversAsCCCPrecompiled( Quivers );
     end;
     
-    Finalize( Quivers );
+    if (FinalizeCategory == true)
+        Finalize( Quivers );
+    end;
     
     return Quivers;
     
@@ -264,7 +266,7 @@ FinQuivers.Name = "FinQuivers";
 ##
 @InstallMethod( CreateQuiver,
         "for an integer, and a list of pairs of integers",
-        [ IsInt, IsList ],
+        [ IsBigInt, IsList ],
         
   function ( n, arrows )
     
@@ -299,7 +301,7 @@ end );
     
     source = CreateQuiver( CapCategory( quiver ),
                       Length( vertices ),
-                      List( arrows_as_pairs, a -> -1 + [ SafePosition( vertices, a[1] ), SafePosition( vertices, a[2] ) ] ) );
+                      List( arrows_as_pairs, a -> -1 + [ BigInt( SafePosition( vertices, a[1] ) ), BigInt( SafePosition( vertices, a[2] ) ) ] ) );
     
     subquiver = CreateQuiverMorphism( source, vertices, arrows, quiver );
     
@@ -587,7 +589,7 @@ end );
     arrows = datum[3];
     
     return @Concatenation( "( ", PrintString( FinSet( datum[1] ) ), ", [",
-           JoinStringsWithSeparator( List( (1):(datum[2]), i -> @Concatenation( " ", StringGAP( -1 + i ), " ↦ ", StringGAP( arrows[i] ) ) ), ", " ), " ] )\n" );
+           JoinStringsWithSeparator( List( (1):(datum[2]), i -> @Concatenation( " ", StringGAP( -1 + i ), " = ", StringGAP( arrows[i] ) ) ), "," ), " ] )\n" );
     
 end );
 

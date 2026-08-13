@@ -1920,6 +1920,8 @@ InstallMethodWithCache( PreSheavesOfFpEnrichedCategory,
         
         if (HasIsSkeletalCategory( B ) && IsSkeletalCategory( B ))
             Add( properties, "IsSkeletalCategory" );
+            # Locales/gap/Poset.gi: InstallTrueMethod( IsPosetCategory, IsThinCategory and IsSkeletalCategory ) is commented out in Julia
+            Add( properties, "IsPosetCategory" );
         end;
         
     end;
@@ -2387,13 +2389,6 @@ InstallMethodWithCache( PreSheavesOfFpEnrichedCategory,
     
     if (FinalizeCategory)
         Finalize( PSh );
-    end;
-    
-    # SetGAP this attribute early because immediate use inside other methods might cause Julia world-age problems.
-    if (HasRangeCategoryOfHomomorphismStructure( Source( PSh ) ) &&
-       ApplicableMethod( EnrichmentSpecificFiniteStrictCoproductCompletion,
-               [ Source( PSh ), RangeCategoryOfHomomorphismStructure( Source( PSh ) ) ] ) != fail)
-        FiniteStrictCoproductCompletionOfSourceCategory( PSh );
     end;
     
     return PSh;
@@ -3479,11 +3474,11 @@ end );
 
 ##
 @InstallMethod( CoYonedaLemmaOnObjects,
-        [ IsPreSheafCategoryOfFpEnrichedCategory, IsObjectInPreSheafCategoryOfFpEnrichedCategory ],
+        [ IsPreSheafCategoryOfFpEnrichedCategory, IsCapCategory, IsObjectInPreSheafCategoryOfFpEnrichedCategory ],
         
-  function ( PSh, F )
+  function ( PSh, UC, F )
     local C, H, defining_triple, nr_objs, nr_mors, arrows, map_of_sources_C, map_of_targets_C, objs, mors,
-          UC, F_vals, V_list_of_objects_in_UC, A_list_of_objects_in_UC,
+          F_vals, V_list_of_objects_in_UC, A_list_of_objects_in_UC,
           s_list_of_morphisms_in_UC, t_list_of_morphisms_in_UC, s, t, V, A, C_hat;
     
     #% CAP_JIT_DROP_NEXT_STATEMENT
@@ -3503,13 +3498,14 @@ end );
     nr_mors = defining_triple[2];
     arrows = defining_triple[3];
     
-    map_of_sources_C = List( (0):(nr_mors - 1), m -> IntGAP( arrows[1 + m][1] ) );
-    map_of_targets_C = List( (0):(nr_mors - 1), m -> IntGAP( arrows[1 + m][2] ) );
+    map_of_sources_C = List( (0):(nr_mors - 1), m -> arrows[1 + m][1] );
+    map_of_targets_C = List( (0):(nr_mors - 1), m -> arrows[1 + m][2] );
+    
+    map_of_sources_C = List( map_of_sources_C, IntGAP );
+    map_of_targets_C = List( map_of_targets_C, IntGAP );
     
     objs = SetOfObjects( C );
     mors = SetOfGeneratingMorphisms( C );
-    
-    UC = FiniteStrictCoproductCompletionOfSourceCategory( PSh );
     
     F_vals = ValuesOfPreSheaf( F );
     
@@ -3596,6 +3592,19 @@ end );
 
 ##
 @InstallMethod( CoYonedaLemmaOnObjects,
+        [ IsPreSheafCategoryOfFpEnrichedCategory, IsObjectInPreSheafCategoryOfFpEnrichedCategory ],
+        
+  function ( PSh, F )
+    local UC;
+    
+    UC = FiniteStrictCoproductCompletionOfSourceCategory( PSh );
+    
+    return CallFuncListAtRuntime( CoYonedaLemmaOnObjects, [ PSh, UC, F ] );
+    
+end );
+
+##
+@InstallMethod( CoYonedaLemmaOnObjects,
         [ IsObjectInPreSheafCategoryOfFpEnrichedCategory ],
         
   function ( F )
@@ -3604,7 +3613,6 @@ end );
     
 end );
 
-#= comment for Julia
 ##
 @InstallMethod( CoYonedaLemmaOnMorphisms,
         [ IsPreSheafCategoryOfFpEnrichedCategory,
@@ -3748,7 +3756,6 @@ end );
                    range );
     
 end );
-# =#
 
 ##
 @InstallMethod( CoYonedaLemmaOnMorphisms,
@@ -4954,16 +4961,14 @@ end );
 
 ##
 @InstallMethod( ApplyPreSheafToObjectInFiniteStrictCoproductCompletion,
-        [ IsPreSheafCategoryOfFpEnrichedCategory, IsObjectInPreSheafCategoryOfFpEnrichedCategory, IsObjectInFiniteStrictCoproductCompletion ],
+        [ IsPreSheafCategoryOfFpEnrichedCategory, IsObjectInPreSheafCategoryOfFpEnrichedCategory, IsCapCategory, IsObjectInFiniteStrictCoproductCompletion ],
         
-  function ( PSh, G, object )
-    local UC, object_data;
+  function ( PSh, G, UC, object )
+    local object_data;
     
     ## TODO:
     ## this code should be produced by something similar to ExtendFunctorToFiniteStrictProductCompletion:
     ## Apply Hom(-,G) to an object (in UC)
-    
-    UC = FiniteStrictCoproductCompletionOfSourceCategory( PSh );
     
     object_data = ObjectDatum( UC, object );
     
@@ -4972,18 +4977,29 @@ end );
 end );
 
 ##
-@InstallMethod( ApplyPreSheafToMorphismInFiniteStrictCoproductCompletion,
-        [ IsPreSheafCategoryOfFpEnrichedCategory, IsObjectInPreSheafCategoryOfFpEnrichedCategory, IsMorphismInFiniteStrictCoproductCompletion ],
+@InstallMethod( ApplyPreSheafToObjectInFiniteStrictCoproductCompletion,
+        [ IsPreSheafCategoryOfFpEnrichedCategory, IsObjectInPreSheafCategoryOfFpEnrichedCategory, IsObjectInFiniteStrictCoproductCompletion ],
         
-  function ( PSh, G, morphism )
-    local UC, G_on_source_diagram, G_on_range_diagram, D, G_on_source, G_on_range,
+  function ( PSh, G, object )
+    local UC;
+    
+    UC = FiniteStrictCoproductCompletionOfSourceCategory( PSh );
+    
+    return CallFuncListAtRuntime( ApplyPreSheafToObjectInFiniteStrictCoproductCompletion, [ PSh, G, UC, object ] );
+    
+end );
+
+##
+@InstallMethod( ApplyPreSheafToMorphismInFiniteStrictCoproductCompletion,
+        [ IsPreSheafCategoryOfFpEnrichedCategory, IsObjectInPreSheafCategoryOfFpEnrichedCategory, IsCapCategory, IsMorphismInFiniteStrictCoproductCompletion ],
+        
+  function ( PSh, G, UC, morphism )
+    local G_on_source_diagram, G_on_range_diagram, D, G_on_source, G_on_range,
           morphism_data, map, mor, G_mor, prj, cmp;
     
     ## TODO:
     ## this code should be produced by something similar to ExtendFunctorToFiniteStrictProductCompletion:
     ## Apply Hom(-,G) to a morphism (in UC)
-    
-    UC = FiniteStrictCoproductCompletionOfSourceCategory( PSh );
     
     G_on_source_diagram = ApplyPreSheafToObjectInFiniteStrictCoproductCompletion( PSh, G, Source( morphism ) );
     G_on_range_diagram = ApplyPreSheafToObjectInFiniteStrictCoproductCompletion( PSh, G, Target( morphism ) );
@@ -5016,6 +5032,19 @@ end );
                    G_on_range,
                    cmp,
                    G_on_source );
+    
+end );
+
+##
+@InstallMethod( ApplyPreSheafToMorphismInFiniteStrictCoproductCompletion,
+        [ IsPreSheafCategoryOfFpEnrichedCategory, IsObjectInPreSheafCategoryOfFpEnrichedCategory, IsMorphismInFiniteStrictCoproductCompletion ],
+        
+  function ( PSh, G, morphism )
+    local UC;
+    
+    UC = FiniteStrictCoproductCompletionOfSourceCategory( PSh );
+    
+    return CallFuncListAtRuntime( ApplyPreSheafToMorphismInFiniteStrictCoproductCompletion, [ PSh, G, UC, morphism ] );
     
 end );
 

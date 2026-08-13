@@ -64,6 +64,7 @@ end );
   @FunctionWithNamedArguments(
   [
     [ "no_precompiled_code", false ],
+    [ "FinalizeCategory", true ],
   ],
   function ( CAP_NAMED_ARGUMENTS, category_of_skeletal_finsets )
     local name, category_filter, category_object_filter, category_morphism_filter,
@@ -240,7 +241,9 @@ end );
         ADD_FUNCTIONS_FOR_FinBouquetsAsCCCPrecompiled( Bouquets );
     end;
     
-    Finalize( Bouquets );
+    if (FinalizeCategory == true)
+        Finalize( Bouquets );
+    end;
     
     return Bouquets;
     
@@ -570,7 +573,7 @@ end );
     loops = datum[3];
     
     return @Concatenation( "( ", PrintString( FinSet( datum[1] ) ), ", [",
-           JoinStringsWithSeparator( List( (1):(datum[2]), i -> @Concatenation( " ", StringGAP( -1 + i ), " ↦ ", StringGAP( loops[i] ) ) ), ", " ), " ] )\n" );
+           JoinStringsWithSeparator( List( (1):(datum[2]), i -> @Concatenation( " ", StringGAP( -1 + i ), " ↦ ", StringGAP( loops[i] ) ) ), "," ), " ] )\n" );
     
 end );
 

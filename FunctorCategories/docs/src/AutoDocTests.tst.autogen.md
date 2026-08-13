@@ -97,7 +97,318 @@ julia> Display( PM )
     42 ↦ 6, 43 ↦ 7, 44 ↦ 6, 45 ↦ 7, 46 ↦ 6, 47 ↦ 7,
     48 ↦ 6, 49 ↦ 7, 50 ↦ 6, 51 ↦ 7, 52 ↦ 6, 53 ↦ 7 ] )
 
-julia> # @Xrop_example_in_Julia
+```
+
+```jldoctest AutoDocTests
+julia> using MatricesForHomalg, CAP, MonoidalCategories, CartesianCategories, QuotientCategories, LinearAlgebraForCAP, LinearClosuresForCAP, AdditiveClosuresForCAP, FreydCategoriesForCAP, ToolsForCategoricalTowers, Toposes, FinSetsForCAP, FpCategories, FpLinearCategories, Locales, FiniteCocompletions, PresheafCategories, SubcategoriesForCAP, FunctorCategories
+
+julia> FinQuivers
+FinQuivers
+
+julia> V = FinQuivers.V
+<An object in FinQuivers>
+
+julia> Display( V )
+( [ 0 ], [ ] )
+
+julia> A = FinQuivers.A
+<An object in FinQuivers>
+
+julia> Display( A )
+( [ 0, 1 ], [ 0 = [ 0, 1 ] ] )
+
+julia> T = TerminalObject( FinQuivers )
+<An object in FinQuivers>
+
+julia> Display( T )
+( [ 0 ], [ 0 = [ 0, 0 ] ] )
+
+julia> T == V
+false
+
+julia> G = CreateQuiver( 3, [ 0,1, 0,1, 1,2, 2,1, 2,2 ] )
+<An object in FinQuivers>
+
+julia> Display( G )
+( [ 0, 1, 2 ],
+  [ 0 = [ 0, 1 ], 1 = [ 0, 1 ], 2 = [ 1, 2 ],
+    3 = [ 2, 1 ], 4 = [ 2, 2 ] ] )
+
+julia> global_G = HomStructure( T, G )
+|1|
+
+julia> Display( global_G )
+[ 0 ]
+
+julia> discrete = DirectProduct( G, V )
+<An object in FinQuivers>
+
+julia> Display( discrete )
+( [ 0, 1, 2 ], [ ] )
+
+julia> global_discrete = HomStructure( T, discrete )
+|0|
+
+julia> Display( global_discrete )
+∅
+
+julia> complete = Exponential( V, G )
+<An object in FinQuivers>
+
+julia> Display( complete )
+( [ 0, 1, 2 ],
+  [ 0 = [ 0, 0 ], 1 = [ 1, 0 ], 2 = [ 2, 0 ], 3 = [ 0, 1 ], 4 = [ 1, 1 ],
+    5 = [ 2, 1 ], 6 = [ 0, 2 ], 7 = [ 1, 2 ], 8 = [ 2, 2 ] ] )
+
+julia> global_complete = HomStructure( T, complete )
+|3|
+
+julia> Display( global_complete )
+[ 0, 1, 2 ]
+
+julia> GA = DirectProduct( G, A )
+<An object in FinQuivers>
+
+julia> Display( GA )
+( [ 0,..., 5 ],
+  [ 0 = [ 0, 4 ], 1 = [ 0, 4 ], 2 = [ 1, 5 ],
+    3 = [ 2, 4 ], 4 = [ 2, 5 ] ] )
+
+julia> homAG = HomStructure( A, G )
+|5|
+
+julia> Display( homAG )
+[ 0,..., 4 ]
+
+julia> arrows = Exponential( A, G )
+<An object in FinQuivers>
+
+julia> Display( arrows )
+( [ 0,..., 8 ],
+  [ 0 = [ 0, 3 ], 1 = [ 0, 4 ], 2 = [ 0, 5 ], 3 = [ 3, 3 ], 4 = [ 3, 4 ],
+    5 = [ 3, 5 ], 6 = [ 6, 3 ], 7 = [ 6, 4 ], 8 = [ 6, 5 ], 9 = [ 0, 3 ],
+    10 = [ 0, 4 ], 11 = [ 0, 5 ], 12 = [ 3, 3 ], 13 = [ 3, 4 ],
+    14 = [ 3, 5 ], 15 = [ 6, 3 ], 16 = [ 6, 4 ], 17 = [ 6, 5 ],
+    18 = [ 1, 6 ], 19 = [ 1, 7 ], 20 = [ 1, 8 ], 21 = [ 4, 6 ],
+    22 = [ 4, 7 ], 23 = [ 4, 8 ], 24 = [ 7, 6 ], 25 = [ 7, 7 ],
+    26 = [ 7, 8 ], 27 = [ 2, 3 ], 28 = [ 2, 4 ], 29 = [ 2, 5 ],
+    30 = [ 5, 3 ], 31 = [ 5, 4 ], 32 = [ 5, 5 ], 33 = [ 8, 3 ],
+    34 = [ 8, 4 ], 35 = [ 8, 5 ], 36 = [ 2, 6 ], 37 = [ 2, 7 ],
+    38 = [ 2, 8 ], 39 = [ 5, 6 ], 40 = [ 5, 7 ], 41 = [ 5, 8 ],
+    42 = [ 8, 6 ], 43 = [ 8, 7 ], 44 = [ 8, 8 ] ] )
+
+julia> global_arrows = HomStructure( T, arrows )
+|5|
+
+julia> Display( global_arrows )
+[ 0,..., 4 ]
+
+julia> prjG = ProjectionInFactorOfDirectProduct( [ G, V ], 1 )
+<A morphism in FinQuivers>
+
+julia> Display( prjG )
+Image of <(V)>:
+[ 0, 1, 2 ] ⱶ[ 0, 1, 2 ]→ [ 0, 1, 2 ]
+
+Image of <(A)>:
+∅ ⱶ[  ]→ [ 0,..., 4 ]
+
+A morphism in FinQuivers
+given by the above data
+
+julia> IsEpimorphism( prjG )
+false
+
+julia> prj_discrete = ProjectionInFactorOfDirectProduct( [ discrete, V ], 1 )
+<A morphism in FinQuivers>
+
+julia> Display( prj_discrete )
+Image of <(V)>:
+[ 0, 1, 2 ] ⱶ[ 0, 1, 2 ]→ [ 0, 1, 2 ]
+
+Image of <(A)>:
+∅ ⱶ[  ]→ ∅
+
+A morphism in FinQuivers
+given by the above data
+
+julia> IsEpimorphism( prj_discrete )
+true
+
+julia> Display( Exponential( T, G ) )
+( [ 0, 1, 2 ],
+  [ 0 = [ 0, 1 ], 1 = [ 0, 1 ], 2 = [ 1, 2 ],
+    3 = [ 2, 1 ], 4 = [ 2, 2 ] ] )
+
+julia> t = UniversalMorphismIntoTerminalObject( V )
+<A morphism in FinQuivers>
+
+julia> Display( t )
+Image of <(V)>:
+[ 0 ] ⱶ[ 0 ]→ [ 0 ]
+
+Image of <(A)>:
+∅ ⱶ[  ]→ [ 0 ]
+
+A morphism in FinQuivers
+given by the above data
+
+julia> embG = Exponential( t, G )
+<A morphism in FinQuivers>
+
+julia> Display( embG )
+Image of <(V)>:
+[ 0, 1, 2 ] ⱶ[ 0, 1, 2 ]→ [ 0, 1, 2 ]
+
+Image of <(A)>:
+[ 0,..., 4 ] ⱶ[ 3, 3, 7, 5, 8 ]→ [ 0,..., 8 ]
+
+A morphism in FinQuivers
+given by the above data
+
+julia> IsEpimorphism( embG )
+false
+
+julia> emb_complete = Exponential( t, complete )
+<A morphism in FinQuivers>
+
+julia> Display( emb_complete )
+Image of <(V)>:
+[ 0, 1, 2 ] ⱶ[ 0, 1, 2 ]→ [ 0, 1, 2 ]
+
+Image of <(A)>:
+[ 0,..., 8 ] ⱶ[ 0, 1, 2, 3, 4, 5, 6, 7, 8 ]→ [ 0,..., 8 ]
+
+A morphism in FinQuivers
+given by the above data
+
+julia> IsEpimorphism( emb_complete )
+true
+
+julia> s = FinQuivers.s
+<A morphism in FinQuivers>
+
+julia> Display( s )
+Image of <(V)>:
+[ 0 ] ⱶ[ 0 ]→ [ 0, 1 ]
+
+Image of <(A)>:
+∅ ⱶ[  ]→ [ 0 ]
+
+A morphism in FinQuivers
+given by the above data
+
+julia> t = FinQuivers.t
+<A morphism in FinQuivers>
+
+julia> Display( t )
+Image of <(V)>:
+[ 0 ] ⱶ[ 1 ]→ [ 0, 1 ]
+
+Image of <(A)>:
+∅ ⱶ[  ]→ [ 0 ]
+
+A morphism in FinQuivers
+given by the above data
+
+julia> omega = SubobjectClassifier( FinQuivers )
+<An object in FinQuivers>
+
+julia> Display( omega )
+( [ 0, 1 ],
+  [ 0 = [ 0, 0 ], 1 = [ 1, 0 ], 2 = [ 0, 1 ],
+    3 = [ 1, 1 ], 4 = [ 1, 1 ] ] )
+
+julia> HomStructure( A, omega )
+|5|
+
+julia> subsA = ListOfSubobjects( A );
+
+julia> Length( subsA )
+5
+
+julia> Perform( subsA, Display )
+Image of <(V)>:
+∅ ⱶ[  ]→ [ 0, 1 ]
+
+Image of <(A)>:
+∅ ⱶ[  ]→ [ 0 ]
+
+A morphism in FinQuivers
+given by the above data
+Image of <(V)>:
+[ 0 ] ⱶ[ 0 ]→ [ 0, 1 ]
+
+Image of <(A)>:
+∅ ⱶ[  ]→ [ 0 ]
+
+A morphism in FinQuivers
+given by the above data
+Image of <(V)>:
+[ 0 ] ⱶ[ 1 ]→ [ 0, 1 ]
+
+Image of <(A)>:
+∅ ⱶ[  ]→ [ 0 ]
+
+A morphism in FinQuivers
+given by the above data
+Image of <(V)>:
+[ 0, 1 ] ⱶ[ 0, 1 ]→ [ 0, 1 ]
+
+Image of <(A)>:
+∅ ⱶ[  ]→ [ 0 ]
+
+A morphism in FinQuivers
+given by the above data
+Image of <(V)>:
+[ 0, 1 ] ⱶ[ 0, 1 ]→ [ 0, 1 ]
+
+Image of <(A)>:
+[ 0 ] ⱶ[ 0 ]→ [ 0 ]
+
+A morphism in FinQuivers
+given by the above data
+
+```
+
+```jldoctest AutoDocTests
+julia> using MatricesForHomalg, CAP, MonoidalCategories, CartesianCategories, QuotientCategories, LinearAlgebraForCAP, LinearClosuresForCAP, AdditiveClosuresForCAP, FreydCategoriesForCAP, ToolsForCategoricalTowers, Toposes, FinSetsForCAP, FpCategories, FpLinearCategories, Locales, FiniteCocompletions, PresheafCategories, SubcategoriesForCAP, FunctorCategories
+
+julia> L = CreateQuiver( 3, [ 1,0,  2,0,  2,2 ] )
+<An object in FinQuivers>
+
+julia> R = CreateQuiver( 4, [ 0,1,  2,0,  0,3 ] )
+<An object in FinQuivers>
+
+julia> l = Subobject( L, [ 0, 1 ], [ ] )
+<A morphism in FinQuivers>
+
+julia> r = Subobject( R, [ 0, 1 ], [ ] )
+<A morphism in FinQuivers>
+
+julia> G = CreateQuiver( 4, [ 1,0,  3,0,  3,3,  2,0,  2,1 ] )
+<An object in FinQuivers>
+
+julia> m = Subobject( G, [ 3, 1, 2 ] )
+<A morphism in FinQuivers>
+
+julia> Source( m ) == L
+true
+
+julia> p = DPO( m, l, r );
+
+julia> p[2]
+<A morphism in FinQuivers>
+
+julia> Display( p[2] )
+Image of <(V)>:
+[ 0,..., 3 ] ⱶ[ 0, 2, 3, 4 ]→ [ 0,..., 4 ]
+
+Image of <(A)>:
+[ 0, 1, 2 ] ⱶ[ 2, 3, 4 ]→ [ 0,..., 4 ]
+
+A morphism in FinQuivers
+given by the above data
 
 ```
 
@@ -107,72 +418,168 @@ julia> using MatricesForHomalg, CAP, MonoidalCategories, CartesianCategories, Qu
 julia> true
 true
 
-julia> FinQuivers
-FinQuivers
+julia> FinReflexiveQuivers
+FinReflexiveQuivers
 
-julia> decorating_quiver = SubobjectClassifier( FinQuivers )
-<An object in FinQuivers>
+julia> V = FinReflexiveQuivers.V
+<An object in FinReflexiveQuivers>
 
-julia> Display( decorating_quiver )
-( [ 0, 1 ],
-  [ 0 = [ 0, 0 ], 1 = [ 1, 0 ], 2 = [ 0, 1 ],
-    3 = [ 1, 1 ], 4 = [ 1, 1 ] ] )
+julia> Display( V )
+( [ 0 ], [ 0 = [ 0 ] ] )
 
-julia> DecoratedFinQuivers =
-          CategoryOfDecoratedQuivers( decorating_quiver,
-                  [ "magenta", "cyan" ],
-                  [ "red", "brown", "orange", "blue", "green" ] )
-CategoryOfDecoratedQuivers( decorating_quiver )
+julia> A = FinReflexiveQuivers.A
+<An object in FinReflexiveQuivers>
 
-julia> B = TerminalObject( DecoratedFinQuivers )
-<An object in CategoryOfDecoratedQuivers( decorating_quiver )>
+julia> Display( A )
+( [ 0, 1 ], [ 0 = [ 0, 1 ], 1 = [ 0 ], 2 = [ 1 ] ] )
 
-julia> Display( B )
-( [ 0 = "magenta", 1 = "cyan" ],
-  [ 0 = [ 0, 0, "red" ], 1 = [ 1, 0, "brown" ], 2 = [ 0, 1, "orange" ],
-    3 = [ 1, 1, "blue" ], 4 = [ 1, 1, "green" ] ] )
+julia> T = TerminalObject( FinReflexiveQuivers )
+<An object in FinReflexiveQuivers>
 
-julia> iota = Subobject( B, [ 0 ], [ 3, 4 ] )
-<A morphism in CategoryOfDecoratedQuivers( decorating_quiver )>
+julia> Display( T )
+( [ 0 ], [ 0 = [ 0 ] ] )
 
-julia> Display( iota )
-Image of <(V)>:
-[ 0, 1 ] ⱶ[ 0, 1 ]→ [ 0, 1 ]
-
-Image of <(A)>:
-[ 0, 1 ] ⱶ[ 3, 4 ]→ [ 0,..., 4 ]
-
-A morphism in CategoryOfDecoratedQuivers( decorating_quiver )
-given by the above data
-
-julia> dq1 = CreateDecoratedQuiver( DecoratedFinQuivers,
-                       [ 0, 1, 1, 1 ], # decoration of [ 0, 1, 2, 3 ]
-                       [ 0,0,0,  0,1,2,  1,0,1,  1,2,3,  2,3,4,  3,2,3 ] )
-<An object in CategoryOfDecoratedQuivers( decorating_quiver )>
-
-julia> Display( dq1 )
-( [ 0 = "magenta", 1 = "cyan", 2 = "cyan", 3 = "cyan" ],
-  [ 0 = [ 0, 0, "red" ], 1 = [ 0, 1, "orange" ], 2 = [ 1, 0, "brown" ],
-    3 = [ 1, 2, "blue" ], 4 = [ 2, 3, "green" ], 5 = [ 3, 2, "blue" ] ] )
-
-julia> IsWellDefined( dq1 )
+julia> T == V
 true
 
-julia> omega = SubobjectClassifier( DecoratedFinQuivers )
-<An object in CategoryOfDecoratedQuivers( decorating_quiver )>
+julia> G = CreateReflexiveQuiver( 2,
+                     [ 1, 4 ],
+                     [ 0,1, 0,0, 0,0, 1,0, 1,1 ] )
+<An object in FinReflexiveQuivers>
+
+julia> IsWellDefined( G )
+true
+
+julia> Display( G )
+( [ 0, 1 ],
+  [ 0 = [ 0, 1 ], 1 = [ 0 ], 2 = [ 0, 0 ], 3 = [ 1, 0 ], 4 = [ 1 ] ] )
+
+julia> global_G = HomStructure( T, G )
+|2|
+
+julia> Display( global_G )
+[ 0, 1 ]
+
+julia> DirectProduct( G, V ) == G
+true
+
+julia> iso = CartesianLeftEvaluationMorphism( T, G )
+<A morphism in FinReflexiveQuivers>
+
+julia> IsIsomorphism( iso )
+true
+
+julia> Display( iso )
+Image of <(C0)>:
+[ 0, 1 ] ⱶ[ 0, 1 ]→ [ 0, 1 ]
+
+Image of <(C1)>:
+[ 0,..., 4 ] ⱶ[ 1, 2, 3, 0, 4 ]→ [ 0,..., 4 ]
+
+A morphism in FinReflexiveQuivers
+given by the above data
+
+julia> s = FinReflexiveQuivers.s;
+
+julia> IsSplitMonomorphism( s )
+true
+
+julia> Display( s )
+Image of <(C0)>:
+[ 0 ] ⱶ[ 0 ]→ [ 0, 1 ]
+
+Image of <(C1)>:
+[ 0 ] ⱶ[ 1 ]→ [ 0, 1, 2 ]
+
+A morphism in FinReflexiveQuivers
+given by the above data
+
+julia> t = FinReflexiveQuivers.t;
+
+julia> IsSplitMonomorphism( t )
+true
+
+julia> Display( t )
+Image of <(C0)>:
+[ 0 ] ⱶ[ 1 ]→ [ 0, 1 ]
+
+Image of <(C1)>:
+[ 0 ] ⱶ[ 2 ]→ [ 0, 1, 2 ]
+
+A morphism in FinReflexiveQuivers
+given by the above data
+
+julia> l = FinReflexiveQuivers.l;
+
+julia> IsSplitEpimorphism( l )
+true
+
+julia> Display( l )
+Image of <(C0)>:
+[ 0, 1 ] ⱶ[ 0, 0 ]→ [ 0 ]
+
+Image of <(C1)>:
+[ 0, 1, 2 ] ⱶ[ 0, 0, 0 ]→ [ 0 ]
+
+A morphism in FinReflexiveQuivers
+given by the above data
+
+julia> omega = SubobjectClassifier( FinReflexiveQuivers )
+<An object in FinReflexiveQuivers>
 
 julia> Display( omega )
-( [ 0 = "magenta", 1 = "magenta", 2 = "cyan", 3 = "cyan" ],
-  [ 0 = [ 0, 0, "red" ], 1 = [ 1, 0, "red" ], 2 = [ 0, 1, "red" ],
-    3 = [ 1, 1, "red" ], 4 = [ 1, 1, "red" ], 5 = [ 2, 0, "brown" ],
-    6 = [ 3, 0, "brown" ], 7 = [ 2, 1, "brown" ], 8 = [ 3, 1, "brown" ],
-    9 = [ 3, 1, "brown" ], 10 = [ 0, 2, "orange" ], 11 = [ 1, 2, "orange" ],
-    12 = [ 0, 3, "orange" ], 13 = [ 1, 3, "orange" ], 14 = [ 1, 3, "orange" ],
-    15 = [ 2, 2, "blue" ], 16 = [ 3, 2, "blue" ], 17 = [ 2, 3, "blue" ],
-    18 = [ 3, 3, "blue" ], 19 = [ 3, 3, "blue" ], 20 = [ 2, 2, "green" ],
-    21 = [ 3, 2, "green" ], 22 = [ 2, 3, "green" ], 23 = [ 3, 3, "green" ],
-    24 = [ 3, 3, "green" ] ] )
+( [ 0, 1 ],
+  [ 0 = [ 0 ], 1 = [ 1, 0 ], 2 = [ 0, 1 ],
+    3 = [ 1, 1 ], 4 = [ 1 ] ] )
 
-julia> # @xrop_example_in_Julia
+julia> HomStructure( A, omega )
+|5|
+
+julia> subsA = ListOfSubobjects( A );
+
+julia> Length( subsA )
+5
+
+julia> Perform( subsA, Display )
+Image of <(C0)>:
+∅ ⱶ[  ]→ [ 0, 1 ]
+
+Image of <(C1)>:
+∅ ⱶ[  ]→ [ 0, 1, 2 ]
+
+A morphism in FinReflexiveQuivers
+given by the above data
+Image of <(C0)>:
+[ 0 ] ⱶ[ 0 ]→ [ 0, 1 ]
+
+Image of <(C1)>:
+[ 0 ] ⱶ[ 1 ]→ [ 0, 1, 2 ]
+
+A morphism in FinReflexiveQuivers
+given by the above data
+Image of <(C0)>:
+[ 0 ] ⱶ[ 1 ]→ [ 0, 1 ]
+
+Image of <(C1)>:
+[ 0 ] ⱶ[ 2 ]→ [ 0, 1, 2 ]
+
+A morphism in FinReflexiveQuivers
+given by the above data
+Image of <(C0)>:
+[ 0, 1 ] ⱶ[ 0, 1 ]→ [ 0, 1 ]
+
+Image of <(C1)>:
+[ 0, 1 ] ⱶ[ 1, 2 ]→ [ 0, 1, 2 ]
+
+A morphism in FinReflexiveQuivers
+given by the above data
+Image of <(C0)>:
+[ 0, 1 ] ⱶ[ 0, 1 ]→ [ 0, 1 ]
+
+Image of <(C1)>:
+[ 0, 1, 2 ] ⱶ[ 0, 1, 2 ]→ [ 0, 1, 2 ]
+
+A morphism in FinReflexiveQuivers
+given by the above data
 
 ```

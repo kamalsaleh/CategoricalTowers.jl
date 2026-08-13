@@ -2,3 +2,8 @@
 empty!(ExcludedNames)
 
 @FilterIntersection( IsCapCategory, IsFinite )
+
+
+# Maybe move those to GAP emulation.jl
+global const IsEvenInt = iseven
+global const IsOddInt = isodd

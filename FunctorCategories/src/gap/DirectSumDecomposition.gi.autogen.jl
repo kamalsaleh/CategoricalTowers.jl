@@ -71,8 +71,12 @@ end ) );
         "for an object in a Hom-category",
         [ IsObjectInFunctorCategory ],
         
-  function ( F )
-    local queue, summands, eta, result;
+    @FunctionWithNamedArguments(
+    [
+        [ "random", true ],
+    ],
+    function ( CAP_NAMED_ARGUMENTS, F )
+        local queue, summands, eta, result;
     
     queue = [ IdentityMorphism( F ) ];
     
@@ -82,7 +86,7 @@ end ) );
         
         eta = Remove( queue );
         
-        result = DecomposeOnceByRandomEndomorphism( Source( eta ) );
+        result = DecomposeOnceByRandomEndomorphism( Source( eta ); random = random );
         
         if (result == fail)
             Add( summands, eta );
@@ -94,4 +98,4 @@ end ) );
     
     return summands;
     
-end );
+end ) );
