@@ -4,6 +4,7 @@
 # Implementations
 #
 
+# Do we still need this??
 @FilterIntersection( IsWrapperCapCategory, IsFiniteCocompletion );
 @FilterIntersection( IsWrapperCapCategoryObject, IsObjectInFiniteCocompletion );
 @FilterIntersection( IsWrapperCapCategoryMorphism, IsMorphismInFiniteCocompletion );
@@ -22,14 +23,118 @@ InstallMethodWithCache( FiniteCocompletion,
     name = @Concatenation( "FiniteCocompletion( ", Name( fp_category ), " )" );
     
     ##
-    category_filter = FilterIntersection( IsWrapperCapCategory, IsFiniteCocompletion );
-    category_object_filter = FilterIntersection( IsWrapperCapCategoryObject, IsObjectInFiniteCocompletion );
-    category_morphism_filter = FilterIntersection( IsWrapperCapCategoryMorphism, IsMorphismInFiniteCocompletion );
+    category_filter = IsFiniteCocompletion;
+    category_object_filter = IsObjectInFiniteCocompletion;
+    category_morphism_filter = IsMorphismInFiniteCocompletion;
     
     ## building the categorical tower:
     
     PSh = PreSheaves( fp_category, range_category_of_hom_structure; FinalizeCategory = true, overhead = false );
-    
+
+    ## Required for Julia: set conjunction-derived properties before WrapperCategory;
+    ## ReinterpretationOfCategory propagates ListKnownCategoricalProperties to the wrapper before Finalize.
+    ## BicartesianCategories.gi: InstallTrueMethod( IsBicartesianClosedCategory, IsBicartesianCategory and IsCartesianClosedCategory );
+    if (HasIsBicartesianCategory( PSh ) && IsBicartesianCategory( PSh ) &&
+      HasIsCartesianClosedCategory( PSh ) && IsCartesianClosedCategory( PSh ))
+      SetIsBicartesianClosedCategory( PSh, true );
+    end;
+
+    ## BicartesianCategories.gi: InstallTrueMethod( IsBicartesianCoclosedCategory, IsBicartesianCategory and IsCocartesianCoclosedCategory );
+    if (HasIsBicartesianCategory( PSh ) && IsBicartesianCategory( PSh ) &&
+      HasIsCocartesianCoclosedCategory( PSh ) && IsCocartesianCoclosedCategory( PSh ))
+      SetIsBicartesianCoclosedCategory( PSh, true );
+    end;
+
+    ## Lattice.gi: InstallTrueMethod( IsStrictCartesianCategory, IsPosetCategory and IsCartesianCategory );
+    if (HasIsPosetCategory( PSh ) && IsPosetCategory( PSh ) &&
+      HasIsCartesianCategory( PSh ) && IsCartesianCategory( PSh ))
+      SetIsStrictCartesianCategory( PSh, true );
+    end;
+
+    ## Lattice.gi: InstallTrueMethod( IsStrictCocartesianCategory, IsPosetCategory and IsCocartesianCategory );
+    if (HasIsPosetCategory( PSh ) && IsPosetCategory( PSh ) &&
+      HasIsCocartesianCategory( PSh ) && IsCocartesianCategory( PSh ))
+      SetIsStrictCocartesianCategory( PSh, true );
+    end;
+
+    ## Lattice.gi: InstallTrueMethod( IsCartesianProset, IsThinCategory and IsCartesianCategory );
+    if (HasIsThinCategory( PSh ) && IsThinCategory( PSh ) &&
+      HasIsCartesianCategory( PSh ) && IsCartesianCategory( PSh ))
+      SetIsCartesianProset( PSh, true );
+    end;
+
+    ## Lattice.gi: InstallTrueMethod( IsCocartesianProset, IsThinCategory and IsCocartesianCategory );
+    if (HasIsThinCategory( PSh ) && IsThinCategory( PSh ) &&
+      HasIsCocartesianCategory( PSh ) && IsCocartesianCategory( PSh ))
+      SetIsCocartesianProset( PSh, true );
+    end;
+
+    ## Lattice.gi: InstallTrueMethod( IsBicartesianProset, IsCartesianProset and IsCocartesianProset );
+    if (HasIsCartesianProset( PSh ) && IsCartesianProset( PSh ) &&
+      HasIsCocartesianProset( PSh ) && IsCocartesianProset( PSh ))
+      SetIsBicartesianProset( PSh, true );
+    end;
+
+    ## Lattice.gi: InstallTrueMethod( IsMeetSemiLattice, IsCartesianProset and IsSkeletalCategory );
+    if (HasIsCartesianProset( PSh ) && IsCartesianProset( PSh ) &&
+      HasIsSkeletalCategory( PSh ) && IsSkeletalCategory( PSh ))
+      SetIsMeetSemiLattice( PSh, true );
+    end;
+
+    ## Lattice.gi: InstallTrueMethod( IsJoinSemiLattice, IsCocartesianProset and IsSkeletalCategory );
+    if (HasIsCocartesianProset( PSh ) && IsCocartesianProset( PSh ) &&
+      HasIsSkeletalCategory( PSh ) && IsSkeletalCategory( PSh ))
+      SetIsJoinSemiLattice( PSh, true );
+    end;
+
+    ## Lattice.gi: InstallTrueMethod( IsLattice, IsMeetSemiLattice and IsJoinSemiLattice );
+    if (HasIsMeetSemiLattice( PSh ) && IsMeetSemiLattice( PSh ) &&
+      HasIsJoinSemiLattice( PSh ) && IsJoinSemiLattice( PSh ))
+      SetIsLattice( PSh, true );
+    end;
+
+    ## Lattice.gi: InstallTrueMethod( IsDistributiveBicartesianProset, IsBicartesianProset and IsDistributiveCategory );
+    if (HasIsBicartesianProset( PSh ) && IsBicartesianProset( PSh ) &&
+      HasIsDistributiveCategory( PSh ) && IsDistributiveCategory( PSh ))
+      SetIsDistributiveBicartesianProset( PSh, true );
+    end;
+
+    ## Lattice.gi: InstallTrueMethod( IsDistributiveLattice, IsDistributiveBicartesianProset and IsSkeletalCategory );
+    if (HasIsDistributiveBicartesianProset( PSh ) && IsDistributiveBicartesianProset( PSh ) &&
+      HasIsSkeletalCategory( PSh ) && IsSkeletalCategory( PSh ))
+      SetIsDistributiveLattice( PSh, true );
+    end;
+
+    ## Lattice.gi: InstallTrueMethod( IsBiHeytingAlgebroid, IsDistributiveBicartesianProset and IsEquivalentToFiniteCategory );
+    if (HasIsDistributiveBicartesianProset( PSh ) && IsDistributiveBicartesianProset( PSh ) &&
+      HasIsEquivalentToFiniteCategory( PSh ) && IsEquivalentToFiniteCategory( PSh ))
+      SetIsBiHeytingAlgebroid( PSh, true );
+    end;
+
+    ## BooleanAlgebra.gi: InstallTrueMethod( IsBiHeytingAlgebra, IsBiHeytingAlgebroid and IsSkeletalCategory );
+    if (HasIsBiHeytingAlgebroid( PSh ) && IsBiHeytingAlgebroid( PSh ) &&
+      HasIsSkeletalCategory( PSh ) && IsSkeletalCategory( PSh ))
+      SetIsBiHeytingAlgebra( PSh, true );
+    end;
+
+    ## HeytingAlgebra.gi: InstallTrueMethod( IsHeytingAlgebra, IsHeytingAlgebroid and IsSkeletalCategory );
+    if (HasIsHeytingAlgebroid( PSh ) && IsHeytingAlgebroid( PSh ) &&
+      HasIsSkeletalCategory( PSh ) && IsSkeletalCategory( PSh ))
+      SetIsHeytingAlgebra( PSh, true );
+    end;
+
+    ## CoHeytingAlgebra.gi: InstallTrueMethod( IsCoHeytingAlgebra, IsCoHeytingAlgebroid and IsSkeletalCategory );
+    if (HasIsCoHeytingAlgebroid( PSh ) && IsCoHeytingAlgebroid( PSh ) &&
+      HasIsSkeletalCategory( PSh ) && IsSkeletalCategory( PSh ))
+      SetIsCoHeytingAlgebra( PSh, true );
+    end;
+
+    ## BicartesianCategories.gi: InstallTrueMethod( IsFiniteBicompleteCategory, IsFiniteCompleteCategory and IsFiniteCocompleteCategory );
+    if (HasIsFiniteCompleteCategory( PSh ) && IsFiniteCompleteCategory( PSh ) &&
+      HasIsFiniteCocompleteCategory( PSh ) && IsFiniteCocompleteCategory( PSh ))
+      SetIsFiniteBicompleteCategory( PSh, true );
+    end;
+
     ##
     finite_cocompletion =
       WrapperCategory( PSh,
@@ -87,7 +192,7 @@ end );
     
     Y = EmbeddingOfUnderlyingCategory( finite_cocompletion );
     
-    Yc = CallFuncListAtRuntime( ApplyFunctor, [ Y, name / F ] );
+    Yc = CallFuncListAtRuntime( ApplyFunctor, [ Y, F[name] ] );
     
     if (IsObjectInFiniteCocompletion( Yc ))
         
@@ -128,17 +233,19 @@ end );
 INSTALL_DOT_METHOD( IsFiniteCocompletion );
 # =#
 
-#= comment for Julia
 ##
-@InstallMethod( \.,
-        "for a cell in a finite cocompletion category and a positive integer",
-        [ IsCellInFiniteCocompletion, IsPosInt ],
+@InstallMethod( /,
+        "for a string and a cell in a finite cocompletion category",
+        [ IsString, IsCellInFiniteCocompletion ],
         
-  function( cell, string_as_int )
+  function( name, cell )
     
-    return UnderlyingCell( cell )[NameRNam( string_as_int ]);
+    return UnderlyingCell( cell )[name];
     
 end );
+
+#= comment for Julia
+INSTALL_DOT_METHOD( IsCellInFiniteCocompletion );
 # =#
 
 ##
