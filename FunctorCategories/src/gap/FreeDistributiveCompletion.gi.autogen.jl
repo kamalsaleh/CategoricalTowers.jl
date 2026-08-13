@@ -35,19 +35,19 @@ InstallMethodWithCache( FreeDistributiveCompletion,
                            ; overhead = false
                             # =#
                             );
-
+    
     ##
     free_distributive_completion =
-       WrapperCategory( finite_cocompletion,
+      WrapperCategory( finite_cocompletion,
               @rec( name = name,
                    category_filter = category_filter,
                    category_object_filter = category_object_filter,
                    category_morphism_filter = category_morphism_filter,
-              only_primitive_operations = true )
+                   only_primitive_operations = true )
               );
-
+    
     SetUnderlyingCategory( free_distributive_completion, fp_category );
-
+    
     if (HasIsInitialCategory( fp_category ) && IsInitialCategory( fp_category ))
         @Assert( 0, [ ] == MissingOperationsForConstructivenessOfCategory( free_distributive_completion, "IsEquippedWithHomomorphismStructure" ) );
     end;
