@@ -470,7 +470,7 @@ end );
         values = ValuesOfPreSheaf( F );
         F = CapFunctor( AmbientCategory( OppositeOfSource( PSh ) ), values[1], values[2], D );
         
-        return ForAll( relations, m -> IsCongruentForMorphisms( D, F( m[1] ), F( m[2] ) ) );
+        return ForAll( relations, m -> IsCongruentForMorphisms( D, CallFuncListAtRuntime( ApplyFunctor, [ F, m[1] ] ), CallFuncListAtRuntime( ApplyFunctor, [ F, m[2] ] ) ) );
         
       end;
       
@@ -2895,15 +2895,13 @@ end );
 
 ##
 @InstallMethod( CategoryOfInternalCategories,
-        "for a CAP category",
-        [ IsCapCategory ],
+        "for a presheaf category of a f.p. enriched category and a category",
+        [ IsPreSheafCategoryOfFpEnrichedCategory, IsCapCategory ],
         
-  function ( H )
-    local Delta2, sH, membership_func;
+  function ( sH, H )
+    local Delta2, membership_func;
     
     Delta2 = SimplicialCategoryTruncatedInDegree2;
-    
-    sH = PreSheaves( Delta2, H );
     
     membership_func =
       function ( sH, N )
@@ -2957,6 +2955,22 @@ end );
     end;
     
     return FullSubcategoryByObjectMembershipFunction( sH, membership_func );
+    
+end );
+
+##
+@InstallMethod( CategoryOfInternalCategories,
+        "for a category",
+        [ IsCapCategory ],
+        
+  function ( H )
+    local Delta2, sH;
+    
+    Delta2 = SimplicialCategoryTruncatedInDegree2;
+    
+    sH = PreSheaves( Delta2, H );
+    
+    return CategoryOfInternalCategories( sH, H );
     
 end );
 
@@ -5302,92 +5316,86 @@ end );
     local PSh, B, vertices, v_dim, v_string, arrows, a_dim, a_string, string;
     
     PSh = CapCategory( F );
-     
-    if (!( IsFpAlgebroidFromDataTables( Source( PSh ) ) && ForAny( [ IsMatrixCategory, IsCategoryOfRows ], is -> is( Target( PSh ) ) ) ))
-        TryNextMethod();
-    end;
     
-    B = Source( CapCategory( F ) );
-    
-    vertices = LabelsOfObjects( UnderlyingQuiver( B ) );
-    
-    v_dim = List( ListOfValues( ValuesOfPreSheaf( F )[1] ), ObjectDatum );
-    
-    v_string = ListN( vertices, v_dim, ( vertex, dim ) -> @Concatenation( "(", StringGAP( vertex ), ")->", StringGAP( dim ) ) );
-    
-    v_string = JoinStringsWithSeparator( v_string, ", " );
-    
-    arrows = LabelsOfMorphisms( UnderlyingQuiver( B ) );
-    
-    a_dim = List( ValuesOfPreSheaf( F )[2], m -> [ ObjectDatum( Source( m ) ), ObjectDatum( Target( m ) ) ] );
-    
-    a_string = ListN( arrows, a_dim,
-                  ( arrow, dim ) -> @Concatenation(
-                      "(", arrow, ")->", StringGAP( dim[ 1 ] ), "x", StringGAP( dim[ 2 ] ) )
-                    );
-    
-    a_string = JoinStringsWithSeparator( a_string, ", " );
-    
-    string = @Concatenation( v_string, "; ", a_string );
-    
-    return @Concatenation( "<", string, ">" );
-    
-end );
-
-#= comment for Julia (requires Algebroids)
-if (IsPackageMarkedForLoading( "Algebroids", ">= 2026.07-04" ))
-##
-@InstallMethod( ViewString,
-        [ IsObjectInPreSheafCategoryOfFpEnrichedCategory ],
+    #= comment for Julia (requires Algebroids)
+    if (IsPackageMarkedForLoading( "Algebroids", ">= 2026.07-04" ))
         
-  function ( F )
-    local PSh, B, vertices, v_dim, v_string, arrows, a_dim, a_string, string;
+        if (( IsFpAlgebroidDefinedByQuiverAlgebra( Source( PSh ) ) && ForAny( [ IsMatrixCategory, IsCategoryOfRows ], is -> is( Target( PSh ) ) ) ))
+            
+            B = Source( CapCategory( F ) );
+            
+            vertices = List( SetOfObjects( B ), UnderlyingVertex );
+            
+            v_dim = List( ListOfValues( ValuesOfPreSheaf( F )[1] ), ObjectDatum );
+            
+            v_string = ListN( vertices, v_dim, ( vertex, dim ) -> @Concatenation( "(", StringGAP( vertex ), ")->", StringGAP( dim ) ) );
+            
+            v_string = JoinStringsWithSeparator( v_string, ", " );
+            
+            arrows = List( SetOfGeneratingMorphisms( B ), UnderlyingQuiverAlgebraElement );
+            
+            if (@not IsPathAlgebra( UnderlyingQuiverAlgebra( B ) ))
+              
+              arrows = List( arrows, a -> Paths( Representative( a ) )[ 1 ] );
+              
+            else
+              
+              arrows = List( arrows, a -> Paths( a )[ 1 ] );
+              
+            end;
+            
+            a_dim = List( ValuesOfPreSheaf( F )[2], m -> [ ObjectDatum( Source( m ) ), ObjectDatum( Target( m ) ) ] );
+            
+            a_string = ListN( arrows, a_dim,
+                          ( arrow, dim ) -> @Concatenation(
+                              "(", StringGAP( arrow ), ")->", StringGAP( dim[ 1 ] ), "x", StringGAP( dim[ 2 ] ) )
+                            );
+            
+            a_string = JoinStringsWithSeparator( a_string, ", " );
+            
+            string = @Concatenation( v_string, "; ", a_string );
+            
+            return @Concatenation( "<", string, ">" );
+            
+        end;
+        
+    end; # IsPackageMarkedForLoading( "Algebroids", ">= 2026.07-04" )
+    # =#
     
-    PSh = CapCategory( F );
-     
-    if (!( IsFpAlgebroidDefinedByQuiverAlgebra( Source( PSh ) ) && ForAny( [ IsMatrixCategory, IsCategoryOfRows ], is -> is( Target( PSh ) ) ) ))
-        TryNextMethod();
-    end;
-    
-    B = Source( CapCategory( F ) );
-    
-    vertices = List( SetOfObjects( B ), UnderlyingVertex );
-    
-    v_dim = List( ListOfValues( ValuesOfPreSheaf( F )[1] ), ObjectDatum );
-    
-    v_string = ListN( vertices, v_dim, ( vertex, dim ) -> @Concatenation( "(", StringGAP( vertex ), ")->", StringGAP( dim ) ) );
-    
-    v_string = JoinStringsWithSeparator( v_string, ", " );
-    
-    arrows = List( SetOfGeneratingMorphisms( B ), UnderlyingQuiverAlgebraElement );
-    
-    if (@not IsPathAlgebra( UnderlyingQuiverAlgebra( B ) ))
-      
-      arrows = List( arrows, a -> Paths( Representative( a ) )[ 1 ] );
-      
+    if (( IsFpAlgebroidFromDataTables( Source( PSh ) ) && ForAny( [ IsMatrixCategory, IsCategoryOfRows ], is -> is( Target( PSh ) ) ) ))
+        
+        B = Source( CapCategory( F ) );
+        
+        vertices = LabelsOfObjects( UnderlyingQuiver( B ) );
+        
+        v_dim = List( ListOfValues( ValuesOfPreSheaf( F )[1] ), ObjectDatum );
+        
+        v_string = ListN( vertices, v_dim, ( vertex, dim ) -> @Concatenation( "(", StringGAP( vertex ), ")->", StringGAP( dim ) ) );
+        
+        v_string = JoinStringsWithSeparator( v_string, ", " );
+        
+        arrows = LabelsOfMorphisms( UnderlyingQuiver( B ) );
+        
+        a_dim = List( ValuesOfPreSheaf( F )[2], m -> [ ObjectDatum( Source( m ) ), ObjectDatum( Target( m ) ) ] );
+        
+        a_string = ListN( arrows, a_dim,
+                      ( arrow, dim ) -> @Concatenation(
+                          "(", arrow, ")->", StringGAP( dim[ 1 ] ), "x", StringGAP( dim[ 2 ] ) )
+                        );
+        
+        a_string = JoinStringsWithSeparator( a_string, ", " );
+        
+        string = @Concatenation( v_string, "; ", a_string );
+        
+        return @Concatenation( "<", string, ">" );
+        
     else
-      
-      arrows = List( arrows, a -> Paths( a )[ 1 ] );
-      
+        
+        return @Concatenation( "<An object in ", Name( CapCategory( F ) ), ">" );
+        
     end;
-    
-    a_dim = List( ValuesOfPreSheaf( F )[2], m -> [ ObjectDatum( Source( m ) ), ObjectDatum( Target( m ) ) ] );
-    
-    a_string = ListN( arrows, a_dim,
-                  ( arrow, dim ) -> @Concatenation(
-                      "(", StringGAP( arrow ), ")->", StringGAP( dim[ 1 ] ), "x", StringGAP( dim[ 2 ] ) )
-                    );
-    
-    a_string = JoinStringsWithSeparator( a_string, ", " );
-    
-    string = @Concatenation( v_string, "; ", a_string );
-    
-    return @Concatenation( "<", string, ">" );
     
 end );
-
-end; # IsPackageMarkedForLoading( "Algebroids", ">= 2026.07-04" )
-# =#
 
 ##
 @InstallMethod( DisplayString,
@@ -5434,65 +5442,76 @@ end );
         [ IsMorphismInPreSheafCategoryOfFpEnrichedCategory ],
         
   function ( eta )
-    local PSh, B, vertices, s_dim, r_dim, string;
+    local PSh, vertices, s_dim, r_dim, string, B, objects, images_of_objects, i;
     
     PSh = CapCategory( eta );
     
-    if (!( IsFpAlgebroidFromDataTables( Source( PSh ) ) && ForAny( [ IsMatrixCategory, IsCategoryOfRows ], is -> is( Target( PSh ) ) ) ))
-        TryNextMethod();
-    end;
-    
-    B = Source( PSh );
-    
-    vertices = LabelsOfObjects( UnderlyingQuiver( B ) );
-    
-    s_dim = List( ValuesOfPreSheaf( Source( eta ) )[1], ObjectDatum );
-    
-    r_dim = List( ValuesOfPreSheaf( Target( eta ) )[1], ObjectDatum );
-    
-    string = ListN( vertices, s_dim, r_dim,
-                ( vertex, s, r ) ->
-                    @Concatenation( "(", vertex, ")->", StringGAP( s ), "x", StringGAP( r ) ) );
-    
-    string = JoinStringsWithSeparator( string, ", " );
-    
-    return @Concatenation( "<", string, ">" );
-    
-end );
-
-#= comment for Julia (requires Algebroids)
-if (IsPackageMarkedForLoading( "Algebroids", ">= 2026.07-04" ))
-##
-@InstallMethod( ViewString,
-        [ IsMorphismInPreSheafCategoryOfFpEnrichedCategory ],
+    #= comment for Julia (requires Algebroids)
+    #
+    if (IsPackageMarkedForLoading( "Algebroids", ">= 2026.07-04" ))
+            
+        if (( IsFpAlgebroidDefinedByQuiverAlgebra( Source( PSh ) ) && ForAny( [ IsMatrixCategory, IsCategoryOfRows ], is -> is( Target( PSh ) ) ) ))
+            
+            vertices = List( SetOfObjects( Source( Source( eta ) ) ), UnderlyingVertex );
+            
+            s_dim = List( ValuesOfPreSheaf( Source( eta ) )[1], ObjectDatum );
+            
+            r_dim = List( ValuesOfPreSheaf( Target( eta ) )[1], ObjectDatum );
+            
+            string = ListN( vertices, s_dim, r_dim,
+                        ( vertex, s, r ) -> @Concatenation( "(", StringGAP( vertex ), ")->", StringGAP( s ), "x", StringGAP( r ) ) );
+            
+            string = JoinStringsWithSeparator( string, ", " );
+            
+            return @Concatenation( "<", string, ">" );
+            
+        end;
         
-  function ( eta )
-    local PSh, vertices, s_dim, r_dim, string;
+    end; # IsPackageMarkedForLoading( "Algebroids", ">= 2026.07-04" )
+    # =#
     
-    PSh = CapCategory( eta );
+    if (( IsFpAlgebroidFromDataTables( Source( PSh ) ) && ForAny( [ IsMatrixCategory, IsCategoryOfRows ], is -> is( Target( PSh ) ) ) ))
     
-    if (!( IsFpAlgebroidDefinedByQuiverAlgebra( Source( PSh ) ) && ForAny( [ IsMatrixCategory, IsCategoryOfRows ], is -> is( Target( PSh ) ) ) ))
-        TryNextMethod();
+        B = Source( PSh );
+        
+        vertices = LabelsOfObjects( UnderlyingQuiver( B ) );
+        
+        s_dim = List( ValuesOfPreSheaf( Source( eta ) )[1], ObjectDatum );
+        
+        r_dim = List( ValuesOfPreSheaf( Target( eta ) )[1], ObjectDatum );
+        
+        string = ListN( vertices, s_dim, r_dim,
+                    ( vertex, s, r ) ->
+                        @Concatenation( "(", vertex, ")->", StringGAP( s ), "x", StringGAP( r ) ) );
+        
+        string = JoinStringsWithSeparator( string, ", " );
+        
+        return @Concatenation( "<", string, ">" );
+    
+    else
+        
+        objects = SetOfObjects( Source( Source( eta ) ) );
+        
+        images_of_objects = ValuesOnAllObjects( eta );
+        
+        string = "";
+        
+        for i in (1):(Length( objects ))
+            
+            string = @Concatenation( string,
+                              "Image of ", StringView( objects[i] ), ":\n",
+                              StringDisplay( images_of_objects[i] ),
+                              "\n" );
+            
+        end;
+        
+        return @Concatenation( string,
+                       "A morphism in ", Name( CapCategory( eta ) ), " given by the above data\n" );
+    
     end;
-    
-    vertices = List( SetOfObjects( Source( Source( eta ) ) ), UnderlyingVertex );
-    
-    s_dim = List( ValuesOfPreSheaf( Source( eta ) )[1], ObjectDatum );
-    
-    r_dim = List( ValuesOfPreSheaf( Target( eta ) )[1], ObjectDatum );
-    
-    string = ListN( vertices, s_dim, r_dim,
-                ( vertex, s, r ) ->
-                    @Concatenation( "(", StringGAP( vertex ), ")->", StringGAP( s ), "x", StringGAP( r ) ) );
-    
-    string = JoinStringsWithSeparator( string, ", " );
-    
-    return @Concatenation( "<", string, ">" );
     
 end );
 
-end; # IsPackageMarkedForLoading( "Algebroids", ">= 2026.07-04" )
-# =#
 
 ##
 @InstallMethod( DisplayString,
@@ -5501,23 +5520,7 @@ end; # IsPackageMarkedForLoading( "Algebroids", ">= 2026.07-04" )
   function ( eta )
     local objects, images_of_objects, string, i;
     
-    objects = SetOfObjects( Source( Source( eta ) ) );
-    
-    images_of_objects = ValuesOnAllObjects( eta );
-    
-    string = "";
-    
-    for i in (1):(Length( objects ))
-        
-        string = @Concatenation( string,
-                          "Image of ", StringView( objects[i] ), ":\n",
-                          StringDisplay( images_of_objects[i] ),
-                          "\n" );
-        
-    end;
-    
-    return @Concatenation( string,
-                   "A morphism in ", Name( CapCategory( eta ) ), " given by the above data\n" );
+
     
 end );
 
