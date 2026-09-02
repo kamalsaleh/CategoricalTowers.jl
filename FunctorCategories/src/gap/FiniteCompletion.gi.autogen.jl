@@ -30,9 +30,7 @@ InstallMethodWithCache( FiniteCompletion,
     ## building the categorical tower:
     
     coPSh = CoPreSheaves( fp_category, range_category_of_hom_structure; FinalizeCategory = true, overhead = false );
-    
-    ADD_CONJUNCTION_DERIVED_LATTICE_PROPERTIES( coPSh );
-    
+
     ##
     finite_completion =
       WrapperCategory( coPSh,
@@ -76,9 +74,7 @@ end );
   function( finite_completion )
     local Y;
     
-    ## Use ModelingCategory to get the stored coPSh instance; CoYonedaEmbedding( UnderlyingCategory ) would create a fresh one,
-    ## causing IsEqualForObjects to fail in PreCompose. Mirrors FiniteCocompletion using YonedaEmbeddingOfSourceCategory( ModelingCategory ).
-    Y = CoYonedaEmbeddingOfSourceCategory( ModelingCategory( finite_completion ) );
+    Y = CoYonedaEmbedding( UnderlyingCategory( finite_completion ) );
     
     return PreCompose( Y, WrappingFunctor( finite_completion ) );
     
