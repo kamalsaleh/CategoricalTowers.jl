@@ -5,6 +5,20 @@
 #
 
 ##
+@InstallMethod( CapFunctor,
+                "for a category, two lists, and a category",
+                [ IsCapCategory, IsList, IsList, IsCapCategory ],
+
+    CreateFunctor );
+
+##
+@InstallMethod( CapFunctor,
+                "for a category, two records, and a category",
+                [ IsCapCategory, IsRecord, IsRecord, IsCapCategory ],
+
+    CreateFunctor );
+
+##
 InstallTrueMethod( IsFiniteCategory, IsInitialCategory );
 
 ##
