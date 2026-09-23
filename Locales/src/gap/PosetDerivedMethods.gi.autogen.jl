@@ -104,9 +104,10 @@ AddDerivationToCAP( SetOfGeneratingMorphismsOfCategory,
     local objects, l, digraph;
     
     objects = SetOfObjectsOfCategory( cat );
+    
     l = Length( objects );
     
-    digraph = DigraphReflexiveTransitiveReduction( Digraph( objects, ( A, B ) -> IsHomSetInhabited( cat, A, B ) ) );
+    digraph = DigraphReflexiveTransitiveReduction( Digraph( objects, IsHomSetInhabited ) );
     
     return @Concatenation( List( (1):(l), s ->
                    List( OutNeighborsOfVertex( digraph, s ), t ->

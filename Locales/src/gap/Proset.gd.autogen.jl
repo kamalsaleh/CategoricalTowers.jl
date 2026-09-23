@@ -166,11 +166,7 @@ CAP_INTERNAL_CONSTRUCTIVE_CATEGORIES_RECORD.IsSymmetricCoclosedMonoidalProset =
 @DeclareOperation( "UniqueMorphism",
         [ IsCapCategoryObject, IsCapCategoryObject ] );
 
-#= comment for Julia
-@DeclareOperation( "CreateFunctor",
-        [ IsCapCategory, IsList, IsList, IsCapCategory ] );
-# =#
-@DeclareFilterDispatchedOperation( "CreateFunctor" );
+# `CreateFunctor` is declared centrally in ToolsForCategoricalTowers
 
 # @Section Tools
 
