@@ -1289,7 +1289,7 @@ end; # IsPackageMarkedForLoading( "Algebroids", ">= 2026.07-04" )
     
     AddMonomorphismIntoInjectiveEnvelopeObject( PSh,
       function( PSh, F )
-        local B, coPSh, NL, NR, NR_on_objs, NR_on_mors, mono_coPSh, mono;
+        local B, coPSh, NL, NR, NR_on_objs, NR_on_mors, NL_F, mono_coPSh, mono;
         
         #% CAP_JIT_DROP_NEXT_STATEMENT
         if (HasMonomorphismIntoInjectiveEnvelopeObject( F ))
@@ -1308,7 +1308,9 @@ end; # IsPackageMarkedForLoading( "Algebroids", ">= 2026.07-04" )
         
         NR_on_mors = NR[2];
         
-        mono_coPSh = CallFuncListAtRuntime( MonomorphismIntoInjectiveEnvelopeObject,  [ coPSh, NL( F ) ] );
+        NL_F = CallFuncListAtRuntime( NL, [ F ] );
+        
+        mono_coPSh = CallFuncListAtRuntime( MonomorphismIntoInjectiveEnvelopeObject,  [ coPSh, NL_F ] );
         
         mono = NR_on_mors( NR_on_objs( Source( mono_coPSh ) ), mono_coPSh, NR_on_objs( Target( mono_coPSh ) ) );
         
@@ -2311,7 +2313,6 @@ InstallMethodWithCache( PreSheavesOfFpEnrichedCategory,
         
     end;
     
-    #= comment for Julia (rely on computing a cover of representables which is not yet available in FunctorCategories.jl)
     if (IsSkeletalCategoryOfFiniteSets( D ) ||
        IsCategoryOfRows( D ) ||
        IsCategoryOfColumns( D ) ||
@@ -2320,7 +2321,6 @@ InstallMethodWithCache( PreSheavesOfFpEnrichedCategory,
         ADD_PROJECTIVE_STRUCTURE_TO_PRESHEAF_CATEGORY( PSh );
         
     end;
-    # =#
     
     if (HasRangeCategoryOfHomomorphismStructure( PSh ) &&
        ## in the following we require (1) that the range category D of the presheaf category
@@ -2358,7 +2358,7 @@ InstallMethodWithCache( PreSheavesOfFpEnrichedCategory,
             
             unit = UnitOfIsbellAdjunction( PSh );
             
-            return IsIsomorphism( PSh, unit( F ) );
+            return IsIsomorphism( PSh, CallFuncListAtRuntime( ApplyNaturalTransformation, [ unit, F ] ) );
             
         end );
         
@@ -2577,10 +2577,14 @@ InstallMethodWithCache( PreSheaves,
     
 end ) );
 
+# Filters can not be defined inside functions in Julia, hence we define it here and retrieve it in the function:
+@FilterIntersection( IsCapCategory, IsFiniteCategory, IsInitialCategory )
+@FilterIntersection( IsPreSheafCategoryOfFpEnrichedCategory, IsTerminalCategory )
+
 ##
 InstallMethodWithCache( PreSheaves,
         "for two CAP categories",
-        [ FilterIntersection( IsCapCategory, IsInitialCategory ), IsCapCategory ],
+        [ FilterIntersection( IsCapCategory, IsFiniteCategory, IsInitialCategory ), IsCapCategory ],
         
   @FunctionWithNamedArguments(
   [
@@ -2823,7 +2827,6 @@ InstallMethodWithCache( PreSheaves,
     
   end ) );
 
-#= comment for julia (clash with a method in PresheafCategories package)
 ##
 @InstallMethod( PreSheaves,
         "for a CAP category",
@@ -2840,8 +2843,6 @@ InstallMethodWithCache( PreSheaves,
     return PreSheaves( B, RangeCategoryOfHomomorphismStructure( B ); FinalizeCategory = FinalizeCategory, overhead = overhead, no_precompiled_code = no_precompiled_code );
     
 end ) );
-# =#
-
 
 ##
 @InstallMethod( FiniteStrictCoproductCompletionOfSourceCategory,
@@ -3010,8 +3011,8 @@ end );
       function ( source, mor, target )
         local source_on_objs, target_on_objs;
         
-        source_on_objs = ObjectDatum( PSh, source )[1];
-        target_on_objs = ObjectDatum( PSh, target )[1];
+        source_on_objs = CallFuncListAtRuntime( ObjectDatum, [ PSh, source ] )[1];
+        target_on_objs = CallFuncListAtRuntime( ObjectDatum, [ PSh, target ] )[1];
         
         return CreatePreSheafMorphismByValues( PSh,
                        source,
@@ -3155,7 +3156,7 @@ end );
     
     values = ValuesOfPreSheaf( F );
     
-    return CapFunctor( OppositeOfSource( PSh ), values[1], values[2], Target( PSh ) );
+    return CreateFunctor( OppositeOfSource( PSh ), values[1], values[2], Target( PSh ) );
     
 end );
 
@@ -3343,10 +3344,11 @@ end );
         
     end;
     
-    return FunctorMorphismOperation( UnderlyingCapTwoCategoryCell( PSh, F ) )(
-                   ApplyObjectInPreSheafCategoryOfFpEnrichedCategoryToObject( PSh, F, Target( morB ) ),
-                   morB_op,
-                   ApplyObjectInPreSheafCategoryOfFpEnrichedCategoryToObject( PSh, F, Source( morB ) ) );
+    return CallFuncListAtRuntime(
+                FunctorMorphismOperation( UnderlyingCapTwoCategoryCell( PSh, F ) ),
+                [ ApplyObjectInPreSheafCategoryOfFpEnrichedCategoryToObject( PSh, F, Target( morB ) ),
+                  morB_op,
+                  ApplyObjectInPreSheafCategoryOfFpEnrichedCategoryToObject( PSh, F, Source( morB ) ) ] );
     
 end );
 
@@ -3844,7 +3846,6 @@ end );
     
 end );
 
-#= comment for Julia
 ##
 @InstallMethod( AssociatedCoequalizerPairInPreSheaves,
         "for a category of colimit quivers and an object therein",
@@ -3938,10 +3939,11 @@ end );
     
     C_hat = FiniteColimitCompletionWithStrictCoproductsOfSourceCategory( PSh );
     
-    return AssociatedCoequalizerPairInPreSheaves( C_hat, CoYonedaLemmaOnObjects( PSh, F ) );
+    SetCategoryOfPreSheavesOfUnderlyingCategory( C_hat, PSh );
+    
+    return CallFuncListAtRuntime( AssociatedCoequalizerPairInPreSheaves, [ C_hat, CoYonedaLemmaOnObjects( PSh, F ) ] );
     
 end );
-# =#
 
 ##
 @InstallMethod( CoYonedaLemmaCoequalizerPair,
@@ -3987,7 +3989,7 @@ end );
         hom = ObjectDatum( H, HomC_srcC_objC );
         
         #% CAP_JIT_DROP_NEXT_STATEMENT
-        @Assert( 0, IsInt( hom ) );
+        @Assert( 0, IsInt( hom ) || IsBigInt( hom ) );
         
         ## Hom_H(𝟙, Hom_C(o', o))
         HomH_d_HomC_srcC_objC = ExactCoverWithGlobalElements( H,
@@ -4357,7 +4359,6 @@ end );
     
 end );
 
-#= comment for Julia
 ##
 @InstallMethod( CoveringListOfRepresentables,
         [ FilterIntersection( IsCapCategory, IsAbelianCategory ), IsPreSheafCategory, IsObjectInPreSheafCategory ],
@@ -4418,7 +4419,6 @@ end );
     return cover;
     
 end );
-# =#
 
 ##
 @InstallMethod( CoveringListOfRepresentables,
@@ -4567,7 +4567,7 @@ end );
   function ( PSh, covering_list, F )
     local C, H, d, defining_triple, nr_objs, objs, UC,
           F_on_objs, embs, cover, sources, source, targets, target,
-          sections, section, complement_sources, complements, complement;
+          sections, section, complement_sources, complements, complement, coproduct_obj;
     
     C = Source( PSh );
     H = RangeCategoryOfHomomorphismStructure( PSh );
@@ -4594,7 +4594,7 @@ end );
         F_o = ObjectDatum( H, F_on_objs[1 + o] );
         
         #% CAP_JIT_DROP_NEXT_STATEMENT
-        @Assert( 0, IsInt( F_o ) );
+        @Assert( 0, IsInt( F_o ) || IsBigInt( F_o ) );
         
         source_diagram_o = ListWithIdenticalEntries( c_o, d );
         
@@ -4627,14 +4627,14 @@ end );
                              objs[1 + o],
                              cover[1 + o][2] ) );
     
-    source = Coproduct( UC, sources );
+    source = CallFuncListAtRuntime( Coproduct, [ UC, sources ] );
     
     targets = List( (0):(nr_objs - 1), o ->
                      TensorizeObjectWithObjectInRangeCategoryOfHomomorphismStructure( H, UC,
                              objs[1 + o],
                              cover[1 + o][3] ) );
     
-    target = Coproduct( UC, targets );
+    target = CallFuncListAtRuntime( Coproduct, [ UC, targets ] );
     
     sections = List( (0):(nr_objs - 1), o ->
                       TensorizeObjectWithMorphismInRangeCategoryOfHomomorphismStructure( H, UC,
@@ -4643,12 +4643,13 @@ end );
                               cover[1 + o][4],
                               targets[1 + o] ) );
     
-    section = CoproductFunctorialWithGivenCoproducts( UC,
-                       source,
-                       sources,
-                       sections,
-                       targets,
-                       target );
+    section = CallFuncListAtRuntime( CoproductFunctorialWithGivenCoproducts,
+                [ UC,
+                  source,
+                  sources,
+                  sections,
+                  targets,
+                  target ] );
     
     complement_sources = List( (0):(nr_objs - 1), o ->
                                 TensorizeObjectWithObjectInRangeCategoryOfHomomorphismStructure( H, UC,
@@ -4662,12 +4663,15 @@ end );
                                  cover[1 + o][5],
                                  targets[1 + o] ) );
     
-    complement = CoproductFunctorialWithGivenCoproducts( UC,
-                          Coproduct( UC, complement_sources ),
-                          complement_sources,
-                          complements,
-                          targets,
-                          target );
+    coproduct_obj = CallFuncListAtRuntime( Coproduct, [ UC, complement_sources ] );
+    
+    complement = CallFuncListAtRuntime( CoproductFunctorialWithGivenCoproducts,
+                [ UC,
+                  coproduct_obj,
+                  complement_sources,
+                  complements,
+                  targets,
+                  target ] );
     
     #% CAP_JIT_DROP_NEXT_STATEMENT
     SetIsSplitMonomorphism( section, true );
@@ -4793,7 +4797,6 @@ end );
     
 end );
 
-#= comment for Julia
 ##
 @InstallMethod( RetractionByCoveringListOfRepresentables,
         [ FilterIntersection( IsCapCategory, IsAbelianCategory ), IsPreSheafCategory, IsList, IsObjectInPreSheafCategory ],
@@ -4855,7 +4858,6 @@ end );
                            V ) );
     
 end );
-# =#
 
 ##
 @InstallMethod( RetractionFromCoYonedaProjectiveObjectOntoOptimizedCoYonedaProjectiveObject,

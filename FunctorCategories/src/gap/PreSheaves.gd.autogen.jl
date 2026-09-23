@@ -436,9 +436,13 @@ CapJitAddTypeSignature( "PreSheavesOfFpEnrichedCategory", [ IsCapCategory, IsCap
 @DeclareAttribute( "MaximalMorphismFromRepresentable",
         IsObjectInPreSheafCategory );
 
+#= comment for Julia
 #! @Arguments F
 @DeclareAttribute( "CoveringListOfRepresentables",
         IsObjectInPreSheafCategory );
+# =#
+
+@DeclareFilterDispatchedOperation( "CoveringListOfRepresentables" )
 
 #! @Arguments F
 @DeclareAttribute( "CoveringListOfRepresentablesUsingSplits",
@@ -456,9 +460,13 @@ CapJitAddTypeSignature( "PreSheavesOfFpEnrichedCategory", [ IsCapCategory, IsCap
 @DeclareAttribute( "SectionFromOptimizedCoYonedaProjectiveObjectIntoCoYonedaProjectiveObject",
         IsObjectInPreSheafCategory );
 
+#= comment for Julia
 #! @Arguments F
 @DeclareOperation( "RetractionByCoveringListOfRepresentables",
         [ IsPreSheafCategory, IsList, IsObjectInPreSheafCategory ] );
+# =#
+
+@DeclareFilterDispatchedOperation( "RetractionByCoveringListOfRepresentables" )
 
 #! @Arguments F
 @DeclareAttribute( "RetractionFromCoYonedaProjectiveObjectOntoOptimizedCoYonedaProjectiveObject",

@@ -2,91 +2,6 @@
 ```jldoctest AutoDocTests
 julia> using MatricesForHomalg, CAP, MonoidalCategories, CartesianCategories, QuotientCategories, LinearAlgebraForCAP, LinearClosuresForCAP, AdditiveClosuresForCAP, FreydCategoriesForCAP, ToolsForCategoricalTowers, Toposes, FinSetsForCAP, FpCategories, FpLinearCategories, Locales, FiniteCocompletions, PresheafCategories, SubcategoriesForCAP, FunctorCategories
 
-julia> Delta2 = SimplicialCategoryTruncatedInDegree( 2 )
-PathCategory( FinQuiver(
-  "Delta(C0,C1,C2)[id:C1→C0,s:C0→C1,t:C0→C1,
-                   is:C2→C1,it:C2→C1,
-                   ps:C1→C2,pt:C1→C2,mu:C1→C2]" ) )
-/ [ s⋅id == id(C0), t⋅id == id(C0), ps⋅is == id(C1), ... ]
-
-julia> DefiningRelations( Delta2 )
-[ [ s⋅id:(C0) → (C0), id(C0):(C0) → (C0) ],
-  [ t⋅id:(C0) → (C0), id(C0):(C0) → (C0) ],
-  [ ps⋅is:(C1) → (C1), id(C1):(C1) → (C1) ],
-  [ pt⋅it:(C1) → (C1), id(C1):(C1) → (C1) ],
-  [ is⋅id:(C2) → (C0), it⋅id:(C2) → (C0) ],
-  [ pt⋅is:(C1) → (C1), id⋅t:(C1) → (C1) ],
-  [ ps⋅it:(C1) → (C1), id⋅s:(C1) → (C1) ],
-  [ s⋅pt:(C0) → (C2), t⋅ps:(C0) → (C2) ],
-  [ s⋅mu:(C0) → (C2), s⋅ps:(C0) → (C2) ],
-  [ t⋅mu:(C0) → (C2), t⋅pt:(C0) → (C2) ],
-  [ mu⋅is:(C1) → (C1), id(C1):(C1) → (C1) ],
-  [ mu⋅it:(C1) → (C1), id(C1):(C1) → (C1) ] ]
-
-julia> Size( Delta2 )
-31
-
-julia> N = NerveTruncatedInDegree2( Delta2 )
-<An object in PreSheaves( PathCategory( FinQuiver(
-  "Delta(C0,C1,C2)[id:C1→C0,s:C0→C1,t:C0→C1,
-                   is:C2→C1,it:C2→C1,
-                   ps:C1→C2,pt:C1→C2,mu:C1→C2]" ) )
-/ [ s⋅id == id(C0), t⋅id == id(C0), ps⋅is == id(C1), ... ],
- SkeletalFinSets )>
-
-julia> IsWellDefined( N )
-true
-
-julia> N.C0
-|3|
-
-julia> Display( N.C0 )
-[ 0, 1, 2 ]
-
-julia> N.C1
-|31|
-
-julia> Display( N.C1 )
-[ 0,..., 30 ]
-
-julia> N.C2
-|393|
-
-julia> Display( N.C2 )
-[ 0,..., 392 ]
-
-julia> N.id
-|3| → |31|
-
-julia> Display( N.id )
-[ 0, 1, 2 ] ⱶ[ 0, 5, 21 ]→ [ 0,..., 30 ]
-
-julia> PSh = CapCategory( N )
-<A category in PreSheaves( PathCategory( FinQuiver(
-  "Delta(C0,C1,C2)[id:C1→C0,s:C0→C1,t:C0→C1,
-                   is:C2→C1,it:C2→C1,
-                   ps:C1→C2,pt:C1→C2,mu:C1→C2]" ) )
-/ [ s⋅id == id(C0), t⋅id == id(C0), ps⋅is == id(C1), ... ],
- SkeletalFinSets )>
-
-julia> IntCat = CategoryOfInternalCategories( PSh,
-                          RangeCategoryOfHomomorphismStructure( Delta2 ) )
-FullSubcategoryByObjectMembershipFunction(
-PreSheaves( PathCategory( FinQuiver(
-  "Delta(C0,C1,C2)[id:C1→C0,s:C0→C1,t:C0→C1,
-                   is:C2→C1,it:C2→C1,
-                   ps:C1→C2,pt:C1→C2,mu:C1→C2]" ) )
-/ [ s⋅id == id(C0), t⋅id == id(C0), ps⋅is == id(C1), ... ],
-SkeletalFinSets ), ObjectMembershipFunction )
-
-julia> IsWellDefined( N / IntCat )
-true
-
-```
-
-```jldoctest AutoDocTests
-julia> using MatricesForHomalg, CAP, MonoidalCategories, CartesianCategories, QuotientCategories, LinearAlgebraForCAP, LinearClosuresForCAP, AdditiveClosuresForCAP, FreydCategoriesForCAP, ToolsForCategoricalTowers, Toposes, FinSetsForCAP, FpCategories, FpLinearCategories, Locales, FiniteCocompletions, PresheafCategories, SubcategoriesForCAP, FunctorCategories
-
 julia> C = SimplicialCategoryTruncatedInDegree( 2 )
 PathCategory( FinQuiver( "Delta(C0,C1,C2)[id:C1→C0,
 s:C0→C1,t:C0→C1,is:C2→C1,it:C2→C1,ps:C1→C2,pt:C1→C2,
@@ -134,6 +49,71 @@ julia> N.id
 
 julia> Display( N.id )
 [ 0, 1, 2 ] ⱶ[ 0, 5, 21 ]→ [ 0,..., 30 ]
+
+```
+
+```jldoctest AutoDocTests
+julia> using MatricesForHomalg, CAP, MonoidalCategories, CartesianCategories, QuotientCategories, LinearAlgebraForCAP, LinearClosuresForCAP, AdditiveClosuresForCAP, FreydCategoriesForCAP, ToolsForCategoricalTowers, Toposes, FinSetsForCAP, FpCategories, FpLinearCategories, Locales, FiniteCocompletions, PresheafCategories, SubcategoriesForCAP, FunctorCategories
+
+julia> true
+true
+
+julia> q = FinQuiver( "q(a,l,r,i,c,b)[ac:a->c,lc:l->c,ri:r->i,ic:i->c,cb:c->b]" )
+FinQuiver( "q(a,l,r,i,c,b)[ac:a→c,lc:l→c,ri:r→i,ic:i→c,cb:c→b]" )
+
+julia> F = PathCategory( q )
+PathCategory(
+FinQuiver( "q(a,l,r,i,c,b)[ac:a→c,lc:l→c,ri:r→i,ic:i→c,cb:c→b]" ) )
+
+julia> Size( F )
+16
+
+julia> P = PosetOfCategory( F )
+PosetOfCategory( PathCategory(
+FinQuiver( "q(a,l,r,i,c,b)[ac:a→c,lc:l→c,ri:r→i,ic:i→c,cb:c→b]" ) ) )
+
+julia> Size( P )
+16
+
+julia> PSh = PreSheaves( P )
+PreSheaves( PosetOfCategory( PathCategory(
+FinQuiver( "q(a,l,r,i,c,b)[ac:a→c,lc:l→c,ri:r→i,ic:i→c,cb:c→b]" ) ) ),
+IntervalCategory )
+
+julia> c = PSh.c
+<An object in PreSheaves( PosetOfCategory( PathCategory(
+ FinQuiver( "q(a,l,r,i,c,b)[ac:a→c,lc:l→c,ri:r→i,ic:i→c,cb:c→b]" ) ) ),
+ IntervalCategory )>
+
+julia> section =
+          SectionFromOptimizedCoYonedaProjectiveObjectIntoCoYonedaProjectiveObject( c )
+<A morphism in FiniteStrictCoproductCompletion(
+ PosetOfCategory( PathCategory(
+ FinQuiver( "q(a,l,r,i,c,b)[ac:a→c,lc:l→c,ri:r→i,ic:i→c,cb:c→b]" ) ) ) )>
+
+julia> IsWellDefined( section )
+true
+
+julia> IsIsomorphism( section )
+true
+
+julia> Display( Source( section ) )
+[ 1, [ An object in the poset given by: (c) ] ]
+
+An object in FiniteStrictCoproductCompletion( PosetOfCategory( PathCategory(
+FinQuiver( "q(a,l,r,i,c,b)[ac:a→c,lc:l→c,ri:r→i,ic:i→c,cb:c→b]" ) ) ) )
+given by the above data
+
+julia> Display( Target( section ) )
+[ 5, [ An object in the poset given by: (a),
+       An object in the poset given by: (l),
+       An object in the poset given by: (r),
+       An object in the poset given by: (i),
+       An object in the poset given by: (c) ] ]
+
+An object in FiniteStrictCoproductCompletion( PosetOfCategory( PathCategory(
+FinQuiver( "q(a,l,r,i,c,b)[ac:a→c,lc:l→c,ri:r→i,ic:i→c,cb:c→b]" ) ) ) )
+given by the above data
 
 ```
 
@@ -719,5 +699,185 @@ Image of <(C1)>:
 
 A morphism in FinReflexiveQuivers
 given by the above data
+
+```
+
+```jldoctest AutoDocTests
+julia> using MatricesForHomalg, CAP, MonoidalCategories, CartesianCategories, QuotientCategories, LinearAlgebraForCAP, LinearClosuresForCAP, AdditiveClosuresForCAP, FreydCategoriesForCAP, ToolsForCategoricalTowers, Toposes, FinSetsForCAP, FpCategories, FpLinearCategories, Locales, FiniteCocompletions, PresheafCategories, SubcategoriesForCAP, FunctorCategories
+
+julia> true
+true
+
+julia> q = FinQuiver( "q(0,1,2,3)[a:0->1,b:1->3,c:0->2,d:2->3,e:3->3]" )
+FinQuiver( "q(0,1,2,3)[a:0→1,b:1→3,c:0→2,d:2→3,e:3→3]" )
+
+julia> k = HomalgFieldOfRationals();
+
+julia> C = PathCategory( q )
+PathCategory( FinQuiver( "q(0,1,2,3)[a:0→1,b:1→3,c:0→2,d:2→3,e:3→3]" ) )
+
+julia> kC = k[C]
+Q-LinearClosure( PathCategory( FinQuiver( "q(0,1,2,3)[a:0→1,b:1→3,c:0→2,
+d:2→3,e:3→3]" ) ) )
+
+julia> quo_kC = kC / [ kC.e^3 ]
+Q-LinearClosure( PathCategory( FinQuiver( "q(0,1,2,3)[a:0→1,b:1→3,c:0→2,
+d:2→3,e:3→3]" ) ) ) / [ 1*e^3 ]
+
+julia> A = AlgebroidFromDataTables( quo_kC )
+Q-algebroid( [0,1,2,3][a:0→1,b:1→3,c:0→2,d:2→3,e:3→3] ) defined by
+4 objects and 5 generating morphisms
+
+julia> e = AssociatedMorphismIntoAlgebroidAsObjectInPreSheavesCategory( A.e )
+<(0⊗0)->0x1, (0⊗1)->0x0, (0⊗2)->0x0, (0⊗3)->0x0, (1⊗0)->0x1, (1⊗1)->0x1,
+(1⊗2)->0x0, (1⊗3)->0x0, (2⊗0)->0x1, (2⊗1)->0x0, (2⊗2)->0x1, (2⊗3)->0x0,
+(3⊗0)->18x6, (3⊗1)->9x3, (3⊗2)->9x3, (3⊗3)->9x3>
+
+julia> IsWellDefined( e )
+true
+
+julia> qA = QuotientCategory( A, [ A.ab - A.cd, 2*A.be ] )
+QuotientCategory( Q-algebroid( [0,1,2,3][a:0→1,b:1→3,c:0→2,d:2→3,e:3→3] )
+defined by 4 objects and 5 generating morphisms, 2-sided ideal generated
+by 2 morphisms )
+
+julia> qA["0"]
+<(0)>
+
+julia> RangeCategoryOfHomomorphismStructure( qA )
+Rows( Q )
+
+julia> IsZeroForMorphisms( qA.cde )
+true
+
+julia> f = RandomMorphism( qA, 20 );
+
+julia> 2 * HomStructure( Source( f ), Target( f ), 3 * HomStructure( f ) ) == 6 * f
+true
+
+julia> qA = QuotientCategory( A, [ A.id_0, A.id_1, A.id_2 ] )
+QuotientCategory( Q-algebroid( [0,1,2,3][a:0→1,b:1→3,c:0→2,d:2→3,e:3→3] )
+defined by 4 objects and 5 generating morphisms, 2-sided ideal generated
+by 3 morphisms )
+
+julia> ForAll( [ qA["0"], qA["1"], qA["2"] ], IsZeroForObjects )
+true
+
+julia> IsZeroForObjects( qA["3"] )
+false
+
+julia> D = AlgebroidFromDataTables( qA )
+Q-algebroid( [3][e:3→3] ) defined by 1 object and 1 generating morphism
+
+julia> Perform( BasisOfExternalHom( D["3"], D["3"] ), Display )
+<1*id(3):(3) → (3)>
+<1*e:(3) → (3)>
+<1*e^2:(3) → (3)>
+
+julia> data_tables = DataTablesOfLinearCategory( quo_kC );
+
+julia> data_tables_Z = ShallowCopy( data_tables );
+
+julia> data_tables_Z[1] = HomalgRingOfIntegers();
+
+julia> B = AlgebroidFromDataTables( data_tables_Z )
+Z-algebroid( [0,1,2,3][a:0→1,b:1→3,c:0→2,d:2→3,e:3→3] ) defined by
+4 objects and 5 generating morphisms
+
+julia> RangeCategoryOfHomomorphismStructure( B )
+Rows( Z )
+
+julia> qB = QuotientCategory( B, [ B.ab - B.cd, 2*B.be ] )
+QuotientCategory( Z-algebroid( [0,1,2,3][a:0→1,b:1→3,c:0→2,d:2→3,e:3→3] )
+defined by 4 objects and 5 generating morphisms, 2-sided ideal generated by
+2 morphisms )
+
+julia> RangeCategoryOfHomomorphismStructure( qB )
+Freyd( Rows( Z ) )
+
+julia> IsZeroForMorphisms( qB.cde )
+false
+
+julia> IsZeroForMorphisms( 2 * qB.cde )
+true
+
+julia> add_qB = AdditiveClosure( qB )
+AdditiveClosure( QuotientCategory( Z-algebroid( [0,1,2,3][a:0→1,b:1→3,
+c:0→2,d:2→3,e:3→3] ) defined by 4 objects and 5 generating morphisms,
+2-sided ideal generated by 2 morphisms ) )
+
+julia> T = RandomObject( add_qB, [[10],[1]] );
+
+julia> u = RandomMorphism( T, T, 5 );
+
+julia> v = RandomMorphism( T, T, 5 );
+
+julia> w = RandomMorphism( T, T, 5 );
+
+julia> HomStructure( PreCompose( [ u, v, w ] ) ) == PreCompose( HomStructure( v ), HomStructure( u, w ) )
+true
+
+julia> HomStructure( T, T, 2 * HomStructure( 3 * u ) ) == 6 * u
+true
+
+```
+
+```jldoctest AutoDocTests
+julia> using MatricesForHomalg, CAP, MonoidalCategories, CartesianCategories, QuotientCategories, LinearAlgebraForCAP, LinearClosuresForCAP, AdditiveClosuresForCAP, FreydCategoriesForCAP, ToolsForCategoricalTowers, Toposes, FinSetsForCAP, FpCategories, FpLinearCategories, Locales, FiniteCocompletions, PresheafCategories, SubcategoriesForCAP, FunctorCategories
+
+julia> true
+true
+
+julia> q = FinQuiver( "q(0,1,2)[x:0->1,y:1->2,z:0->2]" )
+FinQuiver( "q(0,1,2)[x:0→1,y:1→2,z:0→2]" )
+
+julia> C = PathCategory( q )
+PathCategory( FinQuiver( "q(0,1,2)[x:0→1,y:1→2,z:0→2]" ) )
+
+julia> k = HomalgFieldOfRationals( );
+
+julia> kC = k[C]
+Q-LinearClosure( PathCategory( FinQuiver( "q(0,1,2)[x:0→1,
+y:1→2,z:0→2]" ) ) )
+
+julia> A = kC / [ kC.xy - kC.z ]
+Q-LinearClosure( PathCategory( FinQuiver( "q(0,1,2)[x:0→1,
+y:1→2,z:0→2]" ) ) ) / [ 1*x⋅y + (-1)*z ]
+
+julia> B = AlgebroidFromDataTables( A )
+Q-algebroid( [0,1,2][x:0→1,y:1→2,z:0→2] ) defined by 3 objects
+and 3 generating morphisms
+
+julia> IsAdmissibleAlgebroid( B )
+false
+
+julia> q = FinQuiver( "q(o)[x:o->o,y:o->o]" )
+FinQuiver( "q(o)[x:o→o,y:o→o]" )
+
+julia> C = PathCategory( q )
+PathCategory( FinQuiver( "q(o)[x:o→o,y:o→o]" ) )
+
+julia> kC = k[C]
+Q-LinearClosure( PathCategory( FinQuiver( "q(o)[x:o→o,y:o→o]" ) ) )
+
+julia> A = kC / [ kC.xy - kC.yx, kC.x^3, kC.y^3 ]
+Q-LinearClosure( PathCategory( FinQuiver( "q(o)[x:o→o,y:o→o]" ) ) )
+/ [ (-1)*y⋅x + 1*x⋅y, 1*x^3, 1*y^3 ]
+
+julia> B = AlgebroidFromDataTables( A )
+Q-algebroid( [o][x:o→o,y:o→o] ) defined by 1 object and 2 generating morphisms
+
+julia> IsAdmissibleAlgebroid( B )
+true
+
+julia> A = kC / [ kC.xy - kC.yx, kC.x^3 - kC.x, kC.y^3 ]
+Q-LinearClosure( PathCategory( FinQuiver( "q(o)[x:o→o,y:o→o]" ) ) )
+/ [ (-1)*y⋅x + 1*x⋅y, 1*x^3 + (-1)*x, 1*y^3 ]
+
+julia> B = AlgebroidFromDataTables( A )
+Q-algebroid( [o][x:o→o,y:o→o] ) defined by 1 object and 2 generating morphisms
+
+julia> IsAdmissibleAlgebroid( B )
+false
 
 ```
