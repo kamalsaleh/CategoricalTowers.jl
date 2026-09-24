@@ -182,17 +182,10 @@ end );
         
   function ( coPSh, values_of_copresheaf )
     
-    return CreateCapCategoryObjectWithAttributes( coPSh,
-                   Source, Source( coPSh ),
-                   Target, Target( coPSh ),
-                   ValuesOfCoPreSheaf, values_of_copresheaf );
+    return ObjectConstructor( coPSh, values_of_copresheaf );
     
 end );
 
-#= comment for Julia
-# Multiple installations of an object-constructor causes issues in julia (ambiguous number of arguments).
-# It would be much better to implement the object-constructor of CoPreSheaves properly without letting it delegate to CreateCoPreSheafByValues which would have
-# multiple convenience methods.
 ##
 @InstallMethod( CreateCoPreSheafByValues,
         "for a copresheaf category and two lists",
@@ -204,7 +197,6 @@ end );
                    PairGAP( values_of_all_objects, values_of_all_generating_morphisms ) );
     
 end );
-# =#
 
 ##
 @InstallMethod( CreateCoPreSheafByFunctions,
@@ -484,7 +476,11 @@ InstallMethodWithCache( CoPreSheaves,
               CapJitDataTypeOfListOf( CapJitDataTypeOfObjectOfCategory( D ) ),
               CapJitDataTypeOfListOf( CapJitDataTypeOfMorphismOfCategory( D ) ) );
     
-    object_constructor = CreateCoPreSheafByValues;
+    object_constructor =
+      (coPSh, values_of_copresheaf ) -> CreateCapCategoryObjectWithAttributes( coPSh,
+                                            Source, Source( coPSh ),
+                                            Target, Target( coPSh ),
+                                            ValuesOfCoPreSheaf, values_of_copresheaf );
     
     object_datum = ( coPSh, o ) -> ValuesOfCoPreSheaf( o );
     
@@ -709,7 +705,7 @@ end );
       function ( obj )
         local Yobj;
         
-        Yobj = CreateCoPreSheafByValues( coPSh, coyoneda_data[1]( obj ) );
+        Yobj = CallFuncListAtRuntime( CreateCoPreSheafByValues, [ coPSh, coyoneda_data[1]( obj ) ] );
         
         #% CAP_JIT_DROP_NEXT_STATEMENT
         SetIsInjective( Yobj, true );
@@ -784,7 +780,7 @@ end );
     
     F = SourceOfFunctor( coY );
     
-    coYc = coY( F[name] );
+    coYc = CallFuncListAtRuntime( ApplyFunctor, [ coY, F[name] ] );
     
     if (IsObjectInPreSheafCategory( coYc ))
         
@@ -1034,10 +1030,12 @@ end );
 @InstallMethod( LaTeXOutput,
           [ IsMorphismInCoPreSheafCategory ],
           
-  function( eta )
-    local only_datum, objs, v_objs, i, datum;
-    
-    only_datum = ValueOption( "OnlyDatum" );
+  @FunctionWithNamedArguments(
+  [
+    [ "OnlyDatum", false ],
+  ],
+  function( CAP_NAMED_ARGUMENTS, eta )
+    local objs, v_objs, i, datum;
     
     objs = SetOfObjects( Source( Source( eta ) ) );
     
@@ -1058,7 +1056,7 @@ end );
     
     datum = @Concatenation( datum, "\\end[array]" );
     
-    if (only_datum == true)
+    if (OnlyDatum == true)
       
       return datum;
       
@@ -1074,4 +1072,4 @@ end );
     
     end;
     
-end );
+end ) );

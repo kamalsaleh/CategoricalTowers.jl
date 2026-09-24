@@ -34,6 +34,7 @@ end;
 @DeclareAttribute( "DefiningTripleOfUnderlyingQuiver",
         IsCapCategory );
 
+# TODO: Do we need to change those to BigInt?
 CapJitAddTypeSignature( "DefiningTripleOfUnderlyingQuiver", [ IsCapCategory ],
   function ( input_types )
     
@@ -126,6 +127,28 @@ end );
 
 @DeclareAttribute( "TruthMorphismOfTrueToSieveFunctorAndEmbedding",
         IsCapCategory );
+
+#! @Description
+#!  Return the functor of sieves from <C>OppositeOfObjectFiniteCategory</C>( <A>B</A> )
+#!  to <C>RangeCategoryOfHomomorphismStructure</C>( <A>B</A> ).
+#! @Arguments B
+#! @Returns a &CAP; functor
+@DeclareAttribute( "SieveFunctor", IsCapCategory );
+
+#! @Description
+#!  Return the truth morphism of true from the terminal functor
+#!  to the functor of sieves from <C>OppositeOfObjectFiniteCategory</C>( <A>B</A> )
+#!  to <C>RangeCategoryOfHomomorphismStructure</C>( <A>B</A> ).
+#! @Arguments B
+#! @Returns a &CAP; natural transformation
+@DeclareAttribute( "TruthMorphismOfTrueToSieveFunctor", IsCapCategory );
+
+#! @Description
+#!  Return the embedding of <C>SieveFunctor</C>( <A>B</A> ) into the functor
+#!  $c \mapsto \mathrm{Hom}(\mathrm{Hom}(-,c),\Omega)$.
+#! @Arguments B
+#! @Returns a &CAP; natural transformation
+@DeclareAttribute( "EmbeddingOfSieveFunctor", IsCapCategory );
 
 #! @Description
 #!  Construct, using the record (or list) of images <A>eta</A>, a natural transformation

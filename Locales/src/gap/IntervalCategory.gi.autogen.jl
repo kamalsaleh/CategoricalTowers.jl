@@ -37,6 +37,15 @@
     
     SetIsCategoryWithDecidableLifts( IntervalCategory, true );
     SetIsCategoryWithDecidableColifts( IntervalCategory, true );
+
+    ## Required for Julia: IsBooleanAlgebra => IsDistributiveBicartesianProset via InstallTrueMethod in GAP.
+    SetIsDistributiveBicartesianProset( IntervalCategory, true );
+    
+    ## BicartesianCategories.gi: InstallTrueMethod( IsFiniteBicompleteCategory, IsFiniteCompleteCategory and IsFiniteCocompleteCategory );
+    SetIsFiniteBicompleteCategory( IntervalCategory, true );
+    
+    ## Poset.gi: InstallTrueMethod( IsPosetCategory, IsThinCategory and IsSkeletalCategory );
+    SetIsPosetCategory( IntervalCategory, true );
     
     ##
     AddObjectConstructor( IntervalCategory,
