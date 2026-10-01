@@ -6,7 +6,7 @@ authors = [
 ]
 
 # Transpiled from GAP's PresheafCategories v2026.07-04
-version = "0.1.5"
+version = "0.1.6"
 
 [deps]
 CAP = "d64df2ee-d2bb-46f4-8cbc-f03bb858f8cb"
@@ -22,7 +22,7 @@ Toposes = "36a15fe6-6211-457f-8fdb-aa2e0d2f3052"
 [extensions]
 
 [compat]
-CAP = "0.8"
+CAP = "~0.8.17"
 MatricesForHomalg = "~0.1.6"
 LinearAlgebraForCAP = "~0.2.3"
 MonoidalCategories = "~0.2.15, 0.3"
