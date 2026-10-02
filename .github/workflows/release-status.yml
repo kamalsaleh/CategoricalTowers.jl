@@ -3,7 +3,7 @@ name: Update Release Status Badges
 on:
   push:
     branches:
-      - master
+      - main
   schedule:
     - cron: "0 */1 * * *"  # Run every 1 hour
   workflow_dispatch:
@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   release-status:
-    if: github.repository == 'homalg-project/CategoricalTowers.jl'
+    if: github.repository == 'kamalsaleh/CategoricalTowers.jl'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
