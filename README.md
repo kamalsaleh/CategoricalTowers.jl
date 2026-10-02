@@ -4,8 +4,6 @@
 
 This repository contains transpiled Julia versions of several packages from [CategoricalTowers][CategoricalTowers].
 
-[CategoricalTowers]: https://github.com/homalg-project/CategoricalTowers
-
 ## Release status
 
 Each split below has its own repository and Julia package registered in the [General registry][General].
@@ -31,6 +29,7 @@ The badge data is refreshed after every push and every 1 hour. To update the bad
 [General]: https://github.com/JuliaRegistries/General
 [JuliaRegistrator]: https://github.com/JuliaRegistries/Registrator.jl
 
+[CategoricalTowers]: https://github.com/homalg-project/CategoricalTowers
+
 <!-- BEGIN FOOTER -->
 <!-- END FOOTER -->
-

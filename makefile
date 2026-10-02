@@ -21,7 +21,7 @@ gen:
 	$(MAKE) -C PresheafCategories gen
 	$(MAKE) -C FiniteCocompletions gen
 	$(MAKE) -C FunctorCategories gen
-
+	$(MAKE) generate-root
 
 gen-full:
 	$(MAKE) -C ToolsForCategoricalTowers gen-full
@@ -33,6 +33,10 @@ gen-full:
 	$(MAKE) -C PresheafCategories gen-full
 	$(MAKE) -C FiniteCocompletions gen-full
 	$(MAKE) -C FunctorCategories gen-full
+	$(MAKE) generate-root
+
+generate-root:
+	ansible-playbook -i $$HOME/.gap/PackageJanitor/gap_to_julia/hosts $$HOME/.gap/PackageJanitor/gap_to_julia/site.yml -l CategoricalTowers_root --diff
 
 test:
 	$(MAKE) -C ToolsForCategoricalTowers test
