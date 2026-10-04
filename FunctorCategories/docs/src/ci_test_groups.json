@@ -1,0 +1,10 @@
+{
+  "_comment": "Groups of docs/src/*.md files doctested together in one CI job (see ../../.github/workflows/Test.yml). Edit freely to rebalance CI jobs as doctests are added/removed or change in cost.",
+  "groups": [
+    { "group": "SubobjectClassifier_TerminalCategory_YonedaComposition", "files": ["SubobjectClassifier.g.md", "TerminalCategory.g.md", "YonedaComposition.g.md"] },
+    { "group": "StreamVortexSystemBig", "files": ["StreamVortexSystemBig.g.md"] },
+    { "group": "StreamVortexSystem", "files": ["StreamVortexSystem.g.md", "StreamVortexSystemLinear.g.md"] },
+    { "group": "PreSheaves", "files": ["Weierstrass.g.md", "PreSheaves.md", "presheaves_of_algebroid_from_data_tables.g.md"] },
+    { "group": "AutoDocTests", "files": ["AutoDocTests.tst.autogen.md"] }
+  ]
+}
