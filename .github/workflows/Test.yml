@@ -98,7 +98,7 @@ jobs:
         if: matrix.julia-version == '1.12'
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-${{ strategy.job-index }}
+          name: coverage-${{ join(matrix.packages, '-') }}
           path: lcov.info
           if-no-files-found: error
 
@@ -121,7 +121,8 @@ jobs:
         with:
           pattern: coverage-*
           path: coverage
-          merge-multiple: true
+      - name: Install LCOV
+        run: sudo apt-get update && sudo apt-get install --yes lcov
       - name: Merge coverage reports
         run: |
           mapfile -d '' coverage_files < <(find coverage -name lcov.info -print0)
