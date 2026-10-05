@@ -3,7 +3,7 @@ name: Run Julia Tests
 on:
   push:
     branches:
-      - main ## @KAMAL REVERT THIS BACK TO MASTER BRANCH
+      - master
   pull_request:
   schedule:
     - cron: "0 0 * * *"  # Run every day at midnight
@@ -126,7 +126,7 @@ jobs:
       - name: Merge coverage reports
         run: |
           mapfile -d '' coverage_files < <(find coverage -name lcov.info -print0)
-          test "${#coverage_files[@]}" -gt 0
+          test -n "${coverage_files[0]:-}"
           lcov $(printf ' --add-tracefile %q' "${coverage_files[@]}") --output-file lcov.info
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
