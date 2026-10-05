@@ -3,8 +3,7 @@ name: Run Julia Tests
 on:
   push:
     branches:
-      - master
-      - main # Temporary since my master branch is occupied now
+      - main ## @KAMAL REVERT THIS BACK TO MASTER BRANCH
   pull_request:
   schedule:
     - cron: "0 0 * * *"  # Run every day at midnight
@@ -49,6 +48,11 @@ jobs:
           echo "package_groups=$package_groups" >> "$GITHUB_OUTPUT"
           echo "split_groups=$split_groups" >> "$GITHUB_OUTPUT"
 
+          echo "package_groups:"
+          echo "$package_groups" | jq '.'
+          echo "split_groups:"
+          echo "$split_groups" | jq '.'
+
   test:
     needs: prepare_matrices
     name: ${{ join(matrix.packages, ', ') }} - Julia ${{ matrix.julia-version }} on ${{ matrix.os }}
@@ -79,11 +83,62 @@ jobs:
       - name: Run tests
         run: |
           for pkg in ${{ join(matrix.packages, ' ') }}; do
-            make -C "$pkg" test
+            if [[ "${{ matrix.julia-version }}" == '1.12' ]]; then
+              julia -e "using Pkg; Pkg.test(\"$pkg\"; coverage=true)"
+            else
+              make -C "$pkg" test
+            fi
           done
+      - name: Process coverage data
+        if: matrix.julia-version == '1.12'
+        uses: julia-actions/julia-processcoverage@v1
+        with:
+          directories: ${{ join(matrix.packages, ',') }}
+      - name: Upload coverage artifact
+        if: matrix.julia-version == '1.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ strategy.job-index }}
+          path: lcov.info
+          if-no-files-found: error
+
+  coverage:
+    name: Upload combined coverage
+    needs: [test, test_split]
+    if: |
+      always() &&
+      needs.test.result == 'success' &&
+      (needs.test_split.result == 'success' || needs.test_split.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-*
+          path: coverage
+          merge-multiple: true
+      - name: Merge coverage reports
+        run: |
+          mapfile -d '' coverage_files < <(find coverage -name lcov.info -print0)
+          test "${#coverage_files[@]}" -gt 0
+          lcov $(printf ' --add-tracefile %q' "${coverage_files[@]}") --output-file lcov.info
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: lcov.info
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   test_split:
     needs: prepare_matrices
+    # an empty matrix (no package opts into split testing) can hang
+    # instead of being skipped, so skip the job outright in that case
+    if: needs.prepare_matrices.result == 'success' && needs.prepare_matrices.outputs.split_groups != '[]'
     name: ${{ matrix.group.package }} (${{ matrix.group.group }}) - Julia ${{ matrix.julia-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
@@ -112,7 +167,24 @@ jobs:
       - name: Run tests
         env:
           DOCTEST_FILES: ${{ join(matrix.group.files, ',') }}
-        run: make -C "${{ matrix.group.package }}" test
+        run: |
+          if [[ "${{ matrix.julia-version }}" == '1.12' ]]; then
+            julia -e "using Pkg; Pkg.test(\"${{ matrix.group.package }}\"; coverage=true)"
+          else
+            make -C "${{ matrix.group.package }}" test
+          fi
+      - name: Process coverage data
+        if: matrix.julia-version == '1.12'
+        uses: julia-actions/julia-processcoverage@v1
+        with:
+          directories: ${{ matrix.group.package }}
+      - name: Upload coverage artifact
+        if: matrix.julia-version == '1.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-split-${{ strategy.job-index }}
+          path: lcov.info
+          if-no-files-found: error
 
   update_subsplits:
     name: Update subsplits
