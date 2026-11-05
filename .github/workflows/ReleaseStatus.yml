@@ -1,0 +1,22 @@
+name: Refresh Release Status Badges
+
+on:
+  push:
+    branches:
+      - master
+
+permissions: {}
+
+jobs:
+  refresh-release-status:
+    if: github.repository == 'kamalsaleh/CategoricalTowers.jl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch central release-status workflow
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_STATUS_TOKEN }}
+        run: |
+          gh workflow run update-release-status.yml \
+            --repo homalg-project/ReleaseStatusForJuliaPackages \
+            --ref main
