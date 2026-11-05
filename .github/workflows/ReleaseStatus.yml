@@ -17,6 +17,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RELEASE_STATUS_TOKEN }}
         run: |
-          gh workflow run update-release-status.yml \
-            --repo homalg-project/ReleaseStatusForJuliaPackages \
-            --ref main
+          gh api --include --method POST \
+            repos/homalg-project/ReleaseStatusForJuliaPackages/actions/workflows/update-release-status.yml/dispatches \
+            --field ref=main
